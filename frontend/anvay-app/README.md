@@ -68,7 +68,7 @@ src/app/
 
 ---
 
-## 🔌 Replacing Mock Services with Real APIs
+## Replacing Mock Services with Real APIs
 
 All mock logic is in `src/app/services/auth.service.ts`.
 
