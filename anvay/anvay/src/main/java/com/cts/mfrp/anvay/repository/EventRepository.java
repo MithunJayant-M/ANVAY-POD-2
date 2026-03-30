@@ -1,4 +1,12 @@
 package com.cts.mfrp.anvay.repository;
 
-public class EventRepository {
+import com.cts.mfrp.anvay.entity.Event;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface EventRepository extends JpaRepository<Event, Long> {
+    List<Event> findByClubId(Long clubId);
 }
