@@ -2,7 +2,7 @@
 
 A multi-tenant Angular 17 app with **Super Admin**, **Institution**, and **Student** roles.
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 - Node.js >= 18
@@ -22,7 +22,7 @@ Open **http://localhost:4200**
 
 ---
 
-## 🔑 Demo Login Credentials
+## Demo Login Credentials
 
 | Role | Email | Password |
 |------|-------|----------|
@@ -34,7 +34,7 @@ Open **http://localhost:4200**
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 src/app/
@@ -56,7 +56,7 @@ src/app/
 
 ---
 
-## 🎨 Color Palette
+## Color Palette
 
 | Color | Hex | Usage |
 |-------|-----|-------|
@@ -131,7 +131,7 @@ CREATE TABLE Clubs (
 
 ---
 
-## 📦 Build for Production
+## Build for Production
 
 ```bash
 npm run build
@@ -140,7 +140,7 @@ npm run build
 
 ---
 
-## ✅ Features Implemented
+## Features Implemented
 
 - [x] Login page with role selector (Super Admin / Institution / Student)
 - [x] Student signup with institution dropdown (GRIET, VNRVJIET, YCCE, M Kumaraswamy)
