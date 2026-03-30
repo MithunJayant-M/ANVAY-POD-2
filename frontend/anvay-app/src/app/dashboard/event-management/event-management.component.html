@@ -1,0 +1,133 @@
+<div class="event-management">
+  <!-- Header -->
+  <div class="management-header">
+    <h2>Event Management</h2>
+    <button class="btn btn-refresh" (click)="refresh()" title="Refresh">↻</button>
+  </div>
+
+  <!-- Error Alert -->
+  <div *ngIf="error()" class="alert alert-danger">
+    {{ error() }}
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading events...</p>
+  </div>
+
+  <!-- Filters -->
+  <div *ngIf="!loading()" class="filters-section">
+    <div class="filter-group">
+      <input
+        type="text"
+        placeholder="Search events..."
+        [(ngModel)]="searchTerm"
+        class="filter-input"
+      />
+    </div>
+    <div class="filter-group">
+      <select
+        [(ngModel)]="selectedStatusFilter"
+        class="filter-select"
+      >
+        <option value="">All Status</option>
+        <option value="UPCOMING">Upcoming</option>
+        <option value="ONGOING">Ongoing</option>
+        <option value="COMPLETED">Completed</option>
+        <option value="CANCELLED">Cancelled</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <select
+        [(ngModel)]="selectedClubFilter"
+        class="filter-select"
+      >
+        <option [value]="null">All Clubs</option>
+        <option *ngFor="let club of clubs()" [value]="club.clubId">
+          {{ club.clubName }}
+        </option>
+      </select>
+    </div>
+    <button
+      class="btn btn-clear"
+      (click)="clearFilters()"
+      *ngIf="searchTerm() || selectedStatusFilter() || selectedClubFilter()"
+    >
+      Clear Filters
+    </button>
+  </div>
+
+  <!-- Events Table -->
+  <div *ngIf="!loading()" class="table-container">
+    <table class="events-table">
+      <thead>
+        <tr>
+          <th>Event Title</th>
+          <th>Category</th>
+          <th>Date</th>
+          <th>Location</th>
+          <th>Participants</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let event of getFilteredEvents()" class="event-row">
+          <td class="event-title">
+            <strong>{{ event.eventTitle }}</strong>
+          </td>
+          <td>
+            <span class="category-badge" [ngClass]="getCategoryBadgeClass(event.category)">
+              {{ event.category }}
+            </span>
+          </td>
+          <td class="date-cell">
+            {{ event.eventDate | date: 'MMM dd, yyyy' }}
+            <span *ngIf="event.eventTime" class="time">{{ event.eventTime }}</span>
+          </td>
+          <td class="location-cell">
+            {{ event.location }}
+          </td>
+          <td class="participants-cell">
+            <span class="participant-badge">
+              {{ event.registeredCount || 0 }}
+              <span *ngIf="event.capacity"> / {{ event.capacity }}</span>
+            </span>
+          </td>
+          <td>
+            <span class="status-badge" [ngClass]="event.status | lowercase">
+              {{ getStatusLabel(event.status) }}
+            </span>
+          </td>
+          <td class="actions-cell">
+            <button
+              class="action-btn edit-btn"
+              (click)="editEvent(event)"
+              title="Edit Event"
+            >
+              ✎
+            </button>
+            <button
+              class="action-btn delete-btn"
+              (click)="deleteEvent(event.eventId)"
+              title="Delete Event"
+            >
+              ✕
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="getFilteredEvents().length === 0" class="empty-row">
+          <td colspan="7" class="empty-message">
+            No events found. Try adjusting your filters.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Summary -->
+  <div *ngIf="!loading() && events().length > 0" class="summary">
+    <p>Showing {{ getFilteredEvents().length }} of {{ events().length }} events</p>
+  </div>
+</div>

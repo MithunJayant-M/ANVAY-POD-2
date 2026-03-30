@@ -1,0 +1,177 @@
+<div class="institution-dashboard">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1>Institution Dashboard</h1>
+      <p class="header-subtitle">Manage your events, clubs, and student activities</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="openCreateEventModal()">
+        <span class="icon">+</span> Create Event
+      </button>
+      <button class="btn btn-secondary" (click)="refresh()">
+        <span class="icon">↻</span> Refresh
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="error()" class="alert alert-danger">
+    {{ error() }}
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading()" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading dashboard data...</p>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!loading()" class="dashboard-content">
+    <!-- Statistics Cards -->
+    <section class="stats-section">
+      <h2 class="section-title">Overview</h2>
+      <div class="stats-grid">
+        <!-- Total Events Card -->
+        <div class="stat-card">
+          <div class="stat-icon events">
+            <span>📅</span>
+          </div>
+          <div class="stat-content">
+            <h3>Total Events</h3>
+            <p class="stat-value">{{ dashboardStats().totalEvents }}</p>
+            <span class="stat-label">This academic year</span>
+          </div>
+        </div>
+
+        <!-- Total Clubs Card -->
+        <div class="stat-card">
+          <div class="stat-icon clubs">
+            <span>🎭</span>
+          </div>
+          <div class="stat-content">
+            <h3>Total Clubs</h3>
+            <p class="stat-value">{{ dashboardStats().totalClubs }}</p>
+            <span class="stat-label">Active organizations</span>
+          </div>
+        </div>
+
+        <!-- Total Students Card -->
+        <div class="stat-card">
+          <div class="stat-icon students">
+            <span>👥</span>
+          </div>
+          <div class="stat-content">
+            <h3>Total Students</h3>
+            <p class="stat-value">{{ dashboardStats().totalStudents }}</p>
+            <span class="stat-label">Registered members</span>
+          </div>
+        </div>
+
+        <!-- Total Registrations Card -->
+        <div class="stat-card">
+          <div class="stat-icon registrations">
+            <span>📝</span>
+          </div>
+          <div class="stat-content">
+            <h3>Total Registrations</h3>
+            <p class="stat-value">{{ dashboardStats().totalRegistrations }}</p>
+            <span class="stat-label">Event registrations</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Upcoming Events Section -->
+    <section class="upcoming-events-section">
+      <div class="section-header">
+        <h2 class="section-title">Upcoming Events</h2>
+        <span class="badge">{{ upcomingEvents().length }}</span>
+      </div>
+
+      <div *ngIf="upcomingEvents().length === 0" class="empty-state">
+        <p>No upcoming events. <a (click)="openCreateEventModal()">Create one</a></p>
+      </div>
+
+      <div *ngIf="upcomingEvents().length > 0" class="upcoming-events-list">
+        <div *ngFor="let event of upcomingEvents().slice(0, 3)" class="event-card">
+          <div class="event-header">
+            <h3>{{ event.eventTitle }}</h3>
+            <span class="status-badge" [ngClass]="event.status | lowercase">
+              {{ event.status }}
+            </span>
+          </div>
+          <div class="event-details">
+            <div class="detail-item">
+              <span class="label">📅 Date:</span>
+              <span class="value">{{ event.eventDate | date: 'MMM dd, yyyy' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">📍 Location:</span>
+              <span class="value">{{ event.location }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">👥 Participants:</span>
+              <span class="value">{{ event.registeredCount || 0 }} / {{ event.capacity || '∞' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">🏷️ Category:</span>
+              <span class="category-badge">{{ event.category }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Event Management Table -->
+    <section class="event-management-section">
+      <app-event-management [institutionId]="institutionId"></app-event-management>
+    </section>
+
+    <!-- Clubs Overview Section -->
+    <section class="clubs-overview-section">
+      <div class="section-header">
+        <h2 class="section-title">Club Overview</h2>
+        <span class="badge">{{ clubs().length }}</span>
+      </div>
+
+      <div *ngIf="clubs().length === 0" class="empty-state">
+        <p>No clubs available yet.</p>
+      </div>
+
+      <div *ngIf="clubs().length > 0" class="clubs-grid">
+        <div *ngFor="let club of clubs()" class="club-card">
+          <div class="club-header">
+            <h3>{{ club.clubName }}</h3>
+            <span class="club-type-badge">{{ club.type }}</span>
+          </div>
+          <div class="club-stats">
+            <div class="club-stat">
+              <span class="stat-label">Members</span>
+              <span class="stat-number">{{ club.membersCount }}</span>
+            </div>
+            <div class="club-stat">
+              <span class="stat-label">Join Requests</span>
+              <span class="stat-number">{{ club.joinRequestsCount }}</span>
+            </div>
+            <div class="club-stat">
+              <span class="stat-label">Leadership Apps</span>
+              <span class="stat-number">{{ club.leadershipAppsCount }}</span>
+            </div>
+          </div>
+          <div class="club-footer">
+            <small>Created: {{ club.createdDate | date: 'MMM dd, yyyy' }}</small>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- Create Event Modal -->
+  <app-create-event-modal
+    *ngIf="showCreateEventModal()"
+    [institutionId]="institutionId"
+    (close)="closeCreateEventModal()"
+    (eventCreated)="onEventCreated($event)"
+  ></app-create-event-modal>
+</div>

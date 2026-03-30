@@ -1,4 +1,4 @@
-/*import { Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -30,4 +30,4 @@ export const routes: Routes = [
     data: { role: 'student' }
   },
   { path: '**', redirectTo: '/login' }
-];*/
+];
