@@ -8,7 +8,6 @@ public class AnvayApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(AnvayApplication.class, args);
-		System.out.println("The first project");
 	}
 
 }
