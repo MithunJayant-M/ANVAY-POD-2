@@ -1,3 +1,23 @@
+import { Routes } from '@angular/router';
+
+export const routes: Routes = [
+  // Redirect the root URL directly to the Club Management page
+  { path: '', redirectTo: 'club-mgmt', pathMatch: 'full' },
+
+  {
+    path: '',
+    loadComponent: () => 
+      import('./dashboard/institution/club-mgmt/club-mgmt')
+        .then(m => m.ClubMgmtComponent)
+  },
+
+  /* Temporary: Keeping other routes commented out to avoid 
+    'authGuard' or 'login' module errors while you test the UI.
+  */
+  // { path: 'login', loadComponent: ... },
+  // { path: 'dashboard/institution', ... }
+];
+
 /*import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 
