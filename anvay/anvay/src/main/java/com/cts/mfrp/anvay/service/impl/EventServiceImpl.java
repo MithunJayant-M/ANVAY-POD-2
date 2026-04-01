@@ -28,6 +28,12 @@ public class EventServiceImpl implements EventService {
 
     @Override
     @Transactional(readOnly = true)
+    public List<Event> getEvents(){
+        return eventRepository.findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Event getEventById(Long eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new IllegalArgumentException("Event not found"));
@@ -44,8 +50,14 @@ public class EventServiceImpl implements EventService {
         Event existing = getEventById(eventId);
         if (event.getEventName() != null) existing.setEventName(event.getEventName());
         if (event.getDescription() != null) existing.setDescription(event.getDescription());
-        if (event.getEventDate() != null) existing.setEventDate(event.getEventDate());
+        if (event.getStartDate() != null) existing.setStartDate(event.getStartDate());
+        if (event.getEndDate() != null) existing.setEndDate(event.getEndDate());
         if (event.getLocation() != null) existing.setLocation(event.getLocation());
+        if (event.getCategory() != null) existing.setCategory(event.getCategory());
+        if (event.getStatus() != null) existing.setStatus(event.getStatus());
+        if (event.getParticipantType() != null) existing.setParticipantType(event.getParticipantType());
+        if (event.getMaxParticipants() != 0) existing.setMaxParticipants(event.getMaxParticipants());
+        if (event.getRegistrationFee() != 0) existing.setRegistrationFee(event.getRegistrationFee());
         existing.setUpdatedAt(LocalDateTime.now());
         return eventRepository.save(existing);
     }

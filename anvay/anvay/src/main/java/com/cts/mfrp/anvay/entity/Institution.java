@@ -6,13 +6,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "institutions")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Institution {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,6 +23,12 @@ public class Institution {
     @Column(name = "name")
     private String name;
 
+    @Column(name="institution_email")
+    private String institutionEmail;
+
+    @Column(name="status")
+    private String status;
+
     @Column(name = "location")
     private String location;
 
@@ -30,4 +37,10 @@ public class Institution {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @OneToMany(mappedBy = "institution", cascade = CascadeType.ALL)
+    private List<Club> club=new ArrayList<>();
+
+    @OneToMany(mappedBy = "institution", cascade = CascadeType.ALL)
+    private List<User> users=new ArrayList<>();
 }
