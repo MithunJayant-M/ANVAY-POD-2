@@ -1,5 +1,6 @@
 package com.cts.mfrp.anvay.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +13,6 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class ClubMember {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,9 +36,11 @@ public class ClubMember {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_id", insertable = false, updatable = false)
+    @JsonIgnoreProperties("clubMembers")
     private Club club;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @JsonIgnoreProperties("clubMembers")
     private User user;
 }

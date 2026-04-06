@@ -1,5 +1,6 @@
 package com.cts.mfrp.anvay.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +13,6 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Achievement {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +28,9 @@ public class Achievement {
     @Column(name = "description")
     private String description;
 
+    @Column(name="points")
+    private int points;
+
     @Column(name = "badge_type")
     private String badgeType;
 
@@ -39,5 +42,11 @@ public class Achievement {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @JsonIgnoreProperties("achievements")
     private User user;
+
+    @ManyToOne
+    @JoinColumn(name="clubId", insertable = false, updatable = false)
+    @JsonIgnoreProperties("achievements")
+    private Club club;
 }
