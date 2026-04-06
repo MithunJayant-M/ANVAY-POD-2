@@ -13,6 +13,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class InstitutionServiceImpl implements InstitutionService {
@@ -32,7 +34,6 @@ public class InstitutionServiceImpl implements InstitutionService {
             throw new RuntimeException("Email already in use");
         }
 
-        // Create institution (pending approval by super admin)
         Institution institution = Institution.builder()
                 .institutionName(request.getInstitutionName())
                 .email(request.getEmail())
@@ -42,7 +43,6 @@ public class InstitutionServiceImpl implements InstitutionService {
                 .build();
         institution = institutionRepository.save(institution);
 
-        // Create institution admin user
         User adminUser = User.builder()
                 .name(request.getAdminName())
                 .email(request.getEmail())
@@ -64,5 +64,36 @@ public class InstitutionServiceImpl implements InstitutionService {
                 .userId(adminUser.getUserId())
                 .institutionId(adminUser.getInstitutionId())
                 .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Institution getInstitutionById(Integer institutionId) {
+        return institutionRepository.findById(institutionId)
+                .orElseThrow(() -> new IllegalArgumentException("Institution not found"));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Institution> getAllInstitutions() {
+        return institutionRepository.findAll();
+    }
+
+    @Override
+    @Transactional
+    public Institution updateInstitution(Integer institutionId, Institution institution) {
+        Institution existing = getInstitutionById(institutionId);
+        if (institution.getInstitutionName() != null) existing.setInstitutionName(institution.getInstitutionName());
+        if (institution.getEmail() != null) existing.setEmail(institution.getEmail());
+        if (institution.getPhone() != null) existing.setPhone(institution.getPhone());
+        if (institution.getAddress() != null) existing.setAddress(institution.getAddress());
+        if (institution.getStatus() != null) existing.setStatus(institution.getStatus());
+        return institutionRepository.save(existing);
+    }
+
+    @Override
+    @Transactional
+    public void deleteInstitution(Integer institutionId) {
+        institutionRepository.deleteById(institutionId);
     }
 }

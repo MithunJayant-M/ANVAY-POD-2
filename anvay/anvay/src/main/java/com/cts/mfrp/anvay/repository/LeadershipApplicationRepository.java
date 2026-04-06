@@ -12,4 +12,5 @@ public interface LeadershipApplicationRepository extends JpaRepository<Leadershi
     List<LeadershipApplication> findByUserId(Integer userId);
     List<LeadershipApplication> findByStatus(String status);
     List<LeadershipApplication> findByClubIdAndStatus(Integer clubId, String status);
+    long countByClubId(Integer clubId);
 }
