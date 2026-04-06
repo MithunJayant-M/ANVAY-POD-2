@@ -42,7 +42,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": { "buildTarget": "anvay-app:build:production" },
-            "development": { "buildTarget": "anvay-app:build:development" }
+            "development": {
+              "buildTarget": "anvay-app:build:development",
+              "proxyConfig": "proxy.conf.json"
+            }
           },
           "defaultConfiguration": "development"
         }

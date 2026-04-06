@@ -1,8 +1,11 @@
-/*import { Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  {
+    path: '',
+    loadComponent: () => import('./home/home.component').then(m => m.HomeComponent)
+  },
   {
     path: 'login',
     loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent)
@@ -30,4 +33,4 @@ export const routes: Routes = [
     data: { role: 'student' }
   },
   { path: '**', redirectTo: '/login' }
-];*/
+];
