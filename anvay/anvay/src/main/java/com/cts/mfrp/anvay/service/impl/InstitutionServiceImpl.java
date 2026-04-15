@@ -3,6 +3,7 @@ package com.cts.mfrp.anvay.service.impl;
 import com.cts.mfrp.anvay.entity.Institution;
 import com.cts.mfrp.anvay.repository.InstitutionRepository;
 import com.cts.mfrp.anvay.service.InstitutionService;
+import jakarta.persistence.Column;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,8 @@ public class InstitutionServiceImpl implements InstitutionService {
         Institution existing = getInstitutionById(institutionId);
         if (institution.getName() != null) existing.setName(institution.getName());
         if (institution.getLocation() != null) existing.setLocation(institution.getLocation());
+        if (institution.getInstitutionEmail() != null) existing.setInstitutionEmail(institution.getInstitutionEmail());
+        if (institution.getStatus() != null) existing.setStatus(institution.getStatus());
         existing.setUpdatedAt(LocalDateTime.now());
         return institutionRepository.save(existing);
     }

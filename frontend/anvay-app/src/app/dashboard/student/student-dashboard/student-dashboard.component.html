@@ -40,18 +40,27 @@
       <h3>Upcoming Events</h3>
     </div>
     <div class="list-container">
-      <div *ngFor="let event of dashboardData.upcomingEvents" class="list-item">
-  <div class="item-info">
-    <strong>{{ event.title }}</strong> 
+  <ng-container *ngIf="dashboardData.upcomingEvents && dashboardData.upcomingEvents.length > 0; else noEvents">
     
-    <p>{{ event.institution }}</p>
-    
-    <span class="timestamp">{{ event.dateTime | date:'short' }}</span> 
-  </div>
-  
-  <span class="item-badge">{{ event.type }}</span>
-</div>
+    <div *ngFor="let event of dashboardData.upcomingEvents" class="list-item">
+      <div class="item-info">
+        <strong>{{ event.title }}</strong> 
+        <p>{{ event.institution }}</p>
+        <span class="timestamp">{{ event.dateTime | date:'short' }}</span> 
+      </div>
+      <span class="item-badge">{{ event.type }}</span>
     </div>
+
+  </ng-container>
+
+  <ng-template #noEvents>
+    <div class="empty-state-container">
+      <span class="material-icons">event_available</span>
+      <p>No upcoming events registered.</p>
+      <button class="explore-btn" routerLink="/dashboard/student/event-feed">Explore Events</button>
+    </div>
+  </ng-template>
+</div>
   </div>
 
   <div class="content-card clubs-section">

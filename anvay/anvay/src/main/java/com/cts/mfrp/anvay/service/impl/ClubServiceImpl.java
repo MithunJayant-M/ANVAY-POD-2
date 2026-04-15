@@ -38,6 +38,12 @@ public class ClubServiceImpl implements ClubService {
      * @param institutionId the institution ID
      * @return list of ClubDashboardDTO objects containing club information
      */
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Club> getClubs(){
+        return clubRepository.findAll();
+    }
     @Override
     @Transactional(readOnly = true)
     public List<ClubDashboardDTO> getAllClubsByInstitution(Long institutionId) {

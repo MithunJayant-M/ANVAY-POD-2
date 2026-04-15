@@ -1,11 +1,14 @@
 package com.cts.mfrp.anvay.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "events")
@@ -28,11 +31,29 @@ public class Event {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "event_date")
-    private LocalDateTime eventDate;
+    @Column(name="Category")
+    private String category;
+
+    @Column(name = "start_date")
+    private LocalDateTime startDate;
+
+    @Column(name = "end_date")
+    private LocalDateTime endDate;
 
     @Column(name = "location")
     private String location;
+
+    @Column(name="participant_type")
+    private String participantType;
+
+    @Column(name="max_participants")
+    private Integer maxParticipants;
+
+    @Column(name="registration_fee")
+    private Float registrationFee;
+
+    @Column(name="status")
+    private String status;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -42,14 +63,9 @@ public class Event {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_id", insertable = false, updatable = false)
+    @JsonIgnoreProperties("events")
     private Club club;
 
-    @Column(name = "event_type")
-    private String type; // e.g., "Hackathon", "Art"
-
-    @Column(name = "total_capacity")
-    private Integer totalCapacity;
-
-    @Column(name = "registered_count")
-    private Integer registeredCount;
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
+    private List<EventParticipant> er=new ArrayList<>();
 }

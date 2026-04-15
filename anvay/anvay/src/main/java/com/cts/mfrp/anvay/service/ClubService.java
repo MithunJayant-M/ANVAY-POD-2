@@ -22,6 +22,7 @@ public interface ClubService {
      * @throws IllegalArgumentException if institution ID is invalid
      */
     List<ClubDashboardDTO> getAllClubsByInstitution(Long institutionId);
+    List<Club> getClubs();
 
     /**
      * Update club details.

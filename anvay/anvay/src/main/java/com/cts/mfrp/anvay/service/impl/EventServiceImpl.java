@@ -32,9 +32,10 @@ public class EventServiceImpl implements EventService {
         return eventRepository.save(event);
     }
 
+
     @Override
     @Transactional(readOnly = true)
-    public List<Event> getAllEvents() {
+    public List<Event> getEvents(){
         return eventRepository.findAll();
     }
 
@@ -56,8 +57,14 @@ public class EventServiceImpl implements EventService {
         Event existing = getEventById(eventId);
         if (event.getEventName() != null) existing.setEventName(event.getEventName());
         if (event.getDescription() != null) existing.setDescription(event.getDescription());
-        if (event.getEventDate() != null) existing.setEventDate(event.getEventDate());
+        if (event.getStartDate() != null) existing.setStartDate(event.getStartDate());
+        if (event.getEndDate() != null) existing.setEndDate(event.getEndDate());
         if (event.getLocation() != null) existing.setLocation(event.getLocation());
+        if (event.getCategory() != null) existing.setCategory(event.getCategory());
+        if (event.getStatus() != null) existing.setStatus(event.getStatus());
+        if (event.getParticipantType() != null) existing.setParticipantType(event.getParticipantType());
+        if (event.getMaxParticipants() != 0) existing.setMaxParticipants(event.getMaxParticipants());
+        if (event.getRegistrationFee() != 0) existing.setRegistrationFee(event.getRegistrationFee());
         existing.setUpdatedAt(LocalDateTime.now());
         return eventRepository.save(existing);
     }
@@ -93,9 +100,9 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findById(participant.getEventId())
                 .orElseThrow(() -> new IllegalArgumentException("Event not found"));
 
-        int currentRegCount = event.getRegisteredCount() != null ? event.getRegisteredCount() : 0;
-        event.setRegisteredCount(currentRegCount + 1);
-        eventRepository.save(event);
+//        int currentRegCount = event.getEr() != null ? event.getEr().size() : 0;
+//        event.setRegisteredCount(currentRegCount + 1);
+//        eventRepository.save(event);
 
         return savedParticipant;
     }
@@ -111,12 +118,13 @@ public class EventServiceImpl implements EventService {
             return EventFeedDTO.builder()
                     .eventId(event.getEventId())
                     .title(event.getEventName())
-                    .institution(event.getClub().getInstitution().getName())
+                    // Ensure navigation through the Club to get Institution Name works
+                    .institution(event.getClub() != null ? event.getClub().getInstitution().getName() : "General")
                     .location(event.getLocation())
-                    .type(event.getType())
-                    .registeredCount(event.getRegisteredCount())
-                    .totalCapacity(event.getTotalCapacity())
-                    .isRegistered(isRegistered) // This keeps the button green!
+                    .type(event.getCategory()) // Mapping Category to Type
+                    .registeredCount(event.getEr() != null ? event.getEr().size() : 0)
+                    .totalCapacity(event.getMaxParticipants()) // Mapping maxParticipants to totalCapacity
+                    .isRegistered(isRegistered)
                     .build();
         }).collect(Collectors.toList());
     }

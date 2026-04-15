@@ -65,15 +65,18 @@ public class StudentServiceImpl implements StudentService {
         List<Achievement> userAchievements = achievementRepository.findByUserId(studentId);
 
         // 3. Map Upcoming Events (Limit 2 as per wireframe)
-        List<StudentDashboardDTO.EventRecord> upcomingEvents = eventRepository.findAll()
+        List<StudentDashboardDTO.EventRecord> upcomingEvents = user.getEventRegistrations()
                 .stream()
-                .limit(2)
-                .map(event -> StudentDashboardDTO.EventRecord.builder()
-                        .title(event.getEventName())
-                        .institution(event.getClub() != null ? event.getClub().getClubName() : "MKCE")
-                        .dateTime(event.getEventDate().toString())
-                        .type("Event")
-                        .build())
+                .map(registration -> {
+                    var event = registration.getEvent(); // Get the associated event
+                    return StudentDashboardDTO.EventRecord.builder()
+                            .title(event.getEventName())
+                            .institution(event.getClub() != null ? event.getClub().getClubName() : "Unknown Club")
+                            .dateTime(event.getStartDate().toString())
+                            .type(event.getCategory() != null ? event.getCategory() : "Event")
+                            .build();
+                })
+                .limit(3) // Keep your UI limit
                 .collect(Collectors.toList());
 
         // 4. Final Assembly

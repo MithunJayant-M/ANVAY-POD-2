@@ -11,7 +11,7 @@ export class EventService {
   private http = inject(HttpClient);
   
   // This matches your @RequestMapping("/api/events") in Spring Boot
-  private apiUrl = 'http://localhost:9092/api/events';
+  private apiUrl = 'http://localhost:8081/api/events';
 
   // Fetches all records from your EventController's @GetMapping("/all")
   getAllEvents(userId: number): Observable<EventRecord[]> {

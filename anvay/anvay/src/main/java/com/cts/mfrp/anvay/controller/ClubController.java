@@ -27,6 +27,11 @@ public class ClubController {
 
     private final ClubService clubService;
 
+    @GetMapping("/all")
+    public ResponseEntity<List<Club>> getAllClubs(){
+        return ResponseEntity.ok(clubService.getClubs());
+    }
+
     /**
      * Get all clubs for an institution.
      * Returns dashboard data with member counts, join requests, and leadership applications.
