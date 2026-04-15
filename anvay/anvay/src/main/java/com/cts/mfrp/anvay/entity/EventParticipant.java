@@ -32,7 +32,7 @@ public class EventParticipant {
     private LocalDateTime createdAt;
 
     @Column(name = "pointsEarned")
-    private int points_earned;
+    private Integer points_earned;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id", insertable = false, updatable = false)

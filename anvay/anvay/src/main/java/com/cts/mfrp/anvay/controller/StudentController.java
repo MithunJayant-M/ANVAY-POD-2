@@ -1,0 +1,27 @@
+package com.cts.mfrp.anvay.controller;
+
+import com.cts.mfrp.anvay.dto.StudentDashboardDTO;
+import com.cts.mfrp.anvay.entity.User;
+import com.cts.mfrp.anvay.service.StudentService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/students")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:4200")
+public class StudentController {
+
+    private final StudentService studentService;
+
+    @GetMapping("/{id}/dashboard")
+    public ResponseEntity<StudentDashboardDTO> getDashboard(@PathVariable Long id) {
+        return ResponseEntity.ok(studentService.getFullDashboard(id));
+    }
+
+    @GetMapping("/{id}/profile")
+    public ResponseEntity<User> getProfile(@PathVariable Long id) {
+        return ResponseEntity.ok(studentService.getStudentById(id));
+    }
+}
