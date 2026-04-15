@@ -22,6 +22,11 @@ public class User {
     @Column(name = "institution_id")
     private Long institutionId;
 
+    // Inside User.java
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "institution_id", insertable = false, updatable = false)
+    private Institution institution;
+
     @Column(name = "email", unique = true)
     private String email;
 
@@ -39,4 +44,18 @@ public class User {
 
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    // --- ADD THESE FIELDS FOR THE DASHBOARD ---
+    @Column(name = "total_points")
+    private Integer totalPoints;
+
+    @Column(name = "rank_in_leaderboard")
+    private Integer rankInLeaderboard;
+
+    @Column(name = "registered_events_count")
+    private Integer registeredEventsCount;
+
+    @Column(name = "joined_clubs_count")
+    private Integer joinedClubsCount;
+    // ------------------------------------------
 }

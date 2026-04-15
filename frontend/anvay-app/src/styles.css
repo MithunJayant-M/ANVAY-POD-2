@@ -1,0 +1,21 @@
+/* This makes the icon words turn into actual symbols */
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;  /* Adjust size as needed */
+  display: inline-block;
+  line-height: 1;
+  text-transform: none;
+  letter-spacing: normal;
+  word-wrap: normal;
+  white-space: nowrap;
+  direction: ltr;
+}
+
+/* Fix the sidebar alignment */
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* Spacing between icon and text */
+}

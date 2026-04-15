@@ -43,4 +43,13 @@ public class Event {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_id", insertable = false, updatable = false)
     private Club club;
+
+    @Column(name = "event_type")
+    private String type; // e.g., "Hackathon", "Art"
+
+    @Column(name = "total_capacity")
+    private Integer totalCapacity;
+
+    @Column(name = "registered_count")
+    private Integer registeredCount;
 }
