@@ -1,6 +1,5 @@
 package com.cts.mfrp.anvay.service.impl;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,7 +30,7 @@ public class StudentServiceImpl implements StudentService {
 
     @Override
     @Transactional(readOnly = true)
-    public User getStudentById(Long studentId) {
+    public User getStudentById(Integer studentId) {
         return userRepository.findById(studentId)
                 .orElseThrow(() -> new IllegalArgumentException("Student not found"));
     }
@@ -43,11 +42,10 @@ public class StudentServiceImpl implements StudentService {
     }
 
     @Override
-    public User updateStudent(Long studentId, User user) {
+    public User updateStudent(Integer studentId, User user) {
         User existing = getStudentById(studentId);
-        if (user.getFirstName() != null) existing.setFirstName(user.getFirstName());
-        if (user.getLastName() != null) existing.setLastName(user.getLastName());
-        existing.setUpdatedAt(LocalDateTime.now());
+        if (user.getName() != null) existing.setName(user.getName());
+        if (user.getEmail() != null) existing.setEmail(user.getEmail());
         return userRepository.save(existing);
     }
 

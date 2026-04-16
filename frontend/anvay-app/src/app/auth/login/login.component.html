@@ -1,0 +1,84 @@
+<div class="login-page">
+
+  <!-- Left Brand Panel -->
+  <div class="brand-panel">
+    <div class="brand-content">
+      <div class="anvay-brand size-md on-dark" style="margin-bottom:36px">
+        <img src="assets/anvay-logo.svg" class="brand-icon" alt="ANVAY"/>
+        <div class="brand-text">
+          <span class="brand-name">ANVAY</span>
+          <span class="brand-tag">Discover. Join. Host.</span>
+        </div>
+      </div>
+
+      <h2>Your organisation.<br/>One platform.</h2>
+      <p>Manage institutions, host events, join clubs and track achievements — all in one place.</p>
+
+      <div class="feature-pills">
+        <div class="pill">🏫 Institution Management</div>
+        <div class="pill">🎉 Event Hosting</div>
+        <div class="pill">🏆 Leaderboards</div>
+        <div class="pill">📊 Analytics</div>
+      </div>
+    </div>
+    <div class="panel-orb orb1"></div>
+    <div class="panel-orb orb2"></div>
+  </div>
+
+  <!-- Right Form Panel -->
+  <div class="form-panel">
+    <a routerLink="/" class="back-home">← Back to Home</a>
+
+    <div class="form-container">
+      <div class="form-header">
+        <h1>Welcome back</h1>
+        <p>Sign in to your ANVAY account</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <div class="input-wrap">
+            <span class="input-icon">✉</span>
+            <input id="email" type="email" formControlName="email"
+              placeholder="you@example.com"
+              [class.invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"/>
+          </div>
+          @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
+            <span class="field-error">Please enter a valid email</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input id="password" type="password" formControlName="password"
+              placeholder="Enter your password"
+              [class.invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"/>
+          </div>
+          @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {
+            <span class="field-error">Password is required</span>
+          }
+        </div>
+
+        @if (errorMessage) {
+          <div class="alert-error"><span>⚠</span> {{ errorMessage }}</div>
+        }
+
+        <button type="submit" class="btn-signin" [disabled]="loading || loginForm.invalid">
+          @if (loading) { <span class="spinner"></span> Signing in... }
+          @else { Sign In }
+        </button>
+
+        <div class="divider"><span>New to ANVAY?</span></div>
+        <div class="register-links">
+          <a routerLink="/signup" [queryParams]="{type: 'institution'}" class="btn-register">Register Institution</a>
+          <a routerLink="/signup" [queryParams]="{type: 'student'}"     class="btn-register secondary">Join as Student</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>

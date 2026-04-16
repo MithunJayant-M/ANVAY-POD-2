@@ -1,0 +1,329 @@
+<div class="sa-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="anvay-brand size-sm on-dark">
+        <img src="assets/anvay-logo.svg" class="brand-icon" alt="ANVAY"/>
+        <div class="brand-text">
+          <span class="brand-name">ANVAY</span>
+          <span class="brand-tag">Discover. Join. Host.</span>
+        </div>
+      </div>
+      <span class="brand-role">SUPER ADMIN</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item" [class.active]="activeView === 'dashboard'" (click)="setView('dashboard')">
+        <span class="nav-icon">📊</span> Dashboard
+      </button>
+      <button class="nav-item" [class.active]="activeView === 'colleges'" (click)="setView('colleges')">
+        <span class="nav-icon">🏫</span> College Management
+      </button>
+      <button class="nav-item" [class.active]="activeView === 'analytics'" (click)="setView('analytics')">
+        <span class="nav-icon">📈</span> Analytics
+      </button>
+      <button class="nav-item" [class.active]="activeView === 'settings'" (click)="setView('settings')">
+        <span class="nav-icon">⚙️</span> Settings
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="avatar">{{ adminName.charAt(0) }}</div>
+        <div>
+          <div class="user-name">{{ adminName }}</div>
+          <div class="user-role">Super Admin</div>
+        </div>
+      </div>
+      <button class="btn-logout" (click)="logout()">Sign Out</button>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- ===== DASHBOARD VIEW ===== -->
+    @if (activeView === 'dashboard') {
+      <div class="topbar">
+        <div class="page-header">
+          <h1>Dashboard</h1>
+          <p>Platform overview and key statistics</p>
+        </div>
+      </div>
+
+      @if (dashboardLoading) {
+        <div class="loading">Loading dashboard...</div>
+      }
+
+      @if (stats) {
+        <!-- Stat Cards -->
+        <div class="stats-grid">
+          <div class="stat-card teal">
+            <span class="stat-icon">🏫</span>
+            <div class="stat-value">{{ stats.totalColleges }}</div>
+            <div class="stat-label">Total Colleges</div>
+            <div class="stat-sub">{{ stats.activeColleges }} active · {{ stats.pendingColleges }} pending · {{ stats.inactiveColleges }} inactive</div>
+          </div>
+          <div class="stat-card navy">
+            <span class="stat-icon">🎉</span>
+            <div class="stat-value">{{ stats.totalEvents }}</div>
+            <div class="stat-label">Total Events</div>
+            <div class="stat-sub">Across all institutions</div>
+          </div>
+          <div class="stat-card purple">
+            <span class="stat-icon">🏆</span>
+            <div class="stat-value">{{ stats.totalClubs }}</div>
+            <div class="stat-label">Total Clubs</div>
+            <div class="stat-sub">Platform-wide</div>
+          </div>
+          <div class="stat-card amber">
+            <span class="stat-icon">👥</span>
+            <div class="stat-value">{{ stats.totalStudents }}</div>
+            <div class="stat-label">Total Students</div>
+            <div class="stat-sub">Registered users</div>
+          </div>
+        </div>
+
+        <!-- Event Trends -->
+        @if (getTrendKeys().length > 0) {
+          <div class="section-card">
+            <div class="section-header">
+              <div>
+                <div class="section-title">Event Participation Trends</div>
+                <div class="section-sub">Monthly event distribution</div>
+              </div>
+            </div>
+            <div class="trend-bars">
+              @for (month of getTrendKeys(); track month) {
+                <div class="trend-item">
+                  <div class="trend-bar-wrap">
+                    <div class="trend-bar"
+                         [style.height.px]="(stats.eventTrendsByMonth[month] / (stats.totalEvents || 1)) * 120 + 10">
+                    </div>
+                  </div>
+                  <div class="trend-label">{{ month }}</div>
+                  <div class="trend-count">{{ stats.eventTrendsByMonth[month] }}</div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- College Stats Table -->
+        <div class="section-card">
+          <div class="section-header">
+            <div class="section-title">College Statistics</div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Institution</th>
+                <th>Status</th>
+                <th>Students</th>
+                <th>Events</th>
+                <th>Clubs</th>
+                <th>Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (college of stats.topColleges; track college.institutionId) {
+                <tr>
+                  <td><strong>{{ college.institutionName }}</strong><br/><small class="text-muted">{{ college.email }}</small></td>
+                  <td><span class="badge" [class]="getStatusClass(college.status)">{{ college.status }}</span></td>
+                  <td>{{ college.studentCount }}</td>
+                  <td>{{ college.eventCount }}</td>
+                  <td>{{ college.clubCount }}</td>
+                  <td class="points-cell">{{ college.totalPoints }}</td>
+                </tr>
+              }
+              @empty {
+                <tr><td colspan="6" class="empty-msg">No colleges registered yet.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+
+    <!-- ===== COLLEGE MANAGEMENT VIEW ===== -->
+    @if (activeView === 'colleges') {
+      <div class="topbar">
+        <div class="page-header">
+          <h1>College Management</h1>
+          <p>Approve, manage, or deactivate institutional registrations</p>
+        </div>
+      </div>
+
+      @if (actionMessage) {
+        <div class="alert-success">✓ {{ actionMessage }}</div>
+      }
+      @if (actionError) {
+        <div class="alert-error">{{ actionError }}</div>
+      }
+
+      <div class="search-bar">
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (input)="onSearch()"
+          placeholder="🔍  Search by institution name or email..."
+          class="search-input"
+        />
+      </div>
+
+      @if (collegesLoading) {
+        <div class="loading">Loading institutions...</div>
+      }
+
+      <div class="section-card">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Institution</th>
+              <th>Phone</th>
+              <th>Status</th>
+              <th>Registered</th>
+              <th>Students</th>
+              <th>Events</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (inst of institutions; track inst.institutionId; let i = $index) {
+              <tr>
+                <td>{{ i + 1 }}</td>
+                <td>
+                  <strong>{{ inst.institutionName }}</strong><br/>
+                  <small class="text-muted">{{ inst.email }}</small>
+                </td>
+                <td>{{ inst.phone || '—' }}</td>
+                <td><span class="badge" [class]="getStatusClass(inst.status)">{{ inst.status }}</span></td>
+                <td>{{ inst.registeredAt | date:'dd MMM yyyy' }}</td>
+                <td>{{ inst.studentCount }}</td>
+                <td>{{ inst.eventCount }}</td>
+                <td class="action-btns">
+                  @if (inst.status === 'pending') {
+                    <button class="btn-approve" (click)="approveInstitution(inst.institutionId)">Approve</button>
+                  }
+                  @if (inst.status === 'active') {
+                    <button class="btn-deactivate" (click)="deactivateInstitution(inst.institutionId)">Deactivate</button>
+                  }
+                  @if (inst.status === 'inactive') {
+                    <button class="btn-approve" (click)="approveInstitution(inst.institutionId)">Reactivate</button>
+                  }
+                </td>
+              </tr>
+            }
+            @empty {
+              <tr><td colspan="8" class="empty-msg">No institutions found.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <!-- ===== ANALYTICS VIEW ===== -->
+    @if (activeView === 'analytics') {
+      <div class="topbar">
+        <div class="page-header">
+          <h1>Analytics</h1>
+          <p>Platform-wide data and institutional rankings</p>
+        </div>
+      </div>
+
+      @if (analyticsLoading) {
+        <div class="loading">Loading analytics...</div>
+      }
+
+      @if (analytics) {
+        <div class="stats-grid">
+          <div class="stat-card teal">
+            <span class="stat-icon">👤</span>
+            <div class="stat-value">{{ analytics.totalUsers }}</div>
+            <div class="stat-label">Total Users</div>
+          </div>
+          <div class="stat-card navy">
+            <span class="stat-icon">🎉</span>
+            <div class="stat-value">{{ analytics.totalEvents }}</div>
+            <div class="stat-label">Total Events</div>
+          </div>
+          <div class="stat-card purple">
+            <span class="stat-icon">🏆</span>
+            <div class="stat-value">{{ analytics.totalClubs }}</div>
+            <div class="stat-label">Total Clubs</div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Institutional Rankings</div>
+              <div class="section-sub">Ranked by total points earned across events</div>
+            </div>
+          </div>
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Rank</th>
+                <th>Institution</th>
+                <th>Status</th>
+                <th>Students</th>
+                <th>Events</th>
+                <th>Clubs</th>
+                <th>Total Points</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (inst of analytics.institutionRankings; track inst.institutionId; let i = $index) {
+                <tr [class.top-rank]="i < 3">
+                  <td class="rank-cell">{{ getRankBadge(i) }}</td>
+                  <td>
+                    <strong>{{ inst.institutionName }}</strong><br/>
+                    <small class="text-muted">{{ inst.email }}</small>
+                  </td>
+                  <td><span class="badge" [class]="getStatusClass(inst.status)">{{ inst.status }}</span></td>
+                  <td>{{ inst.studentCount }}</td>
+                  <td>{{ inst.eventCount }}</td>
+                  <td>{{ inst.clubCount }}</td>
+                  <td class="points-cell"><strong>{{ inst.totalPoints }}</strong></td>
+                </tr>
+              }
+              @empty {
+                <tr><td colspan="7" class="empty-msg">No data available yet.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    }
+
+    <!-- ===== SETTINGS VIEW ===== -->
+    @if (activeView === 'settings') {
+      <div class="topbar">
+        <div class="page-header">
+          <h1>Settings</h1>
+          <p>Super admin account information</p>
+        </div>
+      </div>
+      <div class="section-card settings-card">
+        <div class="settings-row">
+          <label>Name</label>
+          <span>{{ adminName }}</span>
+        </div>
+        <div class="settings-row">
+          <label>Role</label>
+          <span class="badge badge-active">Super Admin</span>
+        </div>
+        <div class="settings-row">
+          <label>Access Level</label>
+          <span>Full Platform Access</span>
+        </div>
+        <div class="settings-divider"></div>
+        <button class="btn-logout-lg" (click)="logout()">Sign Out</button>
+      </div>
+    }
+
+  </main>
+</div>

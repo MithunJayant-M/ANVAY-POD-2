@@ -10,12 +10,12 @@ import org.springframework.web.bind.annotation.*;
 public class AchievementController {
 
     @GetMapping("/{achievementId}")
-    public ResponseEntity<Void> getAchievement(@PathVariable Long achievementId) {
+    public ResponseEntity<Void> getAchievement(@PathVariable Integer achievementId) {
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<Void> getUserAchievements(@PathVariable Long userId) {
+    public ResponseEntity<Void> getUserAchievements(@PathVariable Integer userId) {
         return ResponseEntity.ok().build();
     }
 }

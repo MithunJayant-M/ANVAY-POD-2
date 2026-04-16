@@ -1,15 +1,10 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router'; // Must import this!
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet], // Must include RouterOutlet here
-  template: `
-    <router-outlet></router-outlet>
-  `,
- // styleUrls: ['./app.component.css'] // Or styles: [...]
+  imports: [RouterOutlet],
+  template: `<router-outlet></router-outlet>`
 })
-export class AppComponent {
-  title = 'anvay-app';
-}
+export class AppComponent {}

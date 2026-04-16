@@ -1,63 +1,70 @@
 package com.cts.mfrp.anvay.service.impl;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.cts.mfrp.anvay.dto.LoginRequest;
+import com.cts.mfrp.anvay.dto.LoginResponse;
+import com.cts.mfrp.anvay.dto.RegisterStudentRequest;
 import com.cts.mfrp.anvay.entity.User;
 import com.cts.mfrp.anvay.repository.UserRepository;
+import com.cts.mfrp.anvay.security.JwtUtil;
 import com.cts.mfrp.anvay.service.UserService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
-@Transactional
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     @Override
-    public User createUser(User user) {
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
-        return userRepository.save(user);
+    public LoginResponse login(LoginRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new BadCredentialsException("Invalid email or password"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new BadCredentialsException("Invalid email or password");
+        }
+
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getUserId(), user.getInstitutionId());
+
+        return LoginResponse.builder()
+                .token(token)
+                .role(user.getRole())
+                .name(user.getName())
+                .userId(user.getUserId())
+                .institutionId(user.getInstitutionId())
+                .build();
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public User getUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-    }
+    @Transactional
+    public LoginResponse registerStudent(RegisterStudentRequest request) {
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new RuntimeException("Email already registered");
+        }
 
-    @Override
-    @Transactional(readOnly = true)
-    public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
-    }
+        User user = User.builder()
+                .name(request.getName())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role("student")
+                .institutionId(request.getInstitutionId())
+                .build();
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
+        user = userRepository.save(user);
+        String token = jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getUserId(), user.getInstitutionId());
 
-    @Override
-    public User updateUser(Long userId, User user) {
-        User existing = getUserById(userId);
-        if (user.getEmail() != null) existing.setEmail(user.getEmail());
-        if (user.getFirstName() != null) existing.setFirstName(user.getFirstName());
-        if (user.getLastName() != null) existing.setLastName(user.getLastName());
-        if (user.getRole() != null) existing.setRole(user.getRole());
-        existing.setUpdatedAt(LocalDateTime.now());
-        return userRepository.save(existing);
-    }
-
-    @Override
-    public void deleteUser(Long userId) {
-        userRepository.deleteById(userId);
+        return LoginResponse.builder()
+                .token(token)
+                .role(user.getRole())
+                .name(user.getName())
+                .userId(user.getUserId())
+                .institutionId(user.getInstitutionId())
+                .build();
     }
 }

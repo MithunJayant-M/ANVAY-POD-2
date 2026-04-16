@@ -1,21 +1,55 @@
-/* This makes the icon words turn into actual symbols */
-.material-icons {
-  font-family: 'Material Icons';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 24px;  /* Adjust size as needed */
-  display: inline-block;
-  line-height: 1;
-  text-transform: none;
-  letter-spacing: normal;
-  word-wrap: normal;
-  white-space: nowrap;
-  direction: ltr;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800&display=swap');
+
+/* ── Colours extracted directly from ANVAY logo gradient ── */
+:root {
+  --lime:      #84cc16;   /* top of logo  */
+  --green:     #22c55e;   /* upper-mid    */
+  --teal:      #14b8a6;   /* centre       */
+  --ocean:     #0891b2;   /* lower        */
+  --deep:      #0c4a6e;   /* bottom       */
+  --navy:      #0f172a;   /* text         */
+
+  --grad:      linear-gradient(135deg, #84cc16 0%, #22c55e 28%, #14b8a6 58%, #0891b2 80%, #0c4a6e 100%);
+  --grad-v:    linear-gradient(180deg,  #84cc16 0%, #14b8a6 55%, #0c4a6e 100%);
+  --grad-soft: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 50%, #e0f2fe 100%);
+
+  --white:     #ffffff;
+  --bg:        #f0fdf9;
+  --gray-50:   #f8fafc;
+  --gray-100:  #f1f5f9;
+  --gray-200:  #e2e8f0;
+  --gray-400:  #94a3b8;
+  --text:      #0f172a;
+  --text-sub:  #334155;
+  --text-muted:#64748b;
+
+  --shadow:    0 4px 24px rgba(8,145,178,0.12);
+  --shadow-lg: 0 8px 48px rgba(8,145,178,0.18);
+  --radius:    14px;
+  --radius-sm: 8px;
 }
 
-/* Fix the sidebar alignment */
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px; /* Spacing between icon and text */
-}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+a { text-decoration: none; color: inherit; }
+button { font-family: inherit; cursor: pointer; }
+input  { font-family: inherit; }
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: var(--teal); border-radius: 4px; }
+
+/* ── Global Brand Component ─────────────────────────── */
+.anvay-brand { display: inline-flex; align-items: center; gap: 12px; }
+.anvay-brand .brand-icon { flex-shrink: 0; display: block; }
+
+.anvay-brand .brand-text  { display: flex; flex-direction: column; line-height: 1; gap: 5px; }
+.anvay-brand .brand-name  { font-weight: 900; letter-spacing: 5px; color: #0f172a; line-height: 1; }
+.anvay-brand .brand-tag   { font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: #0891b2; line-height: 1; }
+
+.anvay-brand.size-xs .brand-icon { width: 30px;  height: 30px;  } .anvay-brand.size-xs .brand-name { font-size: 1rem;   letter-spacing: 4px; } .anvay-brand.size-xs .brand-tag { font-size: 0.52rem; }
+.anvay-brand.size-sm .brand-icon { width: 42px;  height: 42px;  } .anvay-brand.size-sm .brand-name { font-size: 1.4rem; } .anvay-brand.size-sm .brand-tag { font-size: 0.60rem; }
+.anvay-brand.size-md .brand-icon { width: 56px;  height: 56px;  } .anvay-brand.size-md .brand-name { font-size: 1.9rem; } .anvay-brand.size-md .brand-tag { font-size: 0.70rem; }
+.anvay-brand.size-lg .brand-icon { width: 76px;  height: 76px;  } .anvay-brand.size-lg .brand-name { font-size: 2.5rem; } .anvay-brand.size-lg .brand-tag { font-size: 0.80rem; }
+.anvay-brand.size-xl .brand-icon { width: 108px; height: 108px; } .anvay-brand.size-xl .brand-name { font-size: 3.5rem; } .anvay-brand.size-xl .brand-tag { font-size: 0.95rem; }
+
+.anvay-brand.on-dark .brand-name { color: #fff; }
+.anvay-brand.on-dark .brand-tag  { color: rgba(134,239,172,0.85); }

@@ -1,13 +1,15 @@
 package com.cts.mfrp.anvay.service;
 
-import java.util.List;
-
+import com.cts.mfrp.anvay.dto.LoginResponse;
+import com.cts.mfrp.anvay.dto.RegisterInstitutionRequest;
 import com.cts.mfrp.anvay.entity.Institution;
 
+import java.util.List;
+
 public interface InstitutionService {
-    Institution createInstitution(Institution institution);
-    Institution getInstitutionById(Long institutionId);
+    LoginResponse registerInstitution(RegisterInstitutionRequest request);
+    Institution getInstitutionById(Integer institutionId);
     List<Institution> getAllInstitutions();
-    Institution updateInstitution(Long institutionId, Institution institution);
-    void deleteInstitution(Long institutionId);
+    Institution updateInstitution(Integer institutionId, Institution institution);
+    void deleteInstitution(Integer institutionId);
 }

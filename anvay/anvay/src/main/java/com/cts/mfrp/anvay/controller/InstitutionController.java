@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -21,22 +22,17 @@ public class InstitutionController {
     }
 
     @GetMapping("/{institutionId}")
-    public ResponseEntity<Institution> getInstitution(@PathVariable Long institutionId) {
+    public ResponseEntity<Institution> getInstitution(@PathVariable Integer institutionId) {
         return ResponseEntity.ok(institutionService.getInstitutionById(institutionId));
     }
 
-    @PostMapping
-    public ResponseEntity<Institution> createInstitution(@RequestBody Institution institution) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(institutionService.createInstitution(institution));
-    }
-
     @PutMapping("/{institutionId}")
-    public ResponseEntity<Institution> updateInstitution(@PathVariable Long institutionId, @RequestBody Institution institution) {
+    public ResponseEntity<Institution> updateInstitution(@PathVariable Integer institutionId, @RequestBody Institution institution) {
         return ResponseEntity.ok(institutionService.updateInstitution(institutionId, institution));
     }
 
     @DeleteMapping("/{institutionId}")
-    public ResponseEntity<Void> deleteInstitution(@PathVariable Long institutionId) {
+    public ResponseEntity<Void> deleteInstitution(@PathVariable Integer institutionId) {
         institutionService.deleteInstitution(institutionId);
         return ResponseEntity.noContent().build();
     }

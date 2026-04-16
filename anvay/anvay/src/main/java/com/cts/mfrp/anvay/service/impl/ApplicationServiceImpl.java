@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.LocalDateTime;
+
 import java.util.List;
 
 @Service
@@ -20,34 +20,32 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     public LeadershipApplication createApplication(LeadershipApplication application) {
-        application.setCreatedAt(LocalDateTime.now());
-        application.setUpdatedAt(LocalDateTime.now());
         return leadershipApplicationRepository.save(application);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public LeadershipApplication getApplicationById(Long applicationId) {
+    public LeadershipApplication getApplicationById(Integer applicationId) {
         return leadershipApplicationRepository.findById(applicationId)
                 .orElseThrow(() -> new IllegalArgumentException("Application not found"));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<LeadershipApplication> getApplicationsByClubId(Long clubId) {
+    public List<LeadershipApplication> getApplicationsByClubId(Integer clubId) {
         return leadershipApplicationRepository.findByClubId(clubId);
     }
 
     @Override
-    public LeadershipApplication updateApplication(Long applicationId, LeadershipApplication application) {
+    public LeadershipApplication updateApplication(Integer applicationId, LeadershipApplication application) {
         LeadershipApplication existing = getApplicationById(applicationId);
         if (application.getStatus() != null) existing.setStatus(application.getStatus());
-        existing.setUpdatedAt(LocalDateTime.now());
+        if (application.getExperience() != null) existing.setExperience(application.getExperience());
         return leadershipApplicationRepository.save(existing);
     }
 
     @Override
-    public void deleteApplication(Long applicationId) {
+    public void deleteApplication(Integer applicationId) {
         leadershipApplicationRepository.deleteById(applicationId);
     }
 }

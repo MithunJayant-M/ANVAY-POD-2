@@ -2,10 +2,7 @@ package com.cts.mfrp.anvay.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,31 +11,30 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LeadershipApplication {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "application_id")
-    private Long applicationId;
+    private Integer applicationId;
 
     @Column(name = "club_id", nullable = false)
-    private Long clubId;
+    private Integer clubId;
 
     @Column(name = "user_id", nullable = false)
-    private Long userId;
+    private Integer userId;
 
-    @Column(name = "status")
-    private String status; // PENDING, APPROVED, REJECTED
+    @Column(name = "experience", columnDefinition = "TEXT")
+    private String experience;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    @Column(name = "status", length = 50)
+    private String status; // pending, approved, rejected
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    @Column(name = "applied_at")
+    private LocalDateTime appliedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "club_id", insertable = false, updatable = false)
-    private Club club;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", insertable = false, updatable = false)
-    private User user;
+    @PrePersist
+    protected void onCreate() {
+        if (appliedAt == null) appliedAt = LocalDateTime.now();
+        if (status == null) status = "pending";
+    }
 }

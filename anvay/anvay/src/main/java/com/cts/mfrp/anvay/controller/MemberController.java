@@ -5,6 +5,7 @@ import com.cts.mfrp.anvay.service.StudentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -20,12 +21,12 @@ public class MemberController {
     }
 
     @GetMapping("/{memberId}")
-    public ResponseEntity<User> getMember(@PathVariable Long memberId) {
+    public ResponseEntity<User> getMember(@PathVariable Integer memberId) {
         return ResponseEntity.ok(studentService.getStudentById(memberId));
     }
 
     @PutMapping("/{memberId}")
-    public ResponseEntity<User> updateMember(@PathVariable Long memberId, @RequestBody User user) {
+    public ResponseEntity<User> updateMember(@PathVariable Integer memberId, @RequestBody User user) {
         return ResponseEntity.ok(studentService.updateStudent(memberId, user));
     }
 }
