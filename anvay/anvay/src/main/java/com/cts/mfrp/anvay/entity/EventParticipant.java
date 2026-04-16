@@ -1,7 +1,11 @@
 package com.cts.mfrp.anvay.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
@@ -9,29 +13,34 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class EventParticipant {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Integer id;
+    private Long id;
 
-    @Column(name = "event_id", nullable = false)
-    private Integer eventId;
+    @Column(name = "event_id")
+    private Long eventId;
 
-    @Column(name = "user_id", nullable = false)
-    private Integer userId;
+    @Column(name = "user_id")
+    private Long userId;
 
-    @Column(name = "points_earned")
-    private Integer pointsEarned;
+    @Column(name = "status")
+    private String status;
 
     @Column(name = "registered_at")
-    private LocalDateTime registeredAt;
+    private LocalDateTime createdAt;
 
-    @PrePersist
-    protected void onCreate() {
-        if (registeredAt == null) registeredAt = LocalDateTime.now();
-        if (pointsEarned == null) pointsEarned = 0;
-    }
+    @Column(name = "pointsEarned")
+    private Integer points_earned;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "event_id", insertable = false, updatable = false)
+    @JsonIgnoreProperties("er")
+    private Event event;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @JsonIgnoreProperties("eventRegistrations")
+    private User user;
 }

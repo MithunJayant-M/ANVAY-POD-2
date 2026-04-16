@@ -1,29 +1,33 @@
 package com.cts.mfrp.anvay.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "clubs")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Club {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "club_id")
-    private Integer clubId;
+    private Long clubId;
 
     @Column(name = "institution_id", nullable = false)
-    private Integer institutionId;
+    private Long institutionId;
 
-    @Column(name = "club_name", length = 255, nullable = false)
+    @Column(name = "club_name")
     private String clubName;
 
-    @Column(name = "category", length = 100)
+    @Column(name = "category")
     private String category;
 
     @Column(name = "member_count")
@@ -32,9 +36,20 @@ public class Club {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @PrePersist
-    protected void onCreate() {
-        if (createdAt == null) createdAt = LocalDateTime.now();
-        if (memberCount == null) memberCount = 0;
-    }
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "institution_id", insertable = false, updatable = false)
+    @JsonIgnoreProperties("club")
+    private Institution institution;
+
+    @OneToMany(mappedBy = "club", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Event> events = new ArrayList<>();
+
+    @OneToMany(mappedBy = "club", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ClubMember> clubMembers = new ArrayList<>();
+
+    @OneToMany(mappedBy = "club", cascade = CascadeType.ALL)
+    private List<Achievement> achievements=new ArrayList<>();
 }

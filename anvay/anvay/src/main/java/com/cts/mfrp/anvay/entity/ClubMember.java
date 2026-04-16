@@ -1,7 +1,11 @@
 package com.cts.mfrp.anvay.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 @Entity
@@ -9,33 +13,34 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class ClubMember {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Integer id;
+    private Long id;
 
     @Column(name = "club_id", nullable = false)
-    private Integer clubId;
+    private Long clubId;
 
     @Column(name = "user_id", nullable = false)
-    private Integer userId;
+    private Long userId;
 
-    @Column(name = "role_in_club", length = 100)
-    private String roleInClub; // member, leader, secretary
+    @Column(name = "status")
+    private String status; // PENDING, APPROVED, REJECTED
 
-    @Column(name = "status", length = 50)
-    private String status; // active, inactive, pending
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
-    @Column(name = "joined_at")
-    private LocalDateTime joinedAt;
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
-    @PrePersist
-    protected void onCreate() {
-        if (joinedAt == null) joinedAt = LocalDateTime.now();
-        if (status == null) status = "active";
-        if (roleInClub == null) roleInClub = "member";
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "club_id", insertable = false, updatable = false)
+    @JsonIgnoreProperties("clubMembers")
+    private Club club;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @JsonIgnoreProperties("clubMembers")
+    private User user;
 }

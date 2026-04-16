@@ -1,43 +1,46 @@
 package com.cts.mfrp.anvay.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "institutions")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Institution {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "institution_id")
-    private Integer institutionId;
+    private Long institutionId;
 
-    @Column(name = "institution_name", length = 255, nullable = false)
-    private String institutionName;
+    @Column(name = "name")
+    private String name;
 
-    @Column(name = "email", length = 255, unique = true)
-    private String email;
+    @Column(name="institution_email")
+    private String institutionEmail;
 
-    @Column(name = "phone", length = 20)
-    private String phone;
+    @Column(name="status")
+    private String status;
 
-    @Column(name = "address", columnDefinition = "TEXT")
-    private String address;
+    @Column(name = "location")
+    private String location;
 
-    @Column(name = "status", length = 50)
-    private String status; // pending, active, inactive
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
-    @Column(name = "registered_at")
-    private LocalDateTime registeredAt;
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
-    @PrePersist
-    protected void onCreate() {
-        if (registeredAt == null) registeredAt = LocalDateTime.now();
-        if (status == null) status = "pending";
-    }
+    @OneToMany(mappedBy = "institution", cascade = CascadeType.ALL)
+    private List<Club> club=new ArrayList<>();
+
+    @OneToMany(mappedBy = "institution", cascade = CascadeType.ALL)
+    private List<User> users=new ArrayList<>();
 }
