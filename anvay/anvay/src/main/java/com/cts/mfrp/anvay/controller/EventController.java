@@ -37,6 +37,11 @@ public class EventController {
         return ResponseEntity.ok(eventService.getEventsByClubId(clubId));
     }
 
+    @GetMapping("/institution/{institutionId}")
+    public ResponseEntity<List<Event>> getEventsByInstitution(@PathVariable Long institutionId) {
+        return ResponseEntity.ok(eventService.getEventsByInstitutionId(institutionId));
+    }
+
     @PostMapping
     public ResponseEntity<Event> createEvent(@RequestBody Event event) {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(event));
@@ -55,9 +60,14 @@ public class EventController {
 
     @GetMapping("/all")
     public ResponseEntity<List<EventFeedDTO>> getAllEvents(@RequestParam(required = false) Long userId) {
-        // If no userId is provided (guest view), you can pass a null or 0
-        // But for your testing, ensure userId 101 is being passed
         return ResponseEntity.ok(eventService.getAllEventsWithStatus(userId));
+    }
+
+    @GetMapping("/feed")
+    public ResponseEntity<List<EventFeedDTO>> getEventsForStudent(
+            @RequestParam Long userId,
+            @RequestParam Long institutionId) {
+        return ResponseEntity.ok(eventService.getEventsForStudent(userId, institutionId));
     }
 
     @Autowired

@@ -2,10 +2,7 @@ package com.cts.mfrp.anvay.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +10,7 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class User {
@@ -24,9 +22,9 @@ public class User {
     @Column(name = "institution_id")
     private Long institutionId;
 
-    // Inside User.java
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "institution_id", insertable = false, updatable = false)
+    @JsonIgnoreProperties({"users", "club"})
     private Institution institution;
 
     @Column(name = "email", unique = true)
@@ -38,6 +36,9 @@ public class User {
     @Column(name = "last_name")
     private String lastName;
 
+    @Column(name = "password")
+    private String password;
+
     @Column(name = "role")
     private String role;
 
@@ -47,16 +48,21 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<EventParticipant> eventRegistrations=new ArrayList<>();
+    @JsonIgnoreProperties("user")
+    private List<EventParticipant> eventRegistrations = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<ClubMember> clubMembers=new ArrayList<>();
+    @JsonIgnoreProperties("user")
+    private List<ClubMember> clubMembers = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<Achievement> achievements=new ArrayList<>();
+    @JsonIgnoreProperties("user")
+    private List<Achievement> achievements = new ArrayList<>();
 
-    // --- ADD THESE FIELDS FOR THE DASHBOARD ---
     @Column(name = "total_points")
     private Integer totalPoints;
 
@@ -68,5 +74,4 @@ public class User {
 
     @Column(name = "joined_clubs_count")
     private Integer joinedClubsCount;
-    // ------------------------------------------
 }

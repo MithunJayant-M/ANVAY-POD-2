@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InstitutionDto {
-    private Integer institutionId;
+    private Long institutionId;
     private String institutionName;
     private String email;
     private String phone;

@@ -8,10 +8,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Integer> {
+public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByEmail(String email);
     boolean existsByEmail(String email);
-    List<User> findByInstitutionId(Integer institutionId);
-    long countByInstitutionId(Integer institutionId);
+    List<User> findByInstitutionId(Long institutionId);
+    List<User> findByInstitutionIdAndRole(Long institutionId, String role);
+    long countByInstitutionId(Long institutionId);
+    long countByInstitutionIdAndRole(Long institutionId, String role);
+    List<User> findByRole(String role);
     long countByRole(String role);
 }

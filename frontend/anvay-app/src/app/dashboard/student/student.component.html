@@ -1,104 +1,236 @@
-<div class="std-layout">
-
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-brand">
-      <div class="anvay-brand size-sm on-dark">
-        <img src="assets/anvay-logo.svg" class="brand-icon" alt="ANVAY"/>
-        <div class="brand-text">
-          <span class="brand-name">ANVAY</span>
-          <span class="brand-tag">Discover. Join. Host.</span>
-        </div>
-      </div>
-      <span class="brand-role">Student</span>
+<div class="st-shell" [class.sidebar-collapsed]="!sidebarOpen">
+  <!-- SIDEBAR -->
+  <aside class="st-sidebar">
+    <div class="sb-brand">
+      <div><div class="brand-name">ANVAY</div><div class="brand-tag">DISCOVER. JOIN. HOST.</div></div>
     </div>
-
-    <nav class="sidebar-nav">
-      <button class="nav-item active">
-        <span class="nav-icon">🏠</span> Home
+    <div class="sb-role-badge"><span class="role-dot"></span>Student</div>
+    <nav class="sb-nav">
+      <button class="nav-item" [class.active]="activeView==='dashboard'" (click)="setView('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard
       </button>
-      <button class="nav-item">
-        <span class="nav-icon">🎉</span> Events
+      <button class="nav-item" [class.active]="activeView==='events'" (click)="setView('events')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>Event Feed
       </button>
-      <button class="nav-item">
-        <span class="nav-icon">🏆</span> Clubs
+      <button class="nav-item" [class.active]="activeView==='clubs'" (click)="setView('clubs')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>Clubs
       </button>
-      <button class="nav-item">
-        <span class="nav-icon">📋</span> My Registrations
+      <button class="nav-item" [class.active]="activeView==='leaderboard'" (click)="setView('leaderboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Leaderboard
       </button>
-      <button class="nav-item">
-        <span class="nav-icon">🥇</span> Leaderboard
-      </button>
-      <button class="nav-item">
-        <span class="nav-icon">👤</span> Profile
+      <button class="nav-item" [class.active]="activeView==='profile'" (click)="setView('profile')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile
       </button>
     </nav>
-
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="avatar">S</div>
-        <div>
-          <div class="user-name">Student</div>
-          <div class="user-role">Student Portal</div>
-        </div>
-      </div>
-      <button class="btn-logout" (click)="logout()">Sign Out</button>
-    </div>
+    <button class="sb-logout" (click)="logout()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout
+    </button>
   </aside>
 
-  <!-- Main -->
-  <main class="main-content">
-    <div class="topbar">
-      <div class="page-header">
-        <h1>Student Dashboard</h1>
-        <p>Discover events, join clubs and track your achievements</p>
-      </div>
-    </div>
-
-    <!-- Coming Soon Cards -->
-    <div class="coming-soon-grid">
-
-      <div class="cs-card">
-        <div class="cs-icon">🎉</div>
-        <h3>Browse Events</h3>
-        <p>Discover upcoming events, register with a single click and get notified about schedules.</p>
-        <span class="cs-badge">Coming Soon</span>
-      </div>
-
-      <div class="cs-card">
-        <div class="cs-icon">🏆</div>
-        <h3>Join Clubs</h3>
-        <p>Find clubs that match your interests, apply for membership and connect with fellow students.</p>
-        <span class="cs-badge">Coming Soon</span>
-      </div>
-
-      <div class="cs-card">
-        <div class="cs-icon">🥇</div>
-        <h3>Leaderboard</h3>
-        <p>Earn points by attending events and participating in clubs. Climb the leaderboard!</p>
-        <span class="cs-badge">Coming Soon</span>
-      </div>
-
-      <div class="cs-card">
-        <div class="cs-icon">📋</div>
-        <h3>My Registrations</h3>
-        <p>Track all your event registrations, view tickets and manage your upcoming commitments.</p>
-        <span class="cs-badge">Coming Soon</span>
-      </div>
-
-    </div>
-
-    <!-- Welcome Banner -->
-    <div class="welcome-banner">
-      <div class="wb-content">
-        <div class="wb-icon">🎓</div>
-        <div class="wb-text">
-          <strong>Welcome to ANVAY!</strong>
-          <span>You're all set. Full student features — events, clubs, leaderboards and more — are on the way.</span>
+  <!-- MAIN -->
+  <div class="st-main">
+    <header class="st-topbar">
+      <button class="toggle-btn" (click)="sidebarOpen=!sidebarOpen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <span class="topbar-logo">Anvay</span>
+      <span class="role-chip">Student</span>
+      <div class="topbar-right">
+        <button class="bell-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span class="bell-dot"></span></button>
+        <div class="user-chip">
+          <div class="user-avatar">{{dashboard?.firstName?.charAt(0) || 'S'}}</div>
+          <span>{{dashboard?.firstName || 'Student'}}</span>
         </div>
       </div>
-      <div class="wb-deco"></div>
-    </div>
-  </main>
+    </header>
 
+    <div class="msg-bar success" *ngIf="message && messageType==='success'">&#10003; {{message}}</div>
+    <div class="msg-bar error" *ngIf="message && messageType==='error'">&#10005; {{message}}</div>
+
+    <main class="st-content">
+
+      <!-- DASHBOARD -->
+      <div *ngIf="activeView==='dashboard'">
+        <div class="page-header">
+          <h1>Welcome back, {{dashboard?.firstName || 'Student'}}</h1>
+          <p>{{dashboard?.institutionName}} &middot; Track your progress and upcoming events</p>
+        </div>
+        <div *ngIf="dashLoading" class="loading-state"><div class="spinner"></div></div>
+        <ng-container *ngIf="!dashLoading && dashboard">
+          <div class="stat-grid">
+            <div class="stat-card sc-amber">
+              <div class="stat-icon si-amber">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              </div>
+              <div class="stat-body"><div class="stat-num">{{dashboard.totalPoints}}</div><div class="stat-label">Total Points</div></div>
+            </div>
+            <div class="stat-card sc-teal">
+              <div class="stat-icon si-teal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              </div>
+              <div class="stat-body"><div class="stat-num">#{{dashboard.rank || '–'}}</div><div class="stat-label">Rank</div></div>
+            </div>
+            <div class="stat-card sc-green">
+              <div class="stat-icon si-green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </div>
+              <div class="stat-body"><div class="stat-num">{{dashboard.registeredEventsCount}}</div><div class="stat-label">Events Joined</div></div>
+            </div>
+            <div class="stat-card sc-purple">
+              <div class="stat-icon si-purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+              </div>
+              <div class="stat-body"><div class="stat-num">{{dashboard.joinedClubsCount}}</div><div class="stat-label">Clubs Joined</div></div>
+            </div>
+          </div>
+
+          <div class="dash-row">
+            <!-- Upcoming Events -->
+            <div class="dash-card">
+              <div class="dash-card-header">
+                <h3>Upcoming Events</h3>
+                <button class="link-btn" (click)="setView('events')">View All &rarr;</button>
+              </div>
+              <div class="event-list">
+                <div class="event-item" *ngFor="let ev of dashboard.upcomingEvents">
+                  <div class="event-type-dot" [style.background]="'linear-gradient(135deg,#22c55e,#0891b2)'"></div>
+                  <div class="event-info">
+                    <div class="event-title">{{ev.title}}</div>
+                    <div class="event-meta">{{ev.institution}} &middot; {{ev.dateTime | date:'mediumDate'}}</div>
+                  </div>
+                  <span class="tag">{{ev.type}}</span>
+                </div>
+                <div *ngIf="!dashboard.upcomingEvents?.length" class="empty-state-sm">No upcoming events</div>
+              </div>
+            </div>
+
+            <!-- Achievements -->
+            <div class="dash-card">
+              <div class="dash-card-header">
+                <h3>Achievements ({{dashboard.achievementCount}})</h3>
+              </div>
+              <div class="achievement-list">
+                <div class="ach-item" *ngFor="let a of dashboard.achievements">
+                  <div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></div>
+                  <div>
+                    <div class="ach-title">{{a.title}}</div>
+                    <div class="ach-year">{{a.year}}</div>
+                  </div>
+                </div>
+                <div *ngIf="!dashboard.achievements?.length" class="empty-state-sm">No achievements yet</div>
+              </div>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- EVENTS -->
+      <div *ngIf="activeView==='events'">
+        <div class="page-header"><h1>Event Feed</h1><p>Discover and register for events across all institutions</p></div>
+        <div class="toolbar">
+          <div class="search-box">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input [(ngModel)]="searchEvent" placeholder="Search events...">
+          </div>
+        </div>
+        <div *ngIf="eventsLoading" class="loading-state"><div class="spinner"></div></div>
+        <div class="events-grid" *ngIf="!eventsLoading">
+          <div class="event-card" *ngFor="let ev of filteredEvents">
+            <div class="ec-header">
+              <span class="tag">{{ev.type || 'Event'}}</span>
+              <div style="display:flex;gap:6px;align-items:center">
+                <span *ngIf="ev.participantType==='all' && ev.institutionId !== institutionId" class="badge-public-ev">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="10" height="10"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20"/></svg>
+                  Public
+                </span>
+                <span *ngIf="ev.isRegistered" class="badge-registered">Registered</span>
+              </div>
+            </div>
+            <h4 class="ec-title">{{ev.title}}</h4>
+            <div class="ec-meta">
+              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg> {{ev.institution || 'General'}}</span>
+              <span *ngIf="ev.location"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> {{ev.location}}</span>
+            </div>
+            <div class="ec-capacity">
+              <div class="cap-bar"><div class="cap-fill" [style.width.%]="getCapacityPct(ev.registeredCount, ev.totalCapacity)"></div></div>
+              <span class="cap-text">{{ev.registeredCount || 0}} / {{ev.totalCapacity || '&ndash;'}} registered</span>
+            </div>
+            <button class="btn-register" *ngIf="!ev.isRegistered" (click)="registerEvent(ev.eventId)">Register Now</button>
+            <button class="btn-registered" *ngIf="ev.isRegistered" disabled>&#10003; Registered</button>
+          </div>
+          <div *ngIf="filteredEvents.length===0" class="empty-state">No events available</div>
+        </div>
+      </div>
+
+      <!-- CLUBS -->
+      <div *ngIf="activeView==='clubs'">
+        <div class="page-header"><h1>Clubs</h1><p>Browse and join clubs across the platform</p></div>
+        <div *ngIf="clubsLoading" class="loading-state"><div class="spinner"></div></div>
+        <div class="clubs-grid" *ngIf="!clubsLoading">
+          <div class="club-card" *ngFor="let cl of allClubs">
+            <div class="club-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+            </div>
+            <h4 class="club-name">{{cl.clubName}}</h4>
+            <span class="tag">{{cl.type || cl.category}}</span>
+            <div class="club-members">{{cl.membersCount || cl.memberCount || 0}} members</div>
+            <div class="club-actions">
+              <button class="btn-join" *ngIf="!isJoined(cl.clubId)" (click)="joinClub(cl.clubId)">Join Club</button>
+              <button class="btn-joined" *ngIf="isJoined(cl.clubId)" disabled>&#10003; Joined</button>
+              <button class="btn-lead" (click)="applyLeadership(cl.clubId)">Apply Leadership</button>
+            </div>
+          </div>
+          <div *ngIf="allClubs.length===0" class="empty-state">No clubs available</div>
+        </div>
+      </div>
+
+      <!-- LEADERBOARD -->
+      <div *ngIf="activeView==='leaderboard'">
+        <div class="page-header"><h1>Leaderboard</h1><p>See how you rank among your peers</p></div>
+        <div *ngIf="lbLoading" class="loading-state"><div class="spinner"></div></div>
+        <div *ngIf="!lbLoading" class="data-card">
+          <table class="data-table">
+            <thead><tr><th>Rank</th><th>Student</th><th>Email</th><th>Points</th><th>Clubs</th><th>Events</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let u of leaderboard; let i=index" [class.my-row]="u.userId===studentId">
+                <td><span class="rank-badge">{{getRankLabel(i)}}</span></td>
+                <td>
+                  <div class="student-cell">
+                    <div class="student-avatar">{{u.firstName?.charAt(0)||'?'}}</div>
+                    <div class="cell-primary">{{u.firstName}} {{u.lastName}}<span *ngIf="u.userId===studentId" class="you-badge"> (You)</span></div>
+                  </div>
+                </td>
+                <td>{{u.email}}</td>
+                <td><strong class="points-highlight">{{u.totalPoints || 0}}</strong></td>
+                <td>{{u.joinedClubsCount || 0}}</td>
+                <td>{{u.registeredEventsCount || 0}}</td>
+              </tr>
+              <tr *ngIf="leaderboard.length===0"><td colspan="6" class="empty-cell">No data available</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- PROFILE -->
+      <div *ngIf="activeView==='profile'">
+        <div class="page-header"><h1>My Profile</h1><p>View your account details and achievements</p></div>
+        <div *ngIf="profileLoading" class="loading-state"><div class="spinner"></div></div>
+        <div *ngIf="!profileLoading && profile" class="profile-layout">
+          <div class="profile-card">
+            <div class="profile-avatar">{{profile.firstName?.charAt(0)||'S'}}</div>
+            <div class="profile-name">{{profile.firstName}} {{profile.lastName}}</div>
+            <div class="profile-email">{{profile.email}}</div>
+            <div class="profile-role">{{profile.role | titlecase}}</div>
+            <div class="profile-stats">
+              <div class="ps-item"><div class="ps-num">{{profile.totalPoints||0}}</div><div class="ps-lbl">Points</div></div>
+              <div class="ps-item"><div class="ps-num">#{{profile.rank||'&ndash;'}}</div><div class="ps-lbl">Rank</div></div>
+              <div class="ps-item"><div class="ps-num">{{profile.registeredEventsCount||0}}</div><div class="ps-lbl">Events</div></div>
+              <div class="ps-item"><div class="ps-num">{{profile.joinedClubsCount||0}}</div><div class="ps-lbl">Clubs</div></div>
+            </div>
+          </div>
+        </div>
+        <div *ngIf="!profileLoading && !profile" class="empty-state">Profile not found</div>
+      </div>
+    </main>
+  </div>
 </div>

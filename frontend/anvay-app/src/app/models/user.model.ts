@@ -8,21 +8,20 @@ export interface LoginResponse {
   role: string;
   name: string;
   userId: number;
-  institutionId: number | null;
-}
-
-export interface RegisterInstitutionRequest {
-  institutionName: string;
-  email: string;
-  password: string;
-  phone: string;
-  address: string;
-  adminName: string;
+  institutionId: number;
 }
 
 export interface RegisterStudentRequest {
   name: string;
   email: string;
   password: string;
-  institutionId: number | null;
+  institutionId?: number;
+}
+
+export interface RegisterInstitutionRequest {
+  institutionName: string;
+  adminName: string;
+  email: string;
+  password: string;
+  address?: string;
 }

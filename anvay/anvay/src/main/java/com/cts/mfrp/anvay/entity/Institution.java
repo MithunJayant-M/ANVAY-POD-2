@@ -1,5 +1,6 @@
 package com.cts.mfrp.anvay.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -38,9 +39,11 @@ public class Institution {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "institution", cascade = CascadeType.ALL)
     private List<Club> club=new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "institution", cascade = CascadeType.ALL)
     private List<User> users=new ArrayList<>();
 }

@@ -1,6 +1,5 @@
 package com.cts.mfrp.anvay.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -15,19 +14,19 @@ public class LeadershipApplication {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "application_id")
-    private Integer applicationId;
+    private Long applicationId;
 
     @Column(name = "club_id", nullable = false)
-    private Integer clubId;
+    private Long clubId;
 
     @Column(name = "user_id", nullable = false)
-    private Integer userId;
+    private Long userId;
 
     @Column(name = "experience", columnDefinition = "TEXT")
     private String experience;
 
     @Column(name = "status", length = 50)
-    private String status; // pending, approved, rejected
+    private String status;
 
     @Column(name = "applied_at")
     private LocalDateTime appliedAt;

@@ -21,18 +21,26 @@ public class InstitutionController {
         return ResponseEntity.ok(institutionService.getAllInstitutions());
     }
 
+    @GetMapping("/active")
+    public ResponseEntity<List<Institution>> getActiveInstitutions() {
+        return ResponseEntity.ok(institutionService.getAllInstitutions()
+                .stream()
+                .filter(i -> "active".equals(i.getStatus()))
+                .toList());
+    }
+
     @GetMapping("/{institutionId}")
-    public ResponseEntity<Institution> getInstitution(@PathVariable Integer institutionId) {
+    public ResponseEntity<Institution> getInstitution(@PathVariable Long institutionId) {
         return ResponseEntity.ok(institutionService.getInstitutionById(institutionId));
     }
 
     @PutMapping("/{institutionId}")
-    public ResponseEntity<Institution> updateInstitution(@PathVariable Integer institutionId, @RequestBody Institution institution) {
+    public ResponseEntity<Institution> updateInstitution(@PathVariable Long institutionId, @RequestBody Institution institution) {
         return ResponseEntity.ok(institutionService.updateInstitution(institutionId, institution));
     }
 
     @DeleteMapping("/{institutionId}")
-    public ResponseEntity<Void> deleteInstitution(@PathVariable Integer institutionId) {
+    public ResponseEntity<Void> deleteInstitution(@PathVariable Long institutionId) {
         institutionService.deleteInstitution(institutionId);
         return ResponseEntity.noContent().build();
     }

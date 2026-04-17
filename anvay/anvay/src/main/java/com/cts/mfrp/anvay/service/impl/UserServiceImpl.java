@@ -3,7 +3,9 @@ package com.cts.mfrp.anvay.service.impl;
 import com.cts.mfrp.anvay.dto.LoginRequest;
 import com.cts.mfrp.anvay.dto.LoginResponse;
 import com.cts.mfrp.anvay.dto.RegisterStudentRequest;
+import com.cts.mfrp.anvay.entity.Institution;
 import com.cts.mfrp.anvay.entity.User;
+import com.cts.mfrp.anvay.repository.InstitutionRepository;
 import com.cts.mfrp.anvay.repository.UserRepository;
 import com.cts.mfrp.anvay.security.JwtUtil;
 import com.cts.mfrp.anvay.service.UserService;
@@ -18,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final InstitutionRepository institutionRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
 
@@ -30,12 +33,19 @@ public class UserServiceImpl implements UserService {
             throw new BadCredentialsException("Invalid email or password");
         }
 
+        if ("student".equals(user.getRole()) && user.getInstitutionId() != null) {
+            Institution institution = institutionRepository.findById(user.getInstitutionId()).orElse(null);
+            if (institution != null && !"active".equals(institution.getStatus())) {
+                throw new BadCredentialsException("Your institution has not been approved yet. Please wait for admin approval.");
+            }
+        }
+
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getUserId(), user.getInstitutionId());
 
         return LoginResponse.builder()
                 .token(token)
                 .role(user.getRole())
-                .name(user.getName())
+                .name(user.getFirstName())
                 .userId(user.getUserId())
                 .institutionId(user.getInstitutionId())
                 .build();
@@ -48,8 +58,18 @@ public class UserServiceImpl implements UserService {
             throw new RuntimeException("Email already registered");
         }
 
+        if (request.getInstitutionId() == null) {
+            throw new RuntimeException("Please select an institution to register");
+        }
+
+        Institution institution = institutionRepository.findById(request.getInstitutionId())
+                .orElseThrow(() -> new RuntimeException("Selected institution not found"));
+        if (!"active".equals(institution.getStatus())) {
+            throw new RuntimeException("Selected institution has not been approved yet");
+        }
+
         User user = User.builder()
-                .name(request.getName())
+                .firstName(request.getName())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role("student")
@@ -62,7 +82,7 @@ public class UserServiceImpl implements UserService {
         return LoginResponse.builder()
                 .token(token)
                 .role(user.getRole())
-                .name(user.getName())
+                .name(user.getFirstName())
                 .userId(user.getUserId())
                 .institutionId(user.getInstitutionId())
                 .build();

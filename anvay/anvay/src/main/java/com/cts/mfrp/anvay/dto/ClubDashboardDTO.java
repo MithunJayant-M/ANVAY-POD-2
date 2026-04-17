@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class ClubDashboardDTO {
-    private Integer clubId;
+    private Long clubId;
     private String clubName;
     private String type;
     private long membersCount;

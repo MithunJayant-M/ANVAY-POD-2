@@ -8,8 +8,8 @@ import java.util.List;
 
 public interface InstitutionService {
     LoginResponse registerInstitution(RegisterInstitutionRequest request);
-    Institution getInstitutionById(Integer institutionId);
+    Institution getInstitutionById(Long institutionId);
     List<Institution> getAllInstitutions();
-    Institution updateInstitution(Integer institutionId, Institution institution);
-    void deleteInstitution(Integer institutionId);
+    Institution updateInstitution(Long institutionId, Institution institution);
+    void deleteInstitution(Long institutionId);
 }

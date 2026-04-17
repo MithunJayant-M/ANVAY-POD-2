@@ -16,5 +16,5 @@ public class RegisterStudentRequest {
     @NotBlank(message = "Password is required")
     private String password;
 
-    private Integer institutionId;
+    private Long institutionId;
 }

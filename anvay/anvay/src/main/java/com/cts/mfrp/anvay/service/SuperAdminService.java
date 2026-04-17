@@ -9,8 +9,8 @@ import java.util.List;
 public interface SuperAdminService {
     DashboardStatsDto getDashboardStats();
     List<InstitutionDto> getAllInstitutions(String search);
-    InstitutionDto getInstitutionById(Integer institutionId);
-    InstitutionDto approveInstitution(Integer institutionId);
-    InstitutionDto deactivateInstitution(Integer institutionId);
+    InstitutionDto getInstitutionById(Long institutionId);
+    InstitutionDto approveInstitution(Long institutionId);
+    InstitutionDto deactivateInstitution(Long institutionId);
     AnalyticsDto getAnalytics();
 }

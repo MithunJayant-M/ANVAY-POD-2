@@ -42,6 +42,26 @@ interface AnalyticsDto {
   institutionRankings: InstitutionDto[];
 }
 
+interface Event {
+  eventId: number;
+  eventName: string;
+  description: string;
+  category: string;
+  location: string;
+  startDate: string;
+  endDate: string;
+  status: string;
+  maxParticipants: number;
+}
+
+interface Club {
+  clubId: number;
+  clubName: string;
+  category: string;
+  memberCount: number;
+  createdAt: string;
+}
+
 @Component({
   selector: 'app-super-admin',
   standalone: true,
@@ -54,19 +74,23 @@ export class SuperAdminComponent implements OnInit {
 
   activeView: 'dashboard' | 'colleges' | 'analytics' | 'settings' = 'dashboard';
   adminName = '';
+  sidebarOpen = true;
 
-  // Dashboard
   stats: DashboardStats | null = null;
   dashboardLoading = false;
 
-  // College Management
   institutions: InstitutionDto[] = [];
   searchQuery = '';
   collegesLoading = false;
 
-  // Analytics
   analytics: AnalyticsDto | null = null;
   analyticsLoading = false;
+
+  selectedInstitution: InstitutionDto | null = null;
+  institutionEvents: Event[] = [];
+  institutionClubs: Club[] = [];
+  institutionDetailTab: 'events' | 'clubs' = 'events';
+  institutionDetailLoading = false;
 
   actionMessage = '';
   actionError = '';
@@ -86,9 +110,10 @@ export class SuperAdminComponent implements OnInit {
   setView(view: 'dashboard' | 'colleges' | 'analytics' | 'settings'): void {
     this.activeView = view;
     this.clearMessages();
-    if (view === 'dashboard' && !this.stats) this.loadDashboard();
+    this.selectedInstitution = null;
+    if (view === 'dashboard') this.loadDashboard();
     if (view === 'colleges') this.loadColleges();
-    if (view === 'analytics' && !this.analytics) this.loadAnalytics();
+    if (view === 'analytics') this.loadAnalytics();
   }
 
   loadDashboard(): void {
@@ -110,9 +135,7 @@ export class SuperAdminComponent implements OnInit {
     });
   }
 
-  onSearch(): void {
-    this.loadColleges();
-  }
+  onSearch(): void { this.loadColleges(); }
 
   loadAnalytics(): void {
     this.analyticsLoading = true;
@@ -122,52 +145,75 @@ export class SuperAdminComponent implements OnInit {
     });
   }
 
+  viewInstitutionDetail(inst: InstitutionDto): void {
+    this.selectedInstitution = inst;
+    this.institutionDetailTab = 'events';
+    this.loadInstitutionEvents(inst.institutionId);
+  }
+
+  loadInstitutionEvents(id: number): void {
+    this.institutionDetailLoading = true;
+    this.http.get<Event[]>(`${this.API}/institutions/${id}/events`).subscribe({
+      next: (data) => { this.institutionEvents = data; this.institutionDetailLoading = false; },
+      error: () => { this.institutionDetailLoading = false; this.institutionEvents = []; }
+    });
+  }
+
+  loadInstitutionClubs(id: number): void {
+    this.institutionDetailLoading = true;
+    this.http.get<Club[]>(`${this.API}/institutions/${id}/clubs`).subscribe({
+      next: (data) => { this.institutionClubs = data; this.institutionDetailLoading = false; },
+      error: () => { this.institutionDetailLoading = false; this.institutionClubs = []; }
+    });
+  }
+
+  switchInstitutionTab(tab: 'events' | 'clubs'): void {
+    this.institutionDetailTab = tab;
+    if (tab === 'events') this.loadInstitutionEvents(this.selectedInstitution!.institutionId);
+    if (tab === 'clubs') this.loadInstitutionClubs(this.selectedInstitution!.institutionId);
+  }
+
   approveInstitution(id: number): void {
     this.clearMessages();
     this.http.put<InstitutionDto>(`${this.API}/institutions/${id}/approve`, {}).subscribe({
-      next: (updated) => {
-        this.updateInstitutionInList(updated);
-        this.actionMessage = `Institution approved successfully.`;
-      },
-      error: () => { this.actionError = 'Failed to approve institution.'; }
+      next: (updated) => { this.updateList(updated); this.actionMessage = 'Institution approved!'; },
+      error: () => { this.actionError = 'Failed to approve.'; }
     });
   }
 
   deactivateInstitution(id: number): void {
     this.clearMessages();
     this.http.put<InstitutionDto>(`${this.API}/institutions/${id}/deactivate`, {}).subscribe({
-      next: (updated) => {
-        this.updateInstitutionInList(updated);
-        this.actionMessage = `Institution deactivated.`;
-      },
-      error: () => { this.actionError = 'Failed to deactivate institution.'; }
+      next: (updated) => { this.updateList(updated); this.actionMessage = 'Institution deactivated.'; },
+      error: () => { this.actionError = 'Failed to deactivate.'; }
     });
   }
 
-  private updateInstitutionInList(updated: InstitutionDto): void {
+  private updateList(updated: InstitutionDto): void {
     const idx = this.institutions.findIndex(i => i.institutionId === updated.institutionId);
     if (idx !== -1) this.institutions[idx] = updated;
+    if (this.selectedInstitution?.institutionId === updated.institutionId) {
+      this.selectedInstitution = updated;
+    }
   }
 
-  getTrendKeys(): string[] {
-    return this.stats ? Object.keys(this.stats.eventTrendsByMonth) : [];
+  getTrendEntries(): { month: string; count: number; pct: number }[] {
+    if (!this.stats?.eventTrendsByMonth) return [];
+    const entries = Object.entries(this.stats.eventTrendsByMonth);
+    const max = Math.max(...entries.map(([, v]) => v)) || 1;
+    return entries.map(([month, count]) => ({ month, count, pct: Math.round((count / max) * 100) }));
   }
 
   getStatusClass(status: string): string {
-    return { active: 'badge-active', pending: 'badge-pending', inactive: 'badge-inactive' }[status] ?? '';
+    const m: Record<string, string> = { active: 'badge-active', pending: 'badge-pending', inactive: 'badge-inactive' };
+    return m[status] ?? 'badge-pending';
   }
 
-  getRankBadge(index: number): string {
-    return index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`;
+  getRankLabel(i: number): string {
+    return i === 0 ? '1st' : i === 1 ? '2nd' : i === 2 ? '3rd' : `#${i + 1}`;
   }
 
-  logout(): void {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
+  logout(): void { this.authService.logout(); this.router.navigate(['/login']); }
 
-  private clearMessages(): void {
-    this.actionMessage = '';
-    this.actionError = '';
-  }
+  private clearMessages(): void { this.actionMessage = ''; this.actionError = ''; }
 }

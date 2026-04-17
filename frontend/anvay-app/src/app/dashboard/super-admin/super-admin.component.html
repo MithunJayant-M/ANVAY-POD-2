@@ -1,329 +1,386 @@
-<div class="sa-layout">
+<div class="sa-shell" [class.sidebar-collapsed]="!sidebarOpen">
 
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-brand">
-      <div class="anvay-brand size-sm on-dark">
-        <img src="assets/anvay-logo.svg" class="brand-icon" alt="ANVAY"/>
-        <div class="brand-text">
-          <span class="brand-name">ANVAY</span>
-          <span class="brand-tag">Discover. Join. Host.</span>
-        </div>
-      </div>
-      <span class="brand-role">SUPER ADMIN</span>
+  <!-- SIDEBAR -->
+  <aside class="sa-sidebar">
+    <div class="sb-brand">
+      <div><div class="brand-name">ANVAY</div><div class="brand-tag">DISCOVER. JOIN. HOST.</div></div>
     </div>
 
-    <nav class="sidebar-nav">
-      <button class="nav-item" [class.active]="activeView === 'dashboard'" (click)="setView('dashboard')">
-        <span class="nav-icon">📊</span> Dashboard
+    <div class="sb-role-badge">
+      <span class="role-dot"></span>
+      Super Admin
+    </div>
+
+    <nav class="sb-nav">
+      <button class="nav-item" [class.active]="activeView==='dashboard'" (click)="setView('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
       </button>
-      <button class="nav-item" [class.active]="activeView === 'colleges'" (click)="setView('colleges')">
-        <span class="nav-icon">🏫</span> College Management
+      <button class="nav-item" [class.active]="activeView==='colleges'" (click)="setView('colleges')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+        College Management
       </button>
-      <button class="nav-item" [class.active]="activeView === 'analytics'" (click)="setView('analytics')">
-        <span class="nav-icon">📈</span> Analytics
+      <button class="nav-item" [class.active]="activeView==='analytics'" (click)="setView('analytics')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Analytics
       </button>
-      <button class="nav-item" [class.active]="activeView === 'settings'" (click)="setView('settings')">
-        <span class="nav-icon">⚙️</span> Settings
+      <button class="nav-item" [class.active]="activeView==='settings'" (click)="setView('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        Settings
       </button>
     </nav>
 
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="avatar">{{ adminName.charAt(0) }}</div>
-        <div>
-          <div class="user-name">{{ adminName }}</div>
-          <div class="user-role">Super Admin</div>
-        </div>
-      </div>
-      <button class="btn-logout" (click)="logout()">Sign Out</button>
-    </div>
+    <button class="sb-logout" (click)="logout()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logout
+    </button>
   </aside>
 
-  <!-- Main Content -->
-  <main class="main-content">
-
-    <!-- ===== DASHBOARD VIEW ===== -->
-    @if (activeView === 'dashboard') {
-      <div class="topbar">
-        <div class="page-header">
-          <h1>Dashboard</h1>
-          <p>Platform overview and key statistics</p>
+  <!-- MAIN -->
+  <div class="sa-main">
+    <!-- TOPBAR -->
+    <header class="sa-topbar">
+      <button class="toggle-btn" (click)="sidebarOpen=!sidebarOpen">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="topbar-title">
+        <span *ngIf="activeView==='dashboard'">Dashboard</span>
+        <span *ngIf="activeView==='colleges'">College Management</span>
+        <span *ngIf="activeView==='analytics'">Analytics</span>
+        <span *ngIf="activeView==='settings'">Settings</span>
+      </div>
+      <div class="topbar-right">
+        <button class="bell-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="bell-dot"></span>
+        </button>
+        <div class="user-chip">
+          <div class="user-avatar">{{adminName.charAt(0)}}</div>
+          <span>{{adminName}}</span>
         </div>
       </div>
+    </header>
 
-      @if (dashboardLoading) {
-        <div class="loading">Loading dashboard...</div>
-      }
+    <!-- MESSAGES -->
+    <div class="msg-bar success" *ngIf="actionMessage">{{actionMessage}}</div>
+    <div class="msg-bar error" *ngIf="actionError">{{actionError}}</div>
 
-      @if (stats) {
-        <!-- Stat Cards -->
-        <div class="stats-grid">
-          <div class="stat-card teal">
-            <span class="stat-icon">🏫</span>
-            <div class="stat-value">{{ stats.totalColleges }}</div>
-            <div class="stat-label">Total Colleges</div>
-            <div class="stat-sub">{{ stats.activeColleges }} active · {{ stats.pendingColleges }} pending · {{ stats.inactiveColleges }} inactive</div>
-          </div>
-          <div class="stat-card navy">
-            <span class="stat-icon">🎉</span>
-            <div class="stat-value">{{ stats.totalEvents }}</div>
-            <div class="stat-label">Total Events</div>
-            <div class="stat-sub">Across all institutions</div>
-          </div>
-          <div class="stat-card purple">
-            <span class="stat-icon">🏆</span>
-            <div class="stat-value">{{ stats.totalClubs }}</div>
-            <div class="stat-label">Total Clubs</div>
-            <div class="stat-sub">Platform-wide</div>
-          </div>
-          <div class="stat-card amber">
-            <span class="stat-icon">👥</span>
-            <div class="stat-value">{{ stats.totalStudents }}</div>
-            <div class="stat-label">Total Students</div>
-            <div class="stat-sub">Registered users</div>
-          </div>
+    <!-- CONTENT -->
+    <main class="sa-content">
+
+      <!-- ── DASHBOARD ── -->
+      <div *ngIf="activeView==='dashboard'">
+        <div class="page-header">
+          <h1>Platform Overview</h1>
+          <p>Welcome back, {{adminName}}. Here's what's happening across all institutions.</p>
         </div>
 
-        <!-- Event Trends -->
-        @if (getTrendKeys().length > 0) {
-          <div class="section-card">
-            <div class="section-header">
-              <div>
-                <div class="section-title">Event Participation Trends</div>
-                <div class="section-sub">Monthly event distribution</div>
+        <div *ngIf="dashboardLoading" class="loading-state">
+          <div class="spinner"></div>
+          <p>Loading dashboard...</p>
+        </div>
+
+        <ng-container *ngIf="!dashboardLoading && stats">
+          <div class="stat-grid">
+            <div class="stat-card sc-green">
+              <div class="stat-icon si-green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+              </div>
+              <div class="stat-body">
+                <div class="stat-num">{{stats.totalColleges}}</div>
+                <div class="stat-label">Total Colleges</div>
+                <div class="stat-sub">
+                  <span class="badge-active">{{stats.activeColleges}} active</span>
+                  <span class="badge-pending ml-8">{{stats.pendingColleges}} pending</span>
+                </div>
               </div>
             </div>
-            <div class="trend-bars">
-              @for (month of getTrendKeys(); track month) {
-                <div class="trend-item">
-                  <div class="trend-bar-wrap">
-                    <div class="trend-bar"
-                         [style.height.px]="(stats.eventTrendsByMonth[month] / (stats.totalEvents || 1)) * 120 + 10">
+            <div class="stat-card sc-teal">
+              <div class="stat-icon si-teal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </div>
+              <div class="stat-body">
+                <div class="stat-num">{{stats.totalEvents}}</div>
+                <div class="stat-label">Total Events</div>
+                <div class="stat-sub"><span class="trend">Across all institutions</span></div>
+              </div>
+            </div>
+            <div class="stat-card sc-purple">
+              <div class="stat-icon si-purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+              </div>
+              <div class="stat-body">
+                <div class="stat-num">{{stats.totalStudents}}</div>
+                <div class="stat-label">Total Students</div>
+                <div class="stat-sub"><span class="trend">Registered on platform</span></div>
+              </div>
+            </div>
+            <div class="stat-card sc-amber">
+              <div class="stat-icon si-amber">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+              </div>
+              <div class="stat-body">
+                <div class="stat-num">{{stats.totalClubs}}</div>
+                <div class="stat-label">Total Clubs</div>
+                <div class="stat-sub"><span class="trend">Active clubs</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Charts Row -->
+          <div class="charts-row">
+            <!-- Event Trends Chart -->
+            <div class="chart-card wide">
+              <div class="chart-header">
+                <div>
+                  <h3>Event Participation Trends</h3>
+                  <p>Monthly event creation across platform</p>
+                </div>
+              </div>
+              <div class="bar-chart">
+                <div class="bar-group" *ngFor="let t of getTrendEntries()">
+                  <div class="bar-wrap">
+                    <div class="bar" [style.height.%]="t.pct">
+                      <span class="bar-tip">{{t.count}}</span>
                     </div>
                   </div>
-                  <div class="trend-label">{{ month }}</div>
-                  <div class="trend-count">{{ stats.eventTrendsByMonth[month] }}</div>
+                  <span class="bar-label">{{t.month}}</span>
                 </div>
-              }
+                <div *ngIf="getTrendEntries().length === 0" class="empty-chart">No event data yet</div>
+              </div>
+            </div>
+
+            <!-- Top Colleges -->
+            <div class="chart-card">
+              <div class="chart-header">
+                <div>
+                  <h3>Top Colleges</h3>
+                  <p>Ranked by student count</p>
+                </div>
+              </div>
+              <div class="top-list">
+                <div class="top-item" *ngFor="let c of stats.topColleges; let i=index">
+                  <span class="rank-badge">{{getRankLabel(i)}}</span>
+                  <div class="top-info">
+                    <div class="top-name">{{c.institutionName}}</div>
+                    <div class="top-meta">{{c.studentCount}} students · {{c.eventCount}} events</div>
+                  </div>
+                  <span [class]="getStatusClass(c.status)" class="status-badge">{{c.status}}</span>
+                </div>
+                <div *ngIf="stats.topColleges.length === 0" class="empty-state-sm">No colleges registered yet</div>
+              </div>
             </div>
           </div>
-        }
+        </ng-container>
+      </div>
 
-        <!-- College Stats Table -->
-        <div class="section-card">
-          <div class="section-header">
-            <div class="section-title">College Statistics</div>
+      <!-- ── COLLEGES ── -->
+      <div *ngIf="activeView==='colleges'">
+        <div *ngIf="!selectedInstitution">
+          <div class="page-header">
+            <h1>College Management</h1>
+            <p>Manage all registered institutions on the platform</p>
           </div>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Institution</th>
-                <th>Status</th>
-                <th>Students</th>
-                <th>Events</th>
-                <th>Clubs</th>
-                <th>Points</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (college of stats.topColleges; track college.institutionId) {
+          <div class="toolbar">
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              <input [(ngModel)]="searchQuery" (keyup.enter)="onSearch()" placeholder="Search institutions...">
+            </div>
+            <button class="btn-primary" (click)="onSearch()">Search</button>
+          </div>
+
+          <div *ngIf="collegesLoading" class="loading-state"><div class="spinner"></div></div>
+
+          <div *ngIf="!collegesLoading" class="data-card">
+            <table class="data-table">
+              <thead>
                 <tr>
-                  <td><strong>{{ college.institutionName }}</strong><br/><small class="text-muted">{{ college.email }}</small></td>
-                  <td><span class="badge" [class]="getStatusClass(college.status)">{{ college.status }}</span></td>
-                  <td>{{ college.studentCount }}</td>
-                  <td>{{ college.eventCount }}</td>
-                  <td>{{ college.clubCount }}</td>
-                  <td class="points-cell">{{ college.totalPoints }}</td>
+                  <th>Institution</th>
+                  <th>Email</th>
+                  <th>Students</th>
+                  <th>Events</th>
+                  <th>Clubs</th>
+                  <th>Status</th>
+                  <th>Actions</th>
                 </tr>
-              }
-              @empty {
-                <tr><td colspan="6" class="empty-msg">No colleges registered yet.</td></tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      }
-    }
-
-    <!-- ===== COLLEGE MANAGEMENT VIEW ===== -->
-    @if (activeView === 'colleges') {
-      <div class="topbar">
-        <div class="page-header">
-          <h1>College Management</h1>
-          <p>Approve, manage, or deactivate institutional registrations</p>
-        </div>
-      </div>
-
-      @if (actionMessage) {
-        <div class="alert-success">✓ {{ actionMessage }}</div>
-      }
-      @if (actionError) {
-        <div class="alert-error">{{ actionError }}</div>
-      }
-
-      <div class="search-bar">
-        <input
-          type="text"
-          [(ngModel)]="searchQuery"
-          (input)="onSearch()"
-          placeholder="🔍  Search by institution name or email..."
-          class="search-input"
-        />
-      </div>
-
-      @if (collegesLoading) {
-        <div class="loading">Loading institutions...</div>
-      }
-
-      <div class="section-card">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Institution</th>
-              <th>Phone</th>
-              <th>Status</th>
-              <th>Registered</th>
-              <th>Students</th>
-              <th>Events</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (inst of institutions; track inst.institutionId; let i = $index) {
-              <tr>
-                <td>{{ i + 1 }}</td>
-                <td>
-                  <strong>{{ inst.institutionName }}</strong><br/>
-                  <small class="text-muted">{{ inst.email }}</small>
-                </td>
-                <td>{{ inst.phone || '—' }}</td>
-                <td><span class="badge" [class]="getStatusClass(inst.status)">{{ inst.status }}</span></td>
-                <td>{{ inst.registeredAt | date:'dd MMM yyyy' }}</td>
-                <td>{{ inst.studentCount }}</td>
-                <td>{{ inst.eventCount }}</td>
-                <td class="action-btns">
-                  @if (inst.status === 'pending') {
-                    <button class="btn-approve" (click)="approveInstitution(inst.institutionId)">Approve</button>
-                  }
-                  @if (inst.status === 'active') {
-                    <button class="btn-deactivate" (click)="deactivateInstitution(inst.institutionId)">Deactivate</button>
-                  }
-                  @if (inst.status === 'inactive') {
-                    <button class="btn-approve" (click)="approveInstitution(inst.institutionId)">Reactivate</button>
-                  }
-                </td>
-              </tr>
-            }
-            @empty {
-              <tr><td colspan="8" class="empty-msg">No institutions found.</td></tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    }
-
-    <!-- ===== ANALYTICS VIEW ===== -->
-    @if (activeView === 'analytics') {
-      <div class="topbar">
-        <div class="page-header">
-          <h1>Analytics</h1>
-          <p>Platform-wide data and institutional rankings</p>
-        </div>
-      </div>
-
-      @if (analyticsLoading) {
-        <div class="loading">Loading analytics...</div>
-      }
-
-      @if (analytics) {
-        <div class="stats-grid">
-          <div class="stat-card teal">
-            <span class="stat-icon">👤</span>
-            <div class="stat-value">{{ analytics.totalUsers }}</div>
-            <div class="stat-label">Total Users</div>
-          </div>
-          <div class="stat-card navy">
-            <span class="stat-icon">🎉</span>
-            <div class="stat-value">{{ analytics.totalEvents }}</div>
-            <div class="stat-label">Total Events</div>
-          </div>
-          <div class="stat-card purple">
-            <span class="stat-icon">🏆</span>
-            <div class="stat-value">{{ analytics.totalClubs }}</div>
-            <div class="stat-label">Total Clubs</div>
+              </thead>
+              <tbody>
+                <tr *ngFor="let inst of institutions" (click)="viewInstitutionDetail(inst)" class="table-row-hover">
+                  <td>
+                    <div class="cell-primary">{{inst.institutionName}}</div>
+                    <div class="cell-sub">{{inst.address}}</div>
+                  </td>
+                  <td>{{inst.email}}</td>
+                  <td>{{inst.studentCount}}</td>
+                  <td>{{inst.eventCount}}</td>
+                  <td>{{inst.clubCount}}</td>
+                  <td><span [class]="getStatusClass(inst.status)" class="status-badge">{{inst.status}}</span></td>
+                  <td (click)="$event.stopPropagation()">
+                    <div class="action-btns">
+                      <button class="btn-sm btn-success" *ngIf="inst.status!=='active'" (click)="approveInstitution(inst.institutionId)">Approve</button>
+                      <button class="btn-sm btn-danger" *ngIf="inst.status==='active'" (click)="deactivateInstitution(inst.institutionId)">Deactivate</button>
+                    </div>
+                  </td>
+                </tr>
+                <tr *ngIf="institutions.length===0">
+                  <td colspan="7" class="empty-cell">No institutions found</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
-        <div class="section-card">
-          <div class="section-header">
+        <!-- Institution Detail -->
+        <div *ngIf="selectedInstitution">
+          <div class="page-header" style="display:flex;align-items:center;gap:12px">
+            <button class="back-btn" (click)="selectedInstitution=null">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
             <div>
-              <div class="section-title">Institutional Rankings</div>
-              <div class="section-sub">Ranked by total points earned across events</div>
+              <h1>{{selectedInstitution.institutionName}}</h1>
+              <p>{{selectedInstitution.email}} · {{selectedInstitution.address}}</p>
+            </div>
+            <span [class]="getStatusClass(selectedInstitution.status)" class="status-badge" style="margin-left:auto">{{selectedInstitution.status}}</span>
+          </div>
+
+          <div class="mini-stats">
+            <div class="mini-stat"><div class="mn">{{selectedInstitution.studentCount}}</div><div class="ml">Students</div></div>
+            <div class="mini-stat"><div class="mn">{{selectedInstitution.eventCount}}</div><div class="ml">Events</div></div>
+            <div class="mini-stat"><div class="mn">{{selectedInstitution.clubCount}}</div><div class="ml">Clubs</div></div>
+            <div class="mini-stat"><div class="mn">{{selectedInstitution.totalPoints}}</div><div class="ml">Total Points</div></div>
+          </div>
+
+          <div class="tab-bar">
+            <button [class.tab-active]="institutionDetailTab==='events'" (click)="switchInstitutionTab('events')">Events</button>
+            <button [class.tab-active]="institutionDetailTab==='clubs'" (click)="switchInstitutionTab('clubs')">Clubs</button>
+          </div>
+
+          <div *ngIf="institutionDetailLoading" class="loading-state"><div class="spinner"></div></div>
+
+          <div *ngIf="!institutionDetailLoading && institutionDetailTab==='events'" class="data-card">
+            <table class="data-table">
+              <thead><tr><th>Event Name</th><th>Category</th><th>Location</th><th>Start Date</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr *ngFor="let ev of institutionEvents">
+                  <td><div class="cell-primary">{{ev.eventName}}</div></td>
+                  <td><span class="tag">{{ev.category}}</span></td>
+                  <td>{{ev.location}}</td>
+                  <td>{{ev.startDate | date:'mediumDate'}}</td>
+                  <td><span [class]="getStatusClass(ev.status)" class="status-badge">{{ev.status || 'active'}}</span></td>
+                </tr>
+                <tr *ngIf="institutionEvents.length===0"><td colspan="5" class="empty-cell">No events found</td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div *ngIf="!institutionDetailLoading && institutionDetailTab==='clubs'" class="data-card">
+            <table class="data-table">
+              <thead><tr><th>Club Name</th><th>Category</th><th>Members</th><th>Created</th></tr></thead>
+              <tbody>
+                <tr *ngFor="let cl of institutionClubs">
+                  <td><div class="cell-primary">{{cl.clubName}}</div></td>
+                  <td><span class="tag">{{cl.category}}</span></td>
+                  <td>{{cl.memberCount}}</td>
+                  <td>{{cl.createdAt | date:'mediumDate'}}</td>
+                </tr>
+                <tr *ngIf="institutionClubs.length===0"><td colspan="4" class="empty-cell">No clubs found</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ANALYTICS ── -->
+      <div *ngIf="activeView==='analytics'">
+        <div class="page-header">
+          <h1>Platform Analytics</h1>
+          <p>Comprehensive insights across all institutions</p>
+        </div>
+
+        <div *ngIf="analyticsLoading" class="loading-state"><div class="spinner"></div></div>
+
+        <ng-container *ngIf="!analyticsLoading && analytics">
+          <div class="stat-grid">
+            <div class="stat-card sc-green">
+              <div class="stat-icon si-green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              </div>
+              <div class="stat-body"><div class="stat-num">{{analytics.totalUsers}}</div><div class="stat-label">Total Users</div></div>
+            </div>
+            <div class="stat-card sc-teal">
+              <div class="stat-icon si-teal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+              </div>
+              <div class="stat-body"><div class="stat-num">{{analytics.totalInstitutions}}</div><div class="stat-label">Institutions</div></div>
+            </div>
+            <div class="stat-card sc-purple">
+              <div class="stat-icon si-purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </div>
+              <div class="stat-body"><div class="stat-num">{{analytics.totalEvents}}</div><div class="stat-label">Events</div></div>
+            </div>
+            <div class="stat-card sc-amber">
+              <div class="stat-icon si-amber">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+              </div>
+              <div class="stat-body"><div class="stat-num">{{analytics.totalClubs}}</div><div class="stat-label">Clubs</div></div>
             </div>
           </div>
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>Rank</th>
-                <th>Institution</th>
-                <th>Status</th>
-                <th>Students</th>
-                <th>Events</th>
-                <th>Clubs</th>
-                <th>Total Points</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (inst of analytics.institutionRankings; track inst.institutionId; let i = $index) {
-                <tr [class.top-rank]="i < 3">
-                  <td class="rank-cell">{{ getRankBadge(i) }}</td>
-                  <td>
-                    <strong>{{ inst.institutionName }}</strong><br/>
-                    <small class="text-muted">{{ inst.email }}</small>
-                  </td>
-                  <td><span class="badge" [class]="getStatusClass(inst.status)">{{ inst.status }}</span></td>
-                  <td>{{ inst.studentCount }}</td>
-                  <td>{{ inst.eventCount }}</td>
-                  <td>{{ inst.clubCount }}</td>
-                  <td class="points-cell"><strong>{{ inst.totalPoints }}</strong></td>
-                </tr>
-              }
-              @empty {
-                <tr><td colspan="7" class="empty-msg">No data available yet.</td></tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      }
-    }
 
-    <!-- ===== SETTINGS VIEW ===== -->
-    @if (activeView === 'settings') {
-      <div class="topbar">
+          <div class="data-card">
+            <div class="chart-header">
+              <div><h3>Institution Rankings</h3><p>Ranked by total points earned</p></div>
+            </div>
+            <table class="data-table">
+              <thead><tr><th>Rank</th><th>Institution</th><th>Students</th><th>Events</th><th>Clubs</th><th>Points</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr *ngFor="let r of analytics.institutionRankings; let i=index">
+                  <td><span class="rank-badge">{{getRankLabel(i)}}</span></td>
+                  <td><div class="cell-primary">{{r.institutionName}}</div></td>
+                  <td>{{r.studentCount}}</td>
+                  <td>{{r.eventCount}}</td>
+                  <td>{{r.clubCount}}</td>
+                  <td><strong>{{r.totalPoints}}</strong></td>
+                  <td><span [class]="getStatusClass(r.status)" class="status-badge">{{r.status}}</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- ── SETTINGS ── -->
+      <div *ngIf="activeView==='settings'">
         <div class="page-header">
           <h1>Settings</h1>
-          <p>Super admin account information</p>
+          <p>Platform configuration and preferences</p>
+        </div>
+        <div class="data-card" style="max-width:560px">
+          <div class="settings-group">
+            <h3>Profile Information</h3>
+            <div class="settings-field">
+              <label>Display Name</label>
+              <input class="input-field" [value]="adminName" readonly>
+            </div>
+            <div class="settings-field">
+              <label>Role</label>
+              <input class="input-field" value="Super Administrator" readonly>
+            </div>
+          </div>
+          <div class="settings-group">
+            <h3>Platform Info</h3>
+            <div class="settings-field">
+              <label>Platform</label>
+              <input class="input-field" value="ANVAY — Multi-Tenant Event Management" readonly>
+            </div>
+            <div class="settings-field">
+              <label>Version</label>
+              <input class="input-field" value="1.0.0" readonly>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="section-card settings-card">
-        <div class="settings-row">
-          <label>Name</label>
-          <span>{{ adminName }}</span>
-        </div>
-        <div class="settings-row">
-          <label>Role</label>
-          <span class="badge badge-active">Super Admin</span>
-        </div>
-        <div class="settings-row">
-          <label>Access Level</label>
-          <span>Full Platform Access</span>
-        </div>
-        <div class="settings-divider"></div>
-        <button class="btn-logout-lg" (click)="logout()">Sign Out</button>
-      </div>
-    }
 
-  </main>
+    </main>
+  </div>
 </div>

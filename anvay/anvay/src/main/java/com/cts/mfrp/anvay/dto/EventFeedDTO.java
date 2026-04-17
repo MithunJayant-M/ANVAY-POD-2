@@ -11,7 +11,9 @@ public class EventFeedDTO {
     private String title;
     private String location;
     private String institution;
+    private Long institutionId;
     private String type;
+    private String participantType;
     private Integer registeredCount;
     private Integer totalCapacity;
     private Boolean isRegistered;

@@ -1,5 +1,6 @@
 package com.cts.mfrp.anvay.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -44,12 +45,15 @@ public class Club {
     @JsonIgnoreProperties("club")
     private Institution institution;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "club", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Event> events = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "club", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ClubMember> clubMembers = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "club", cascade = CascadeType.ALL)
-    private List<Achievement> achievements=new ArrayList<>();
+    private List<Achievement> achievements = new ArrayList<>();
 }

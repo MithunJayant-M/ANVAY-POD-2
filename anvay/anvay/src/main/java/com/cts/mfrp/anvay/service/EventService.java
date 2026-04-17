@@ -11,8 +11,10 @@ public interface EventService {
     Event createEvent(Event event);
     Event getEventById(Long eventId);
     List<Event> getEventsByClubId(Long clubId);
+    List<Event> getEventsByInstitutionId(Long institutionId);
     Event updateEvent(Long eventId, Event event);
     void deleteEvent(Long eventId);
     EventParticipant registerParticipant(EventParticipant participant);
     List<EventFeedDTO> getAllEventsWithStatus(Long userId);
+    List<EventFeedDTO> getEventsForStudent(Long userId, Long institutionId);
 }

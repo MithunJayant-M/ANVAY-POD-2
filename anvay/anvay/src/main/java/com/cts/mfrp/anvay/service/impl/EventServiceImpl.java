@@ -53,6 +53,12 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<Event> getEventsByInstitutionId(Long institutionId) {
+        return eventRepository.findByInstitutionId(institutionId);
+    }
+
+    @Override
     public Event updateEvent(Long eventId, Event event) {
         Event existing = getEventById(eventId);
         if (event.getEventName() != null) existing.setEventName(event.getEventName());
@@ -63,8 +69,8 @@ public class EventServiceImpl implements EventService {
         if (event.getCategory() != null) existing.setCategory(event.getCategory());
         if (event.getStatus() != null) existing.setStatus(event.getStatus());
         if (event.getParticipantType() != null) existing.setParticipantType(event.getParticipantType());
-        if (event.getMaxParticipants() != 0) existing.setMaxParticipants(event.getMaxParticipants());
-        if (event.getRegistrationFee() != 0) existing.setRegistrationFee(event.getRegistrationFee());
+        if (event.getMaxParticipants() != null) existing.setMaxParticipants(event.getMaxParticipants());
+        if (event.getRegistrationFee() != null) existing.setRegistrationFee(event.getRegistrationFee());
         existing.setUpdatedAt(LocalDateTime.now());
         return eventRepository.save(existing);
     }
@@ -110,20 +116,32 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventFeedDTO> getAllEventsWithStatus(Long userId) {
         List<Object[]> results = eventRepository.findAllEventsWithRegistrationStatus(userId);
+        return mapToFeedDTOs(results);
+    }
 
+    @Override
+    public List<EventFeedDTO> getEventsForStudent(Long userId, Long institutionId) {
+        List<Object[]> results = eventRepository.findEventsForStudent(userId, institutionId);
+        return mapToFeedDTOs(results);
+    }
+
+    private List<EventFeedDTO> mapToFeedDTOs(List<Object[]> results) {
         return results.stream().map(result -> {
-            Event event = (Event) result[0]; // The Event object
-            Boolean isRegistered = (Boolean) result[1]; // The CASE WHEN result
-
+            Event event = (Event) result[0];
+            Boolean isRegistered = (Boolean) result[1];
+            String institutionName = event.getClub() != null && event.getClub().getInstitution() != null
+                    ? event.getClub().getInstitution().getName() : "General";
+            Long institutionId = event.getClub() != null ? event.getClub().getInstitutionId() : null;
             return EventFeedDTO.builder()
                     .eventId(event.getEventId())
                     .title(event.getEventName())
-                    // Ensure navigation through the Club to get Institution Name works
-                    .institution(event.getClub() != null ? event.getClub().getInstitution().getName() : "General")
+                    .institution(institutionName)
+                    .institutionId(institutionId)
                     .location(event.getLocation())
-                    .type(event.getCategory()) // Mapping Category to Type
+                    .type(event.getCategory())
+                    .participantType(event.getParticipantType())
                     .registeredCount(event.getEr() != null ? event.getEr().size() : 0)
-                    .totalCapacity(event.getMaxParticipants()) // Mapping maxParticipants to totalCapacity
+                    .totalCapacity(event.getMaxParticipants())
                     .isRegistered(isRegistered)
                     .build();
         }).collect(Collectors.toList());

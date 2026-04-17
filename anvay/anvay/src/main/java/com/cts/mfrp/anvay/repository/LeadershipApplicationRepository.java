@@ -7,10 +7,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface LeadershipApplicationRepository extends JpaRepository<LeadershipApplication, Integer> {
-    List<LeadershipApplication> findByClubId(Integer clubId);
-    List<LeadershipApplication> findByUserId(Integer userId);
+public interface LeadershipApplicationRepository extends JpaRepository<LeadershipApplication, Long> {
+    List<LeadershipApplication> findByClubId(Long clubId);
+    List<LeadershipApplication> findByUserId(Long userId);
     List<LeadershipApplication> findByStatus(String status);
-    List<LeadershipApplication> findByClubIdAndStatus(Integer clubId, String status);
-    long countByClubId(Integer clubId);
+    List<LeadershipApplication> findByClubIdAndStatus(Long clubId, String status);
+    long countByClubId(Long clubId);
 }
