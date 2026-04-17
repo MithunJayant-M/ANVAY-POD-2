@@ -24,6 +24,11 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
         Analytics
       </button>
+      <button class="nav-item" [class.active]="activeView==='approvals'" (click)="setView('approvals')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        Points Approvals
+        <span class="nav-badge" *ngIf="pendingWinners.length > 0">{{pendingWinners.length}}</span>
+      </button>
       <button class="nav-item" [class.active]="activeView==='settings'" (click)="setView('settings')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
         Settings
@@ -47,6 +52,7 @@
         <span *ngIf="activeView==='dashboard'">Dashboard</span>
         <span *ngIf="activeView==='colleges'">College Management</span>
         <span *ngIf="activeView==='analytics'">Analytics</span>
+        <span *ngIf="activeView==='approvals'">Points Approvals</span>
         <span *ngIf="activeView==='settings'">Settings</span>
       </div>
       <div class="topbar-right">
@@ -217,7 +223,7 @@
                   <td><span [class]="getStatusClass(inst.status)" class="status-badge">{{inst.status}}</span></td>
                   <td (click)="$event.stopPropagation()">
                     <div class="action-btns">
-                      <button class="btn-sm btn-success" *ngIf="inst.status!=='active'" (click)="approveInstitution(inst.institutionId)">Approve</button>
+                      <button class="btn-sm btn-success" *ngIf="inst.status!=='active'" (click)="openApproveModal(inst.institutionId)">Approve</button>
                       <button class="btn-sm btn-danger" *ngIf="inst.status==='active'" (click)="deactivateInstitution(inst.institutionId)">Deactivate</button>
                     </div>
                   </td>
@@ -275,15 +281,16 @@
 
           <div *ngIf="!institutionDetailLoading && institutionDetailTab==='clubs'" class="data-card">
             <table class="data-table">
-              <thead><tr><th>Club Name</th><th>Category</th><th>Members</th><th>Created</th></tr></thead>
+              <thead><tr><th>Club Name</th><th>Category</th><th>Members</th><th>Pending Requests</th><th>Created</th></tr></thead>
               <tbody>
                 <tr *ngFor="let cl of institutionClubs">
                   <td><div class="cell-primary">{{cl.clubName}}</div></td>
-                  <td><span class="tag">{{cl.category}}</span></td>
-                  <td>{{cl.memberCount}}</td>
-                  <td>{{cl.createdAt | date:'mediumDate'}}</td>
+                  <td><span class="tag">{{cl.type}}</span></td>
+                  <td>{{cl.membersCount}}</td>
+                  <td>{{cl.joinRequestsCount > 0 ? cl.joinRequestsCount + ' pending' : '—'}}</td>
+                  <td>{{cl.createdDate | date:'mediumDate'}}</td>
                 </tr>
-                <tr *ngIf="institutionClubs.length===0"><td colspan="4" class="empty-cell">No clubs found</td></tr>
+                <tr *ngIf="institutionClubs.length===0"><td colspan="5" class="empty-cell">No clubs found</td></tr>
               </tbody>
             </table>
           </div>
@@ -349,6 +356,56 @@
         </ng-container>
       </div>
 
+      <!-- ── POINTS APPROVALS ── -->
+      <div *ngIf="activeView==='approvals'">
+        <div class="page-header">
+          <h1>Points Approvals</h1>
+          <p>Review and approve winner point assignments submitted by institution admins</p>
+        </div>
+        <div *ngIf="actionMessage" class="alert-success">{{actionMessage}}</div>
+        <div *ngIf="actionError" class="alert-error">{{actionError}}</div>
+        <div *ngIf="pendingWinnersLoading" class="loading-state"><div class="spinner"></div></div>
+        <div *ngIf="!pendingWinnersLoading && pendingWinners.length === 0" class="empty-approvals">
+          <div class="empty-approvals-icon">🏆</div>
+          <div class="empty-approvals-text">No pending points approvals</div>
+          <div class="empty-approvals-sub">When institution admins submit winners, they'll appear here for your review.</div>
+        </div>
+        <div *ngIf="!pendingWinnersLoading && pendingWinners.length > 0" class="approvals-grid">
+          <div class="approval-card" *ngFor="let item of pendingWinners">
+            <div class="approval-card-header">
+              <div>
+                <div class="approval-event-name">{{item.eventName}}</div>
+                <div class="approval-institution">{{item.institutionName}}</div>
+              </div>
+              <span class="appr-pending-badge">⏳ Pending</span>
+            </div>
+            <div class="winners-list">
+              <div class="winner-entry gold" *ngIf="item.winner1Name">
+                <span class="winner-rank">🥇 1st</span>
+                <span class="winner-name">{{item.winner1Name}}</span>
+                <span class="winner-pts">+100 pts</span>
+              </div>
+              <div class="winner-entry silver" *ngIf="item.winner2Name">
+                <span class="winner-rank">🥈 2nd</span>
+                <span class="winner-name">{{item.winner2Name}}</span>
+                <span class="winner-pts">+75 pts</span>
+              </div>
+              <div class="winner-entry bronze" *ngIf="item.winner3Name">
+                <span class="winner-rank">🥉 3rd</span>
+                <span class="winner-name">{{item.winner3Name}}</span>
+                <span class="winner-pts">+50 pts</span>
+              </div>
+            </div>
+            <div class="approval-card-footer">
+              <button class="btn-approve-winners" (click)="approveEventWinners(item.eventId)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="15" height="15"><polyline points="20 6 9 17 4 12"/></svg>
+                Approve & Award Points
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- ── SETTINGS ── -->
       <div *ngIf="activeView==='settings'">
         <div class="page-header">
@@ -382,5 +439,28 @@
       </div>
 
     </main>
+  </div>
+</div>
+
+<!-- Approval Verification Modal -->
+<div class="modal-overlay" *ngIf="approveModal" (click)="approveModal=false">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="28" height="28"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    </div>
+    <h2 class="modal-title">Approve Institution</h2>
+    <p class="modal-desc">Before approving, please verify that the institution's details and email are valid and authentic.</p>
+    <label class="verify-check">
+      <input type="checkbox" [(ngModel)]="approveVerified">
+      <span class="check-box"></span>
+      <span class="check-label">I have verified the email and details provided are valid</span>
+    </label>
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" (click)="approveModal=false">Cancel</button>
+      <button class="modal-btn-approve" [disabled]="!approveVerified" (click)="confirmApprove()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="16" height="16"><polyline points="20 6 9 17 4 12"/></svg>
+        Approve Institution
+      </button>
+    </div>
   </div>
 </div>

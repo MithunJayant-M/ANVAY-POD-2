@@ -1,10 +1,11 @@
 package com.cts.mfrp.anvay.controller;
 
 import com.cts.mfrp.anvay.dto.AnalyticsDto;
+import com.cts.mfrp.anvay.dto.ClubDashboardDTO;
 import com.cts.mfrp.anvay.dto.DashboardStatsDto;
 import com.cts.mfrp.anvay.dto.InstitutionDto;
-import com.cts.mfrp.anvay.repository.ClubRepository;
 import com.cts.mfrp.anvay.repository.EventRepository;
+import com.cts.mfrp.anvay.service.ClubService;
 import com.cts.mfrp.anvay.service.SuperAdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +23,7 @@ public class SuperAdminController {
 
     private final SuperAdminService superAdminService;
     private final EventRepository eventRepository;
-    private final ClubRepository clubRepository;
+    private final ClubService clubService;
 
     /**
      * Dashboard: total colleges, events, clubs, student count, event trends
@@ -65,7 +66,8 @@ public class SuperAdminController {
     @GetMapping("/institutions/{id}/clubs")
     public ResponseEntity<?> getInstitutionClubs(@PathVariable Long id) {
         try {
-            return ResponseEntity.ok(clubRepository.findByInstitutionId(id));
+            List<ClubDashboardDTO> clubs = clubService.getAllClubsByInstitution(id);
+            return ResponseEntity.ok(clubs);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }

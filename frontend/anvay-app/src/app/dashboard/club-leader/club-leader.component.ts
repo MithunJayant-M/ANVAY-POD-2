@@ -5,6 +5,8 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
+interface ManagedClub { clubId: number; clubName: string; category: string; }
+interface ClubMember { id: number; userId: number; clubId: number; status: string; user?: { firstName: string; lastName: string; email: string }; }
 interface StudentDashboard {
   firstName: string; institutionName: string; totalPoints: number; rank: number;
   registeredEventsCount: number; joinedClubsCount: number; achievementCount: number;
@@ -14,35 +16,49 @@ interface EventRecord { title: string; institution: string; dateTime: string; ty
 interface ClubRecord { name: string; memberCount: number; category: string; }
 interface AchievementRecord { title: string; year: string; badgeType: string; }
 interface EventFeed { eventId: number; title: string; location: string; institution: string; institutionId: number; type: string; participantType: string; registeredCount: number; totalCapacity: number; isRegistered: boolean; }
-interface Club { clubId: number; clubName: string; category: string; type: string; membersCount: number; memberCount: number; institutionId: number; }
+interface BrowseClub { clubId: number; clubName: string; category: string; type: string; membersCount: number; memberCount: number; institutionId: number; }
 interface LeaderboardUser { userId: number; firstName: string; lastName: string; email: string; totalPoints: number; joinedClubsCount: number; registeredEventsCount: number; }
 interface InstitutionRank { institutionId: number; institutionName: string; totalPoints: number; studentCount: number; eventCount: number; }
 interface UserProfile { userId: number; firstName: string; lastName: string; email: string; totalPoints: number; rank: number; registeredEventsCount: number; joinedClubsCount: number; role: string; }
 
 @Component({
-  selector: 'app-student',
+  selector: 'app-club-leader',
   standalone: true,
   imports: [CommonModule, FormsModule],
-  templateUrl: './student.component.html',
-  styleUrls: ['./student.component.css']
+  templateUrl: './club-leader.component.html',
+  styleUrls: ['./club-leader.component.css']
 })
-export class StudentComponent implements OnInit {
-  activeView: 'dashboard' | 'events' | 'clubs' | 'leaderboard' | 'profile' = 'dashboard';
-  sidebarOpen = true;
+export class ClubLeaderComponent implements OnInit {
+  leaderName = '';
   studentId: number = 0;
   institutionId: number = 0;
+  leadingClubId: number = 0;
+  managedClub: ManagedClub | null = null;
+  sidebarOpen = true;
+  activeView: 'dashboard' | 'events' | 'clubs' | 'leaderboard' | 'profile' | 'requests' | 'members' = 'dashboard';
+  message = ''; messageType = '';
 
+  // Club management
+  joinRequests: ClubMember[] = [];
+  members: ClubMember[] = [];
+  requestsLoading = false;
+  membersLoading = false;
+
+  // Student dashboard
   dashboard: StudentDashboard | null = null;
   dashLoading = false;
 
+  // Events
   events: EventFeed[] = [];
   eventsLoading = false;
   searchEvent = '';
 
-  allClubs: Club[] = [];
+  // Clubs browse
+  allClubs: BrowseClub[] = [];
   myClubIds: number[] = [];
   clubsLoading = false;
 
+  // Leaderboard
   leaderboard: LeaderboardUser[] = [];
   lbLoading = false;
   globalLeaderboard: LeaderboardUser[] = [];
@@ -51,29 +67,82 @@ export class StudentComponent implements OnInit {
   collegeLb: InstitutionRank[] = [];
   collegeLbLoading = false;
 
+  // Profile
   profile: UserProfile | null = null;
   profileLoading = false;
-
-  message = ''; messageType = '';
 
   constructor(private http: HttpClient, private authService: AuthService, private router: Router) {}
 
   ngOnInit() {
     const user = this.authService.getCurrentUser();
+    this.leaderName = user?.name ?? 'Leader';
     this.studentId = user?.userId ?? 0;
     this.institutionId = user?.institutionId ?? 0;
+    this.leadingClubId = (user as any)?.leadingClubId ?? 0;
+    if (this.leadingClubId) {
+      this.loadManagedClub();
+      this.loadJoinRequests();
+    }
     this.loadDashboard();
   }
 
-  setView(v: 'dashboard'|'events'|'clubs'|'leaderboard'|'profile') {
+  setView(v: 'dashboard'|'events'|'clubs'|'leaderboard'|'profile'|'requests'|'members') {
     this.activeView = v; this.message = '';
     if (v === 'dashboard') this.loadDashboard();
     if (v === 'events') this.loadEvents();
     if (v === 'clubs') this.loadClubs();
     if (v === 'leaderboard') this.loadLeaderboard();
     if (v === 'profile') this.loadProfile();
+    if (v === 'requests') this.loadJoinRequests();
+    if (v === 'members') this.loadMembers();
   }
 
+  // ── Club management ──────────────────────────────────────
+  loadManagedClub() {
+    this.http.get<ManagedClub>(`/api/clubs/${this.leadingClubId}`).subscribe({
+      next: c => this.managedClub = c, error: () => {}
+    });
+  }
+
+  loadJoinRequests() {
+    this.requestsLoading = true;
+    this.http.get<ClubMember[]>(`/api/clubs/${this.leadingClubId}/join-requests`).subscribe({
+      next: d => { this.joinRequests = d; this.requestsLoading = false; },
+      error: () => this.requestsLoading = false
+    });
+  }
+
+  loadMembers() {
+    this.membersLoading = true;
+    this.http.get<ClubMember[]>(`/api/clubs/${this.leadingClubId}/members/approved`).subscribe({
+      next: d => { this.members = d; this.membersLoading = false; },
+      error: () => this.membersLoading = false
+    });
+  }
+
+  approveRequest(memberId: number) {
+    this.http.put(`/api/clubs/${this.leadingClubId}/join-requests/${memberId}/approve`, {}).subscribe({
+      next: () => { this.showMessage('Member approved!', 'success'); this.loadJoinRequests(); },
+      error: () => this.showMessage('Failed to approve', 'error')
+    });
+  }
+
+  rejectRequest(memberId: number) {
+    this.http.put(`/api/clubs/${this.leadingClubId}/join-requests/${memberId}/reject`, {}).subscribe({
+      next: () => { this.showMessage('Request rejected', 'success'); this.loadJoinRequests(); },
+      error: () => this.showMessage('Failed to reject', 'error')
+    });
+  }
+
+  removeMember(memberId: number) {
+    if (!confirm('Remove this member from the club?')) return;
+    this.http.delete(`/api/clubs/${this.leadingClubId}/members/${memberId}`).subscribe({
+      next: () => { this.showMessage('Member removed', 'success'); this.loadMembers(); },
+      error: () => this.showMessage('Failed to remove', 'error')
+    });
+  }
+
+  // ── Student pages ─────────────────────────────────────────
   loadDashboard() {
     if (!this.studentId) return;
     this.dashLoading = true;
@@ -110,7 +179,7 @@ export class StudentComponent implements OnInit {
       next: memberships => { this.myClubIds = memberships.map(m => m.clubId); },
       error: () => {}
     });
-    this.http.get<Club[]>(`/api/clubs/institution/${this.institutionId}`).subscribe({
+    this.http.get<BrowseClub[]>(`/api/clubs/institution/${this.institutionId}`).subscribe({
       next: c => { this.allClubs = c; this.clubsLoading = false; },
       error: () => this.clubsLoading = false
     });
@@ -174,6 +243,6 @@ export class StudentComponent implements OnInit {
 
   showMessage(msg: string, type: string) { this.message = msg; this.messageType = type; setTimeout(() => this.message = '', 3000); }
   getRankLabel(i: number) { return i===0?'1st':i===1?'2nd':i===2?'3rd':`#${i+1}`; }
-  logout() { this.authService.logout(); this.router.navigate(['/login']); }
   getCapacityPct(r: number, t: number) { return t ? Math.min(100, Math.round((r/t)*100)) : 0; }
+  logout() { this.authService.logout(); this.router.navigate(['/login']); }
 }

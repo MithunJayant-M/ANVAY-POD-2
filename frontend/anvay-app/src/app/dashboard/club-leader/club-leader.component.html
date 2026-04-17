@@ -1,10 +1,10 @@
-<div class="st-shell" [class.sidebar-collapsed]="!sidebarOpen">
+<div class="leader-shell" [class.sidebar-collapsed]="!sidebarOpen">
   <!-- SIDEBAR -->
-  <aside class="st-sidebar">
+  <aside class="leader-sidebar">
     <div class="sb-brand">
       <div><div class="brand-name">ANVAY</div><div class="brand-tag">DISCOVER. JOIN. HOST.</div></div>
     </div>
-    <div class="sb-role-badge"><span class="role-dot"></span>Student</div>
+    <div class="sb-role-badge"><span class="role-dot"></span>Club Leader</div>
     <nav class="sb-nav">
       <button class="nav-item" [class.active]="activeView==='dashboard'" (click)="setView('dashboard')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Dashboard
@@ -21,25 +21,41 @@
       <button class="nav-item" [class.active]="activeView==='profile'" (click)="setView('profile')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile
       </button>
+
+      <div class="nav-divider"><span>My Club</span></div>
+
+      <button class="nav-item" [class.active]="activeView==='requests'" (click)="setView('requests')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Join Requests
+        <span class="req-badge" *ngIf="joinRequests.length > 0">{{joinRequests.length}}</span>
+      </button>
+      <button class="nav-item" [class.active]="activeView==='members'" (click)="setView('members')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Members
+      </button>
     </nav>
+    <div class="sb-club-info" *ngIf="managedClub">
+      <div class="sb-club-name">🏛️ {{managedClub.clubName}}</div>
+      <div class="sb-club-cat">{{managedClub.category}}</div>
+    </div>
     <button class="sb-logout" (click)="logout()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Logout
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      Logout
     </button>
   </aside>
 
   <!-- MAIN -->
-  <div class="st-main">
-    <header class="st-topbar">
+  <div class="leader-main">
+    <header class="leader-topbar">
       <button class="toggle-btn" (click)="sidebarOpen=!sidebarOpen">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       </button>
       <span class="topbar-logo">Anvay</span>
-      <span class="role-chip">Student</span>
+      <span class="role-chip">Club Leader</span>
       <div class="topbar-right">
-        <button class="bell-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg><span class="bell-dot"></span></button>
         <div class="user-chip">
-          <div class="user-avatar">{{dashboard?.firstName?.charAt(0) || 'S'}}</div>
-          <span>{{dashboard?.firstName || 'Student'}}</span>
+          <div class="user-avatar">{{leaderName.charAt(0)}}</div>
+          <span>{{leaderName}}</span>
         </div>
       </div>
     </header>
@@ -47,13 +63,13 @@
     <div class="msg-bar success" *ngIf="message && messageType==='success'">&#10003; {{message}}</div>
     <div class="msg-bar error" *ngIf="message && messageType==='error'">&#10005; {{message}}</div>
 
-    <main class="st-content">
+    <main class="leader-content">
 
       <!-- DASHBOARD -->
       <div *ngIf="activeView==='dashboard'">
         <div class="page-header">
-          <h1>Welcome back, {{dashboard?.firstName || 'Student'}}</h1>
-          <p>{{dashboard?.institutionName}} &middot; Track your progress and upcoming events</p>
+          <h1>Welcome back, {{dashboard?.firstName || leaderName}}</h1>
+          <p>{{dashboard?.institutionName}} &middot; Track your progress and manage your club</p>
         </div>
         <div *ngIf="dashLoading" class="loading-state"><div class="spinner"></div></div>
         <ng-container *ngIf="!dashLoading && dashboard">
@@ -85,7 +101,6 @@
           </div>
 
           <div class="dash-row">
-            <!-- Upcoming Events -->
             <div class="dash-card">
               <div class="dash-card-header">
                 <h3>Upcoming Events</h3>
@@ -93,7 +108,7 @@
               </div>
               <div class="event-list">
                 <div class="event-item" *ngFor="let ev of dashboard.upcomingEvents">
-                  <div class="event-type-dot" [style.background]="'linear-gradient(135deg,#22c55e,#0891b2)'"></div>
+                  <div class="event-type-dot"></div>
                   <div class="event-info">
                     <div class="event-title">{{ev.title}}</div>
                     <div class="event-meta">{{ev.institution}} &middot; {{ev.dateTime | date:'mediumDate'}}</div>
@@ -103,22 +118,25 @@
                 <div *ngIf="!dashboard.upcomingEvents?.length" class="empty-state-sm">No upcoming events</div>
               </div>
             </div>
-
-            <!-- Achievements -->
             <div class="dash-card">
               <div class="dash-card-header">
-                <h3>Achievements ({{dashboard.achievementCount}})</h3>
+                <h3>My Club</h3>
+                <button class="link-btn" (click)="setView('requests')">Manage &rarr;</button>
               </div>
-              <div class="achievement-list">
-                <div class="ach-item" *ngFor="let a of dashboard.achievements">
-                  <div class="ach-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg></div>
-                  <div>
-                    <div class="ach-title">{{a.title}}</div>
-                    <div class="ach-year">{{a.year}}</div>
-                  </div>
+              <div class="club-dash-info" *ngIf="managedClub">
+                <div class="club-dash-icon">🏛️</div>
+                <div class="club-dash-name">{{managedClub.clubName}}</div>
+                <div class="club-dash-cat">{{managedClub.category}}</div>
+                <div class="club-dash-counts">
+                  <span class="cdc-item" (click)="setView('requests')">
+                    <strong>{{joinRequests.length}}</strong> pending requests
+                  </span>
+                  <span class="cdc-item" (click)="setView('members')">
+                    <strong>{{members.length}}</strong> members
+                  </span>
                 </div>
-                <div *ngIf="!dashboard.achievements?.length" class="empty-state-sm">No achievements yet</div>
               </div>
+              <div *ngIf="!managedClub" class="empty-state-sm">No club assigned</div>
             </div>
           </div>
         </ng-container>
@@ -139,21 +157,18 @@
             <div class="ec-header">
               <span class="tag">{{ev.type || 'Event'}}</span>
               <div style="display:flex;gap:6px;align-items:center">
-                <span *ngIf="ev.participantType==='all' && ev.institutionId !== institutionId" class="badge-public-ev">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="10" height="10"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 010 20"/></svg>
-                  Public
-                </span>
+                <span *ngIf="ev.participantType==='all' && ev.institutionId !== institutionId" class="badge-public-ev">Public</span>
                 <span *ngIf="ev.isRegistered" class="badge-registered">Registered</span>
               </div>
             </div>
             <h4 class="ec-title">{{ev.title}}</h4>
             <div class="ec-meta">
-              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/></svg> {{ev.institution || 'General'}}</span>
-              <span *ngIf="ev.location"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg> {{ev.location}}</span>
+              <span>🏠 {{ev.institution || 'General'}}</span>
+              <span *ngIf="ev.location">📍 {{ev.location}}</span>
             </div>
             <div class="ec-capacity">
               <div class="cap-bar"><div class="cap-fill" [style.width.%]="getCapacityPct(ev.registeredCount, ev.totalCapacity)"></div></div>
-              <span class="cap-text">{{ev.registeredCount || 0}} / {{ev.totalCapacity || '&ndash;'}} registered</span>
+              <span class="cap-text">{{ev.registeredCount || 0}} / {{ev.totalCapacity || '–'}} registered</span>
             </div>
             <button class="btn-register" *ngIf="!ev.isRegistered" (click)="registerEvent(ev.eventId)">Register Now</button>
             <button class="btn-registered" *ngIf="ev.isRegistered" disabled>&#10003; Registered</button>
@@ -164,11 +179,11 @@
 
       <!-- CLUBS -->
       <div *ngIf="activeView==='clubs'">
-        <div class="page-header"><h1>Clubs</h1><p>Browse and join clubs across the platform</p></div>
+        <div class="page-header"><h1>Clubs</h1><p>Browse and join clubs at your institution</p></div>
         <div *ngIf="clubsLoading" class="loading-state"><div class="spinner"></div></div>
         <div class="clubs-grid" *ngIf="!clubsLoading">
           <div class="club-card" *ngFor="let cl of allClubs">
-            <div class="club-icon">
+            <div class="club-card-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="28" height="28"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
             </div>
             <h4 class="club-name">{{cl.clubName}}</h4>
@@ -193,7 +208,6 @@
           <button class="lb-tab" [class.active]="lbTab==='colleges'" (click)="switchLbTab('colleges')">🏫 College Rankings</button>
         </div>
 
-        <!-- My Institution tab -->
         <div *ngIf="lbTab==='institution'">
           <div *ngIf="lbLoading" class="loading-state"><div class="spinner"></div></div>
           <div *ngIf="!lbLoading" class="data-card">
@@ -219,7 +233,6 @@
           </div>
         </div>
 
-        <!-- All Students tab -->
         <div *ngIf="lbTab==='global'">
           <div *ngIf="globalLbLoading" class="loading-state"><div class="spinner"></div></div>
           <div *ngIf="!globalLbLoading" class="data-card">
@@ -245,7 +258,6 @@
           </div>
         </div>
 
-        <!-- College Rankings tab -->
         <div *ngIf="lbTab==='colleges'">
           <div *ngIf="collegeLbLoading" class="loading-state"><div class="spinner"></div></div>
           <div *ngIf="!collegeLbLoading" class="data-card">
@@ -253,14 +265,10 @@
               <thead><tr><th>Rank</th><th>Institution</th><th>Total Points</th><th>Students</th><th>Events</th></tr></thead>
               <tbody>
                 <tr *ngFor="let c of collegeLb; let i=index" [class.my-row]="c.institutionId===institutionId">
-                  <td>
-                    <span class="rank-badge" [class.rank-gold]="i===0" [class.rank-silver]="i===1" [class.rank-bronze]="i===2">
-                      {{i===0?'🥇':i===1?'🥈':i===2?'🥉':getRankLabel(i)}}
-                    </span>
-                  </td>
+                  <td><span class="rank-badge">{{i===0?'🥇':i===1?'🥈':i===2?'🥉':getRankLabel(i)}}</span></td>
                   <td>
                     <div class="student-cell">
-                      <div class="student-avatar clg-avatar">🏫</div>
+                      <div class="student-avatar">🏫</div>
                       <div class="cell-primary">{{c.institutionName}}<span *ngIf="c.institutionId===institutionId" class="you-badge"> (Your College)</span></div>
                     </div>
                   </td>
@@ -281,13 +289,13 @@
         <div *ngIf="profileLoading" class="loading-state"><div class="spinner"></div></div>
         <div *ngIf="!profileLoading && profile" class="profile-layout">
           <div class="profile-card">
-            <div class="profile-avatar">{{profile.firstName?.charAt(0)||'S'}}</div>
+            <div class="profile-avatar">{{profile.firstName?.charAt(0)||'L'}}</div>
             <div class="profile-name">{{profile.firstName}} {{profile.lastName}}</div>
             <div class="profile-email">{{profile.email}}</div>
-            <div class="profile-role">{{profile.role | titlecase}}</div>
+            <div class="profile-role">Club Leader</div>
             <div class="profile-stats">
               <div class="ps-item"><div class="ps-num">{{profile.totalPoints||0}}</div><div class="ps-lbl">Points</div></div>
-              <div class="ps-item"><div class="ps-num">#{{profile.rank||'&ndash;'}}</div><div class="ps-lbl">Rank</div></div>
+              <div class="ps-item"><div class="ps-num">#{{profile.rank||'–'}}</div><div class="ps-lbl">Rank</div></div>
               <div class="ps-item"><div class="ps-num">{{profile.registeredEventsCount||0}}</div><div class="ps-lbl">Events</div></div>
               <div class="ps-item"><div class="ps-num">{{profile.joinedClubsCount||0}}</div><div class="ps-lbl">Clubs</div></div>
             </div>
@@ -295,6 +303,69 @@
         </div>
         <div *ngIf="!profileLoading && !profile" class="empty-state">Profile not found</div>
       </div>
+
+      <!-- JOIN REQUESTS -->
+      <div *ngIf="activeView==='requests'">
+        <div class="page-header"><h1>Join Requests</h1><p>Review and approve membership requests for {{managedClub?.clubName || 'your club'}}</p></div>
+        <div *ngIf="requestsLoading" class="loading-state"><div class="spinner"></div></div>
+        <div *ngIf="!requestsLoading && joinRequests.length === 0" class="empty-state">
+          <div class="empty-icon">📭</div>
+          <div class="empty-text">No pending join requests</div>
+        </div>
+        <div *ngIf="!requestsLoading && joinRequests.length > 0" class="data-card">
+          <table class="data-table">
+            <thead><tr><th>Student</th><th>Email</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let r of joinRequests">
+                <td>
+                  <div class="student-cell">
+                    <div class="student-avatar">{{r.user?.firstName?.charAt(0)||'?'}}</div>
+                    <div class="cell-primary">{{r.user?.firstName}} {{r.user?.lastName}}</div>
+                  </div>
+                </td>
+                <td>{{r.user?.email}}</td>
+                <td>
+                  <div class="action-btns">
+                    <button class="btn-sm btn-approve" (click)="approveRequest(r.id)">&#10003; Approve</button>
+                    <button class="btn-sm btn-del" (click)="rejectRequest(r.id)">&#10005; Reject</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- MEMBERS -->
+      <div *ngIf="activeView==='members'">
+        <div class="page-header"><h1>Club Members</h1><p>Manage approved members of {{managedClub?.clubName || 'your club'}}</p></div>
+        <div *ngIf="membersLoading" class="loading-state"><div class="spinner"></div></div>
+        <div *ngIf="!membersLoading && members.length === 0" class="empty-state">
+          <div class="empty-icon">👥</div>
+          <div class="empty-text">No approved members yet</div>
+        </div>
+        <div *ngIf="!membersLoading && members.length > 0" class="data-card">
+          <table class="data-table">
+            <thead><tr><th>#</th><th>Student</th><th>Email</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let m of members; let i=index">
+                <td>{{i+1}}</td>
+                <td>
+                  <div class="student-cell">
+                    <div class="student-avatar">{{m.user?.firstName?.charAt(0)||'?'}}</div>
+                    <div class="cell-primary">{{m.user?.firstName}} {{m.user?.lastName}}</div>
+                  </div>
+                </td>
+                <td>{{m.user?.email}}</td>
+                <td>
+                  <button class="btn-sm btn-del" (click)="removeMember(m.id)">Remove</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </main>
   </div>
 </div>

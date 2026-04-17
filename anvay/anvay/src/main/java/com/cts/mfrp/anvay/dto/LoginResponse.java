@@ -15,4 +15,5 @@ public class LoginResponse {
     private String name;
     private Long userId;
     private Long institutionId;
+    private Long leadingClubId;
 }

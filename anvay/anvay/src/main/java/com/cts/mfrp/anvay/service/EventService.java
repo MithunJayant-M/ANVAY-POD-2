@@ -3,6 +3,7 @@ package com.cts.mfrp.anvay.service;
 import java.util.List;
 
 import com.cts.mfrp.anvay.dto.EventFeedDTO;
+import com.cts.mfrp.anvay.dto.WinnersApprovalDTO;
 import com.cts.mfrp.anvay.entity.Event;
 import com.cts.mfrp.anvay.entity.EventParticipant;
 
@@ -17,4 +18,8 @@ public interface EventService {
     EventParticipant registerParticipant(EventParticipant participant);
     List<EventFeedDTO> getAllEventsWithStatus(Long userId);
     List<EventFeedDTO> getEventsForStudent(Long userId, Long institutionId);
+    void submitWinners(Long eventId, Long firstUserId, Long secondUserId, Long thirdUserId);
+    void approveWinners(Long eventId);
+    List<WinnersApprovalDTO> getPendingWinners();
+    List<EventParticipant> getEventParticipants(Long eventId);
 }

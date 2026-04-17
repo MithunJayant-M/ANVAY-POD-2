@@ -1,6 +1,7 @@
 package com.cts.mfrp.anvay.controller;
 
 import com.cts.mfrp.anvay.dto.EventFeedDTO;
+import com.cts.mfrp.anvay.dto.WinnersApprovalDTO;
 import com.cts.mfrp.anvay.entity.Event;
 import com.cts.mfrp.anvay.entity.EventParticipant;
 import com.cts.mfrp.anvay.repository.EventParticipantRepository;
@@ -77,6 +78,28 @@ public class EventController {
     public ResponseEntity<EventParticipant> registerParticipant(@RequestBody EventParticipant participant) {
         EventParticipant savedParticipant = eventService.registerParticipant(participant);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedParticipant);
+    }
+
+    @GetMapping("/{eventId}/participants")
+    public ResponseEntity<List<EventParticipant>> getParticipants(@PathVariable Long eventId) {
+        return ResponseEntity.ok(eventService.getEventParticipants(eventId));
+    }
+
+    @PostMapping("/{eventId}/award-winners")
+    public ResponseEntity<?> submitWinners(@PathVariable Long eventId, @RequestBody java.util.Map<String, Long> body) {
+        eventService.submitWinners(eventId, body.get("firstUserId"), body.get("secondUserId"), body.get("thirdUserId"));
+        return ResponseEntity.ok(java.util.Map.of("message", "Winners submitted for approval"));
+    }
+
+    @PostMapping("/{eventId}/approve-winners")
+    public ResponseEntity<?> approveWinners(@PathVariable Long eventId) {
+        eventService.approveWinners(eventId);
+        return ResponseEntity.ok(java.util.Map.of("message", "Winners approved and points awarded"));
+    }
+
+    @GetMapping("/pending-winners")
+    public ResponseEntity<List<WinnersApprovalDTO>> getPendingWinners() {
+        return ResponseEntity.ok(eventService.getPendingWinners());
     }
 
 }

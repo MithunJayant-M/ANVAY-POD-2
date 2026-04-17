@@ -69,11 +69,17 @@ public class StudentServiceImpl implements StudentService {
                 .limit(3)
                 .collect(Collectors.toList());
 
+        List<User> institutionRanking = userRepository.findStudentsByInstitutionId(user.getInstitutionId());
+        int rank = 1;
+        for (int i = 0; i < institutionRanking.size(); i++) {
+            if (institutionRanking.get(i).getUserId().equals(user.getUserId())) { rank = i + 1; break; }
+        }
+
         return StudentDashboardDTO.builder()
                 .firstName(user.getFirstName())
                 .institutionName(user.getInstitution() != null ? user.getInstitution().getName() : "")
                 .totalPoints(user.getTotalPoints() != null ? user.getTotalPoints() : 0)
-                .rank(user.getRankInLeaderboard() != null ? user.getRankInLeaderboard() : 0)
+                .rank(rank)
                 .registeredEventsCount(user.getRegisteredEventsCount() != null ? user.getRegisteredEventsCount() : 0)
                 .joinedClubsCount(user.getJoinedClubsCount() != null ? user.getJoinedClubsCount() : 0)
                 .achievementCount(userAchievements.size())

@@ -19,4 +19,9 @@ public interface EventParticipantRepository extends JpaRepository<EventParticipa
 
     @Query("SELECT SUM(ep.points_earned) FROM EventParticipant ep JOIN Event e ON ep.eventId = e.eventId JOIN Club c ON e.clubId = c.clubId WHERE c.institutionId = :institutionId")
     Long sumPointsByInstitutionId(@Param("institutionId") Long institutionId);
+
+    @Query("SELECT ep FROM EventParticipant ep JOIN FETCH ep.user WHERE ep.eventId = :eventId")
+    List<EventParticipant> findByEventIdWithUser(@Param("eventId") Long eventId);
+
+    java.util.Optional<EventParticipant> findByEventIdAndUserId(Long eventId, Long userId);
 }

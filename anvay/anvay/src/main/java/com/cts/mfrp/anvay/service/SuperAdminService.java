@@ -13,4 +13,5 @@ public interface SuperAdminService {
     InstitutionDto approveInstitution(Long institutionId);
     InstitutionDto deactivateInstitution(Long institutionId);
     AnalyticsDto getAnalytics();
+    List<InstitutionDto> getInstitutionLeaderboard();
 }

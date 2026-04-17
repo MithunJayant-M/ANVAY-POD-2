@@ -31,7 +31,12 @@ public class StudentController {
 
     @GetMapping("/institution/{institutionId}/leaderboard")
     public ResponseEntity<List<User>> getInstitutionLeaderboard(@PathVariable Long institutionId) {
-        return ResponseEntity.ok(userRepository.findByInstitutionIdAndRole(institutionId, "student"));
+        return ResponseEntity.ok(userRepository.findStudentsByInstitutionId(institutionId));
+    }
+
+    @GetMapping("/leaderboard")
+    public ResponseEntity<List<User>> getGlobalLeaderboard() {
+        return ResponseEntity.ok(userRepository.findAllStudents());
     }
 
     @GetMapping

@@ -1,7 +1,9 @@
 package com.cts.mfrp.anvay.controller;
 
 import com.cts.mfrp.anvay.entity.LeadershipApplication;
+import com.cts.mfrp.anvay.entity.User;
 import com.cts.mfrp.anvay.repository.LeadershipApplicationRepository;
+import com.cts.mfrp.anvay.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import java.util.Map;
 public class LeadershipApplicationController {
 
     private final LeadershipApplicationRepository applicationRepository;
+    private final UserRepository userRepository;
 
     @PostMapping
     public ResponseEntity<LeadershipApplication> apply(@RequestBody LeadershipApplication application) {
@@ -41,7 +44,13 @@ public class LeadershipApplicationController {
     public ResponseEntity<?> approve(@PathVariable Long id) {
         return applicationRepository.findById(id).map(app -> {
             app.setStatus("approved");
-            return ResponseEntity.ok(applicationRepository.save(app));
+            applicationRepository.save(app);
+            userRepository.findById(app.getUserId()).ifPresent(user -> {
+                user.setRole("club_leader");
+                user.setLeadingClubId(app.getClubId());
+                userRepository.save(user);
+            });
+            return ResponseEntity.ok(app);
         }).orElse(ResponseEntity.notFound().build());
     }
 

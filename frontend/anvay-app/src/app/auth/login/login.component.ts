@@ -45,6 +45,9 @@ export class LoginComponent {
           case 'student':
             this.router.navigate(['/dashboard/student']);
             break;
+          case 'club_leader':
+            this.router.navigate(['/dashboard/leader']);
+            break;
           default:
             this.router.navigate(['/login']);
         }

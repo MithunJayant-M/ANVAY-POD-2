@@ -1,5 +1,6 @@
 package com.cts.mfrp.anvay.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -30,6 +31,11 @@ public class LeadershipApplication {
 
     @Column(name = "applied_at")
     private LocalDateTime appliedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", insertable = false, updatable = false)
+    @JsonIgnoreProperties({"clubMembers", "achievements", "eventRegistrations", "institution"})
+    private User user;
 
     @PrePersist
     protected void onCreate() {

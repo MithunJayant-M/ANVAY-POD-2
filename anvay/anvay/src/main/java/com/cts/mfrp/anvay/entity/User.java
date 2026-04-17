@@ -74,4 +74,7 @@ public class User {
 
     @Column(name = "joined_clubs_count")
     private Integer joinedClubsCount;
+
+    @Column(name = "leading_club_id")
+    private Long leadingClubId;
 }

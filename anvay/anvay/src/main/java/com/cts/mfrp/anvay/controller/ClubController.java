@@ -4,6 +4,7 @@ import com.cts.mfrp.anvay.dto.ClubDashboardDTO;
 import com.cts.mfrp.anvay.entity.Club;
 import com.cts.mfrp.anvay.entity.ClubMember;
 import com.cts.mfrp.anvay.repository.ClubMemberRepository;
+import com.cts.mfrp.anvay.repository.UserRepository;
 import com.cts.mfrp.anvay.service.ClubService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ public class ClubController {
 
     private final ClubService clubService;
     private final ClubMemberRepository clubMemberRepository;
+    private final UserRepository userRepository;
 
     @GetMapping("/all")
     public ResponseEntity<List<Club>> getAllClubs(){
@@ -208,7 +210,12 @@ public class ClubController {
         return clubMemberRepository.findById(memberId).map(m -> {
             m.setStatus("APPROVED");
             m.setUpdatedAt(LocalDateTime.now());
-            return ResponseEntity.ok(clubMemberRepository.save(m));
+            clubMemberRepository.save(m);
+            userRepository.findById(m.getUserId()).ifPresent(u -> {
+                u.setJoinedClubsCount((u.getJoinedClubsCount() != null ? u.getJoinedClubsCount() : 0) + 1);
+                userRepository.save(u);
+            });
+            return ResponseEntity.ok(m);
         }).orElse(ResponseEntity.notFound().build());
     }
 
@@ -224,6 +231,19 @@ public class ClubController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<?> getClubsByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(clubMemberRepository.findByUserId(userId));
+    }
+
+    @DeleteMapping("/{clubId}/members/{memberId}")
+    public ResponseEntity<?> removeMember(@PathVariable Long clubId, @PathVariable Long memberId) {
+        return clubMemberRepository.findById(memberId).map(m -> {
+            clubMemberRepository.delete(m);
+            userRepository.findById(m.getUserId()).ifPresent(u -> {
+                int count = u.getJoinedClubsCount() != null ? u.getJoinedClubsCount() : 0;
+                u.setJoinedClubsCount(Math.max(0, count - 1));
+                userRepository.save(u);
+            });
+            return ResponseEntity.noContent().build();
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{clubId}")

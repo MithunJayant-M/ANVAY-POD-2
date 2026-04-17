@@ -1,6 +1,7 @@
 package com.cts.mfrp.anvay.service.impl;
 
 import com.cts.mfrp.anvay.dto.EventFeedDTO;
+import com.cts.mfrp.anvay.dto.WinnersApprovalDTO;
 import com.cts.mfrp.anvay.entity.Event;
 import com.cts.mfrp.anvay.entity.EventParticipant;
 import com.cts.mfrp.anvay.entity.User;
@@ -123,6 +124,75 @@ public class EventServiceImpl implements EventService {
     public List<EventFeedDTO> getEventsForStudent(Long userId, Long institutionId) {
         List<Object[]> results = eventRepository.findEventsForStudent(userId, institutionId);
         return mapToFeedDTOs(results);
+    }
+
+    @Override
+    public List<EventParticipant> getEventParticipants(Long eventId) {
+        return participantRepository.findByEventIdWithUser(eventId);
+    }
+
+    @Override
+    public void submitWinners(Long eventId, Long firstUserId, Long secondUserId, Long thirdUserId) {
+        Event event = getEventById(eventId);
+        if ("pending".equals(event.getWinnersStatus()) || "approved".equals(event.getWinnersStatus())) {
+            throw new IllegalStateException("Winners already submitted for this event");
+        }
+        event.setWinner1UserId(firstUserId);
+        event.setWinner2UserId(secondUserId);
+        event.setWinner3UserId(thirdUserId);
+        event.setWinnersStatus("pending");
+        eventRepository.save(event);
+    }
+
+    @Override
+    public void approveWinners(Long eventId) {
+        Event event = getEventById(eventId);
+        if (!"pending".equals(event.getWinnersStatus())) {
+            throw new IllegalStateException("No pending winners for this event");
+        }
+        awardPoints(eventId, event.getWinner1UserId(), 100);
+        awardPoints(eventId, event.getWinner2UserId(), 75);
+        awardPoints(eventId, event.getWinner3UserId(), 50);
+        event.setWinnersStatus("approved");
+        eventRepository.save(event);
+    }
+
+    @Override
+    public List<WinnersApprovalDTO> getPendingWinners() {
+        List<Event> pending = eventRepository.findByWinnersStatus("pending");
+        return pending.stream().map(event -> {
+            String institutionName = event.getClub() != null && event.getClub().getInstitution() != null
+                    ? event.getClub().getInstitution().getName() : "Unknown";
+            return WinnersApprovalDTO.builder()
+                    .eventId(event.getEventId())
+                    .eventName(event.getEventName())
+                    .institutionName(institutionName)
+                    .winner1UserId(event.getWinner1UserId())
+                    .winner1Name(resolveUserName(event.getWinner1UserId()))
+                    .winner2UserId(event.getWinner2UserId())
+                    .winner2Name(resolveUserName(event.getWinner2UserId()))
+                    .winner3UserId(event.getWinner3UserId())
+                    .winner3Name(resolveUserName(event.getWinner3UserId()))
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
+    private String resolveUserName(Long userId) {
+        if (userId == null) return null;
+        return userRepository.findById(userId)
+                .map(u -> u.getFirstName() + " " + u.getLastName())
+                .orElse("Unknown");
+    }
+
+    private void awardPoints(Long eventId, Long userId, int points) {
+        if (userId == null) return;
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+        user.setTotalPoints((user.getTotalPoints() != null ? user.getTotalPoints() : 0) + points);
+        userRepository.save(user);
+        participantRepository.findByEventIdAndUserId(eventId, userId).ifPresent(ep -> {
+            ep.setPoints_earned(points);
+            participantRepository.save(ep);
+        });
     }
 
     private List<EventFeedDTO> mapToFeedDTOs(List<Object[]> results) {

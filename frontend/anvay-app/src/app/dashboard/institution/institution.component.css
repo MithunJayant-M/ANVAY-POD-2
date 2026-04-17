@@ -229,5 +229,77 @@ textarea.input-field { resize:vertical; }
 .vis-desc  { font-size:.72rem; color:#94a3b8; margin-top:2px; }
 .vis-selected .vis-title { color:#15803d; }
 
+/* ── Approval Modal ── */
+.modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:flex; align-items:center; justify-content:center; z-index:1000; animation:fadeIn .2s ease; }
+@keyframes fadeIn { from{opacity:0} to{opacity:1} }
+.modal-box { background:#fff; border-radius:20px; padding:36px; max-width:460px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,.2); animation:slideUp .25s ease; }
+@keyframes slideUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+.modal-icon { width:60px; height:60px; border-radius:14px; background:#dcfce7; color:#16a34a; display:flex; align-items:center; justify-content:center; margin-bottom:20px; }
+.modal-title { font-size:1.2rem; font-weight:800; color:#0f172a; margin-bottom:8px; }
+.modal-desc { font-size:.875rem; color:#64748b; line-height:1.6; margin-bottom:24px; }
+.verify-check { display:flex; align-items:flex-start; gap:12px; background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:12px; padding:16px; cursor:pointer; margin-bottom:24px; }
+.verify-check input { display:none; }
+.check-box { width:20px; height:20px; border-radius:6px; border:2px solid #cbd5e1; background:#fff; flex-shrink:0; display:flex; align-items:center; justify-content:center; transition:.15s; margin-top:1px; }
+.verify-check:has(input:checked) .check-box { background:#16a34a; border-color:#16a34a; }
+.verify-check:has(input:checked) .check-box::after { content:'✓'; color:#fff; font-size:.75rem; font-weight:700; }
+.check-label { font-size:.85rem; font-weight:600; color:#374151; line-height:1.5; }
+.modal-actions { display:flex; gap:12px; justify-content:flex-end; }
+.modal-btn-cancel { padding:10px 20px; background:#f1f5f9; color:#64748b; border:none; border-radius:10px; font-weight:600; font-size:.85rem; cursor:pointer; font-family:inherit; transition:.15s; }
+.modal-btn-cancel:hover { background:#e2e8f0; }
+.modal-btn-approve { display:flex; align-items:center; gap:8px; padding:10px 22px; background:#16a34a; color:#fff; border:none; border-radius:10px; font-weight:700; font-size:.85rem; cursor:pointer; font-family:inherit; transition:.15s; }
+.modal-btn-approve:hover:not(:disabled) { background:#15803d; }
+.modal-btn-approve:disabled { opacity:.4; cursor:not-allowed; }
+
+/* ── Winners Modal ── */
+.winners-modal { background:#fff; border-radius:24px; padding:36px; max-width:500px; width:90%; box-shadow:0 20px 60px rgba(0,0,0,.22); animation:slideUp .25s ease; }
+.winners-header { text-align:center; margin-bottom:28px; }
+.winners-trophy { font-size:2.8rem; line-height:1; margin-bottom:10px; }
+.winners-title { font-size:1.3rem; font-weight:800; color:#0f172a; margin-bottom:6px; }
+.winners-subtitle { font-size:.875rem; color:#64748b; font-weight:500; }
+.winners-loading { text-align:center; color:#94a3b8; padding:24px 0; font-size:.9rem; }
+.winners-empty { text-align:center; color:#94a3b8; padding:20px 0; font-size:.9rem; }
+.winners-hint { font-size:.78rem; color:#64748b; background:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:8px 12px; margin-bottom:16px; }
+.winners-body { display:flex; flex-direction:column; gap:16px; margin-bottom:28px; }
+.winner-row { display:flex; flex-direction:column; gap:8px; }
+.winner-badge { display:flex; align-items:center; gap:8px; font-size:.82rem; font-weight:700; }
+.winner-badge.gold { color:#b45309; }
+.winner-badge.silver { color:#475569; }
+.winner-badge.bronze { color:#92400e; }
+.pts-badge { background:#f0fdf4; color:#16a34a; border:1px solid #86efac; border-radius:20px; padding:1px 8px; font-size:.72rem; font-weight:700; margin-left:4px; }
+.winner-select { width:100%; padding:10px 14px; border:1.5px solid #e2e8f0; border-radius:10px; font-size:.875rem; font-family:inherit; color:#0f172a; background:#f8fafc; outline:none; cursor:pointer; transition:.15s; }
+.winner-select:focus { border-color:#16a34a; background:#fff; box-shadow:0 0 0 3px rgba(22,163,74,.1); }
+.winners-actions { display:flex; gap:12px; justify-content:flex-end; }
+
+/* ── Events table action buttons ── */
+.btn-view { background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe; padding:5px 12px; border-radius:7px; font-size:.75rem; font-weight:700; cursor:pointer; transition:.15s; }
+.btn-view:hover { background:#dbeafe; }
+.btn-winners { background:#fef3c7; color:#92400e; border:1px solid #fcd34d; padding:5px 12px; border-radius:7px; font-size:.75rem; font-weight:700; cursor:pointer; transition:.15s; }
+.btn-winners:hover { background:#fde68a; }
+.back-btn { display:inline-flex; align-items:center; gap:6px; background:transparent; border:1.5px solid #e2e8f0; color:#64748b; padding:6px 14px; border-radius:8px; font-size:.82rem; font-weight:600; cursor:pointer; font-family:inherit; margin-bottom:12px; transition:.15s; }
+.back-btn:hover { background:#f1f5f9; color:#0f172a; }
+.pts-earned { color:#15803d; font-size:.9rem; }
+.no-pts { color:#cbd5e1; }
+.winners-status-badge { display:inline-flex; align-items:center; padding:4px 10px; border-radius:20px; font-size:.72rem; font-weight:700; white-space:nowrap; }
+.winners-status-badge.pending { background:#fef3c7; color:#92400e; border:1px solid #fcd34d; }
+.winners-status-badge.approved { background:#dcfce7; color:#15803d; border:1px solid #86efac; }
+
+/* ── Leadership email ── */
+.leader-email { font-size:.75rem; color:#94a3b8; margin-top:2px; }
+
+/* ── Dashboard college leaderboard section ── */
+.dash-section { margin-top:28px; }
+.dash-section-header { display:flex; align-items:baseline; gap:12px; margin-bottom:14px; }
+.dash-section-header h3 { font-size:1.05rem; font-weight:700; color:#0f172a; margin:0; }
+.dash-section-sub { font-size:.8rem; color:#94a3b8; }
+.my-inst-row { background:#f0fdf4 !important; }
+.rank-badge-inst { display:inline-block; padding:3px 10px; border-radius:8px; font-size:.82rem; font-weight:700; background:#f1f5f9; color:#64748b; }
+.rank-badge-inst.gold  { background:linear-gradient(135deg,#fef3c7,#fde68a); color:#92400e; }
+.rank-badge-inst.silver { background:linear-gradient(135deg,#f1f5f9,#e2e8f0); color:#475569; }
+.rank-badge-inst.bronze { background:linear-gradient(135deg,#fff7ed,#fed7aa); color:#92400e; }
+.inst-cell { display:flex; align-items:center; gap:10px; }
+.inst-avatar { width:32px; height:32px; border-radius:8px; background:#eff6ff; display:flex; align-items:center; justify-content:center; font-size:.95rem; flex-shrink:0; }
+.you-inst-badge { font-size:.72rem; font-weight:700; color:#16a34a; margin-left:4px; }
+.pts-num { color:#15803d; font-size:.95rem; }
+
 @media(max-width:1100px) { .stat-grid{grid-template-columns:repeat(2,1fr)} }
 @media(max-width:768px)  { .inst-sidebar{width:0;overflow:hidden} .inst-main{margin-left:0} }

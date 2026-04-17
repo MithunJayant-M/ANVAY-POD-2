@@ -54,12 +54,25 @@ interface Event {
   maxParticipants: number;
 }
 
+interface WinnersApproval {
+  eventId: number;
+  eventName: string;
+  institutionName: string;
+  winner1UserId: number | null;
+  winner1Name: string | null;
+  winner2UserId: number | null;
+  winner2Name: string | null;
+  winner3UserId: number | null;
+  winner3Name: string | null;
+}
+
 interface Club {
   clubId: number;
   clubName: string;
-  category: string;
-  memberCount: number;
-  createdAt: string;
+  type: string;
+  membersCount: number;
+  joinRequestsCount: number;
+  createdDate: string;
 }
 
 @Component({
@@ -72,7 +85,7 @@ interface Club {
 export class SuperAdminComponent implements OnInit {
   private readonly API = '/api/super-admin';
 
-  activeView: 'dashboard' | 'colleges' | 'analytics' | 'settings' = 'dashboard';
+  activeView: 'dashboard' | 'colleges' | 'analytics' | 'approvals' | 'settings' = 'dashboard';
   adminName = '';
   sidebarOpen = true;
 
@@ -95,6 +108,13 @@ export class SuperAdminComponent implements OnInit {
   actionMessage = '';
   actionError = '';
 
+  approveModal = false;
+  approveVerified = false;
+  pendingApproveId: number | null = null;
+
+  pendingWinners: WinnersApproval[] = [];
+  pendingWinnersLoading = false;
+
   constructor(
     private http: HttpClient,
     private authService: AuthService,
@@ -105,15 +125,32 @@ export class SuperAdminComponent implements OnInit {
     const user = this.authService.getCurrentUser();
     this.adminName = user?.name ?? 'Super Admin';
     this.loadDashboard();
+    this.loadPendingWinners();
   }
 
-  setView(view: 'dashboard' | 'colleges' | 'analytics' | 'settings'): void {
+  setView(view: 'dashboard' | 'colleges' | 'analytics' | 'approvals' | 'settings'): void {
     this.activeView = view;
     this.clearMessages();
     this.selectedInstitution = null;
     if (view === 'dashboard') this.loadDashboard();
     if (view === 'colleges') this.loadColleges();
     if (view === 'analytics') this.loadAnalytics();
+    if (view === 'approvals') this.loadPendingWinners();
+  }
+
+  loadPendingWinners(): void {
+    this.pendingWinnersLoading = true;
+    this.http.get<WinnersApproval[]>('/api/events/pending-winners').subscribe({
+      next: d => { this.pendingWinners = d; this.pendingWinnersLoading = false; },
+      error: () => { this.pendingWinnersLoading = false; }
+    });
+  }
+
+  approveEventWinners(eventId: number): void {
+    this.http.post(`/api/events/${eventId}/approve-winners`, {}).subscribe({
+      next: () => { this.actionMessage = 'Winners approved and points awarded!'; this.loadPendingWinners(); },
+      error: () => { this.actionError = 'Failed to approve winners.'; }
+    });
   }
 
   loadDashboard(): void {
@@ -173,13 +210,22 @@ export class SuperAdminComponent implements OnInit {
     if (tab === 'clubs') this.loadInstitutionClubs(this.selectedInstitution!.institutionId);
   }
 
-  approveInstitution(id: number): void {
+  openApproveModal(id: number): void {
+    this.pendingApproveId = id;
+    this.approveVerified = false;
+    this.approveModal = true;
+  }
+
+  confirmApprove(): void {
+    if (!this.approveVerified || !this.pendingApproveId) return;
     this.clearMessages();
-    this.http.put<InstitutionDto>(`${this.API}/institutions/${id}/approve`, {}).subscribe({
-      next: (updated) => { this.updateList(updated); this.actionMessage = 'Institution approved!'; },
-      error: () => { this.actionError = 'Failed to approve.'; }
+    this.http.put<InstitutionDto>(`${this.API}/institutions/${this.pendingApproveId}/approve`, {}).subscribe({
+      next: (updated) => { this.updateList(updated); this.actionMessage = 'Institution approved!'; this.approveModal = false; },
+      error: () => { this.actionError = 'Failed to approve.'; this.approveModal = false; }
     });
   }
+
+  approveInstitution(id: number): void { this.openApproveModal(id); }
 
   deactivateInstitution(id: number): void {
     this.clearMessages();

@@ -1,7 +1,9 @@
 package com.cts.mfrp.anvay.controller;
 
+import com.cts.mfrp.anvay.dto.InstitutionDto;
 import com.cts.mfrp.anvay.entity.Institution;
 import com.cts.mfrp.anvay.service.InstitutionService;
+import com.cts.mfrp.anvay.service.SuperAdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +17,16 @@ import java.util.List;
 public class InstitutionController {
 
     private final InstitutionService institutionService;
+    private final SuperAdminService superAdminService;
 
     @GetMapping
     public ResponseEntity<List<Institution>> getAllInstitutions() {
         return ResponseEntity.ok(institutionService.getAllInstitutions());
+    }
+
+    @GetMapping("/leaderboard")
+    public ResponseEntity<List<InstitutionDto>> getInstitutionLeaderboard() {
+        return ResponseEntity.ok(superAdminService.getInstitutionLeaderboard());
     }
 
     @GetMapping("/active")

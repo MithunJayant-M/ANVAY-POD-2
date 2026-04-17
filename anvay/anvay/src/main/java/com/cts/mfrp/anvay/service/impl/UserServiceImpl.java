@@ -48,6 +48,7 @@ public class UserServiceImpl implements UserService {
                 .name(user.getFirstName())
                 .userId(user.getUserId())
                 .institutionId(user.getInstitutionId())
+                .leadingClubId(user.getLeadingClubId())
                 .build();
     }
 
@@ -85,6 +86,7 @@ public class UserServiceImpl implements UserService {
                 .name(user.getFirstName())
                 .userId(user.getUserId())
                 .institutionId(user.getInstitutionId())
+                .leadingClubId(user.getLeadingClubId())
                 .build();
     }
 }

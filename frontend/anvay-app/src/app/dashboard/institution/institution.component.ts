@@ -10,12 +10,15 @@ interface Event {
   location: string; startDate: string; endDate: string; registrationDeadline: string;
   maxParticipants: number; registrationFee: number; status: string; eventRules: string;
   participantType: string; clubId: number;
+  winnersStatus?: string; winner1UserId?: number; winner2UserId?: number; winner3UserId?: number;
 }
 interface Club { clubId: number; clubName: string; category: string; membersCount: number; joinRequestsCount: number; leadershipAppsCount: number; createdDate: string; }
 interface ClubMember { id: number; userId: number; clubId: number; status: string; user?: {firstName: string; email: string}; }
-interface LeadershipApp { applicationId: number; userId: number; clubId: number; experience: string; status: string; appliedAt: string; }
+interface LeadershipApp { applicationId: number; userId: number; clubId: number; experience: string; status: string; appliedAt: string; user?: {firstName: string; lastName: string; email: string}; }
+interface EventParticipant { id: number; userId: number; eventId: number; status: string; points_earned?: number; user?: {firstName: string; lastName: string; email: string}; }
 interface Student { userId: number; firstName: string; lastName: string; email: string; totalPoints: number; registeredEventsCount: number; joinedClubsCount: number; achievements?: Achievement[]; }
 interface Achievement { title: string; description: string; badgeType: string; }
+interface InstitutionRank { institutionId: number; institutionName: string; totalPoints: number; studentCount: number; eventCount: number; }
 
 @Component({
   selector: 'app-institution',
@@ -41,6 +44,9 @@ export class InstitutionComponent implements OnInit {
   eventsLoading = false;
   showEventModal = false;
   editingEvent: Event | null = null;
+  selectedEvent: Event | null = null;
+  selectedEventParticipants: EventParticipant[] = [];
+  selectedEventParticipantsLoading = false;
   eventForm!: FormGroup;
   categories = ['Technical', 'Cultural', 'Sports', 'Academic', 'Workshop', 'Seminar', 'Hackathon', 'Other'];
 
@@ -60,7 +66,25 @@ export class InstitutionComponent implements OnInit {
   students: Student[] = [];
   studentsLoading = false;
 
+  collegeLb: InstitutionRank[] = [];
+  collegeLbLoading = false;
+
   message = ''; messageType = '';
+
+  // Winners modal
+  winnersModal = false;
+  winnersEventId: number | null = null;
+  winnersEventName = '';
+  eventParticipants: EventParticipant[] = [];
+  winner1: number | null = null;
+  winner2: number | null = null;
+  winner3: number | null = null;
+  winnersLoading = false;
+
+  approveModal = false;
+  approveVerified = false;
+  pendingClubId: number | null = null;
+  pendingMemberId: number | null = null;
 
   constructor(private http: HttpClient, private authService: AuthService, private router: Router, private fb: FormBuilder) {}
 
@@ -94,7 +118,7 @@ export class InstitutionComponent implements OnInit {
       maxParticipants: [100, [Validators.required, Validators.min(1)]],
       registrationFee: [0],
       eventRules: [''],
-      participantType: ['all'],
+      participantType: ['all'],  // always public
       status: ['active'],
       clubId: [null, Validators.required]
     });
@@ -106,7 +130,7 @@ export class InstitutionComponent implements OnInit {
 
   setView(v: 'dashboard'|'events'|'clubs'|'students') {
     this.activeView = v;
-    this.message = ''; this.selectedClub = null;
+    this.message = ''; this.selectedClub = null; this.selectedEvent = null;
     if (v === 'events') { this.loadClubs(); this.loadEvents(); }
     if (v === 'clubs') this.loadClubs();
     if (v === 'students') this.loadStudents();
@@ -117,6 +141,20 @@ export class InstitutionComponent implements OnInit {
     this.http.get<Event[]>(`/api/events/institution/${this.institutionId}`).subscribe({ next: d => this.dashStats.totalEvents = d.length, error: () => {} });
     this.http.get<Club[]>(`/api/clubs/institution/${this.institutionId}`).subscribe({ next: d => this.dashStats.totalClubs = d.length, error: () => {} });
     this.http.get<Student[]>(`/api/students/institution/${this.institutionId}/leaderboard`).subscribe({ next: d => { this.dashStats.totalStudents = d.length; this.dashStats.totalPoints = d.reduce((s, st) => s + (st.totalPoints||0), 0); }, error: () => {} });
+    this.loadCollegeLeaderboard();
+  }
+
+  loadCollegeLeaderboard() {
+    this.collegeLbLoading = true;
+    this.http.get<InstitutionRank[]>('/api/institutions/leaderboard').subscribe({
+      next: d => {
+        this.collegeLb = d;
+        this.collegeLbLoading = false;
+        const mine = d.find(i => i.institutionId === this.institutionId);
+        if (mine) this.dashStats.totalPoints = mine.totalPoints;
+      },
+      error: () => { this.collegeLbLoading = false; }
+    });
   }
 
   // EVENTS
@@ -211,16 +249,26 @@ export class InstitutionComponent implements OnInit {
     if (tab === 'leadership') this.loadLeadershipApps(this.selectedClub!.clubId);
   }
 
-  approveJoinRequest(clubId: number, memberId: number) {
-    this.http.put(`/api/clubs/${clubId}/join-requests/${memberId}/approve`, {}).subscribe({
-      next: () => { this.showMessage('Approved!','success'); this.loadJoinRequests(clubId); },
-      error: () => this.showMessage('Failed','error')
+  openApproveModal(clubId: number, memberId: number) {
+    this.pendingClubId = clubId;
+    this.pendingMemberId = memberId;
+    this.approveVerified = false;
+    this.approveModal = true;
+  }
+
+  confirmApprove() {
+    if (!this.approveVerified || !this.pendingClubId || !this.pendingMemberId) return;
+    this.http.put(`/api/clubs/${this.pendingClubId}/join-requests/${this.pendingMemberId}/approve`, {}).subscribe({
+      next: () => { this.showMessage('Approved!','success'); this.loadJoinRequests(this.pendingClubId!); this.loadClubs(); this.approveModal = false; },
+      error: () => { this.showMessage('Failed','error'); this.approveModal = false; }
     });
   }
 
+  approveJoinRequest(clubId: number, memberId: number) { this.openApproveModal(clubId, memberId); }
+
   rejectJoinRequest(clubId: number, memberId: number) {
     this.http.put(`/api/clubs/${clubId}/join-requests/${memberId}/reject`, {}).subscribe({
-      next: () => { this.showMessage('Rejected','success'); this.loadJoinRequests(clubId); },
+      next: () => { this.showMessage('Rejected','success'); this.loadJoinRequests(clubId); this.loadClubs(); },
       error: () => this.showMessage('Failed','error')
     });
   }
@@ -245,6 +293,42 @@ export class InstitutionComponent implements OnInit {
     this.http.get<Student[]>(`/api/students/institution/${this.institutionId}/leaderboard`).subscribe({
       next: s => { this.students = s.sort((a,b) => (b.totalPoints||0)-(a.totalPoints||0)); this.studentsLoading = false; },
       error: () => this.studentsLoading = false
+    });
+  }
+
+  viewEventParticipants(ev: Event) {
+    this.selectedEvent = ev;
+    this.selectedEventParticipants = [];
+    this.selectedEventParticipantsLoading = true;
+    this.http.get<EventParticipant[]>(`/api/events/${ev.eventId}/participants`).subscribe({
+      next: p => { this.selectedEventParticipants = p; this.selectedEventParticipantsLoading = false; },
+      error: () => { this.selectedEventParticipantsLoading = false; }
+    });
+  }
+
+  openWinnersModal(ev: Event) {
+    if (ev.winnersStatus) return; // frozen once submitted
+    this.winnersEventId = ev.eventId;
+    this.winnersEventName = ev.eventName;
+    this.winner1 = null; this.winner2 = null; this.winner3 = null;
+    this.eventParticipants = [];
+    this.winnersModal = true;
+    this.winnersLoading = true;
+    this.http.get<EventParticipant[]>(`/api/events/${ev.eventId}/participants`).subscribe({
+      next: p => { this.eventParticipants = p; this.winnersLoading = false; },
+      error: () => { this.winnersLoading = false; }
+    });
+  }
+
+  submitWinners() {
+    if (!this.winner1 && !this.winner2 && !this.winner3) { this.showMessage('Please select at least one rank winner', 'error'); return; }
+    this.http.post(`/api/events/${this.winnersEventId}/award-winners`, {
+      firstUserId: this.winner1,
+      secondUserId: this.winner2 || null,
+      thirdUserId: this.winner3 || null
+    }).subscribe({
+      next: () => { this.showMessage('Winners submitted! Awaiting super admin approval.', 'success'); this.winnersModal = false; this.loadEvents(); },
+      error: () => this.showMessage('Failed to submit winners', 'error')
     });
   }
 

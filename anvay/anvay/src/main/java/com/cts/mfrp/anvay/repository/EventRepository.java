@@ -28,6 +28,9 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("SELECT e FROM Event e JOIN Club c ON e.clubId = c.clubId WHERE c.institutionId = :institutionId")
     List<Event> findByInstitutionId(@Param("institutionId") Long institutionId);
 
+    @Query("SELECT e FROM Event e JOIN FETCH e.club cl JOIN FETCH cl.institution WHERE e.winnersStatus = :status")
+    List<Event> findByWinnersStatus(@Param("status") String status);
+
     @Query("SELECT MONTH(e.startDate), COUNT(e) FROM Event e WHERE e.startDate IS NOT NULL GROUP BY MONTH(e.startDate) ORDER BY MONTH(e.startDate)")
     List<Object[]> countEventsByMonth();
 }

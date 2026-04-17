@@ -70,4 +70,16 @@ public class Event {
     @JsonIgnore
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL)
     private List<EventParticipant> er=new ArrayList<>();
+
+    @Column(name = "winner1_user_id")
+    private Long winner1UserId;
+
+    @Column(name = "winner2_user_id")
+    private Long winner2UserId;
+
+    @Column(name = "winner3_user_id")
+    private Long winner3UserId;
+
+    @Column(name = "winners_status")
+    private String winnersStatus;
 }

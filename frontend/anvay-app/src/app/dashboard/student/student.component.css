@@ -174,5 +174,17 @@
 .badge-public-ev { display:inline-flex; align-items:center; gap:4px; background:#dbeafe; color:#1d4ed8; padding:2px 8px; border-radius:5px; font-size:.7rem; font-weight:700; }
 .badge-public-ev svg { width:12px; height:12px; }
 
+/* ── Leaderboard tabs ── */
+.lb-tabs { display:flex; gap:4px; background:#f1f5f9; padding:4px; border-radius:12px; width:fit-content; margin-bottom:20px; }
+.lb-tab { padding:8px 18px; border:none; background:transparent; border-radius:9px; font-size:.85rem; font-weight:600; color:#64748b; cursor:pointer; font-family:inherit; transition:.15s; }
+.lb-tab.active { background:#fff; color:#15803d; box-shadow:0 1px 4px rgba(0,0,0,.1); }
+.lb-tab:hover:not(.active) { color:#0f172a; }
+
+/* ── College rank badges ── */
+.rank-gold  { background:linear-gradient(135deg,#fef3c7,#fde68a); color:#92400e; }
+.rank-silver { background:linear-gradient(135deg,#f1f5f9,#e2e8f0); color:#475569; }
+.rank-bronze { background:linear-gradient(135deg,#fff7ed,#fed7aa); color:#92400e; }
+.clg-avatar { background:#eff6ff; font-size:1rem; display:flex; align-items:center; justify-content:center; }
+
 @media(max-width:1100px) { .stat-grid{grid-template-columns:repeat(2,1fr)} .dash-row{grid-template-columns:1fr} }
 @media(max-width:768px)  { .st-sidebar{width:0;overflow:hidden} .st-main{margin-left:0} }

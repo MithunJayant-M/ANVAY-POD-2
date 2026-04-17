@@ -32,7 +32,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         long inactiveColleges = institutionRepository.countByStatus("inactive");
         long totalEvents = eventRepository.count();
         long totalClubs = clubRepository.count();
-        long totalStudents = userRepository.countByRole("student");
+        long totalStudents = userRepository.countByRole("student") + userRepository.countByRole("club_leader");
 
         List<Institution> institutions = institutionRepository.findAll();
         List<InstitutionDto> topColleges = institutions.stream()
@@ -103,9 +103,17 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
+    public List<InstitutionDto> getInstitutionLeaderboard() {
+        return institutionRepository.findAll().stream()
+                .map(this::mapToDto)
+                .sorted(Comparator.comparingLong(InstitutionDto::getTotalPoints).reversed())
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public AnalyticsDto getAnalytics() {
         long totalUsers = userRepository.count();
-        long totalStudents = userRepository.countByRole("student");
+        long totalStudents = userRepository.countByRole("student") + userRepository.countByRole("club_leader");
         long totalInstitutions = institutionRepository.count();
         long totalEvents = eventRepository.count();
         long totalClubs = clubRepository.count();
@@ -129,7 +137,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     private InstitutionDto mapToDto(Institution institution) {
-        long studentCount = userRepository.countByInstitutionIdAndRole(institution.getInstitutionId(), "student");
+        long studentCount = userRepository.countStudentsByInstitutionId(institution.getInstitutionId());
         long eventCount = eventRepository.countByInstitutionId(institution.getInstitutionId());
         long clubCount = clubRepository.countByInstitutionId(institution.getInstitutionId());
         Long points = eventParticipantRepository.sumPointsByInstitutionId(institution.getInstitutionId());

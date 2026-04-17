@@ -9,6 +9,7 @@ export interface LoginResponse {
   name: string;
   userId: number;
   institutionId: number;
+  leadingClubId?: number;
 }
 
 export interface RegisterStudentRequest {
