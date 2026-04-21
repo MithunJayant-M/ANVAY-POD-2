@@ -25,7 +25,8 @@ export class RegisterStudentComponent implements OnInit {
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-      institutionId: [null, Validators.required]
+      institutionId: [null, Validators.required],
+      studentIdNumber: ['', Validators.required]
     });
     this.http.get<any[]>('/api/institutions/active').subscribe({
       next: ins => this.institutions = ins.map(i => ({ institutionId: i.institutionId, institutionName: i.name })),

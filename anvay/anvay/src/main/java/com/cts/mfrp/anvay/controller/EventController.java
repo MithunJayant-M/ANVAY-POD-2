@@ -102,4 +102,15 @@ public class EventController {
         return ResponseEntity.ok(eventService.getPendingWinners());
     }
 
+    @PutMapping("/{eventId}/end")
+    public ResponseEntity<?> endEvent(@PathVariable Long eventId) {
+        eventService.endEvent(eventId);
+        return ResponseEntity.ok(java.util.Map.of("message", "Event ended successfully"));
+    }
+
+    @GetMapping("/my-registrations")
+    public ResponseEntity<List<EventFeedDTO>> getMyRegistrations(@RequestParam Long userId) {
+        return ResponseEntity.ok(eventService.getMyRegistrations(userId));
+    }
+
 }

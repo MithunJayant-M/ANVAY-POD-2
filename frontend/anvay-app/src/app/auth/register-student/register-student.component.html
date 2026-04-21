@@ -82,6 +82,17 @@
         </div>
       </div>
 
+      <div class="form-row">
+        <div class="form-group">
+          <label>Student ID Number</label>
+          <div class="input-wrap">
+            <svg class="inp-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
+            <input formControlName="studentIdNumber" type="text" placeholder="e.g. CS2021001" class="form-input">
+          </div>
+          <div class="field-err" *ngIf="form.get('studentIdNumber')?.invalid && form.get('studentIdNumber')?.touched">Student ID is required</div>
+        </div>
+      </div>
+
       <div class="approval-note">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
         Your registration will be reviewed by your Institution Admin before you can log in.

@@ -22,4 +22,6 @@ public interface EventService {
     void approveWinners(Long eventId);
     List<WinnersApprovalDTO> getPendingWinners();
     List<EventParticipant> getEventParticipants(Long eventId);
+    void endEvent(Long eventId);
+    List<EventFeedDTO> getMyRegistrations(Long userId);
 }

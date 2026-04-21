@@ -24,4 +24,7 @@ public interface EventParticipantRepository extends JpaRepository<EventParticipa
     List<EventParticipant> findByEventIdWithUser(@Param("eventId") Long eventId);
 
     java.util.Optional<EventParticipant> findByEventIdAndUserId(Long eventId, Long userId);
+
+    @Query("SELECT ep FROM EventParticipant ep JOIN FETCH ep.event WHERE ep.userId = :userId")
+    List<EventParticipant> findByUserIdWithEvent(@Param("userId") Long userId);
 }

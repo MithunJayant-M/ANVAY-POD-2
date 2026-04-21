@@ -10,6 +10,7 @@ export interface LoginResponse {
   userId: number;
   institutionId: number;
   leadingClubId?: number;
+  studentIdNumber?: string;
 }
 
 export interface RegisterStudentRequest {
@@ -17,6 +18,7 @@ export interface RegisterStudentRequest {
   email: string;
   password: string;
   institutionId?: number;
+  studentIdNumber?: string;
 }
 
 export interface RegisterInstitutionRequest {

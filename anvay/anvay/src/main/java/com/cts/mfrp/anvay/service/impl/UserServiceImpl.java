@@ -33,10 +33,11 @@ public class UserServiceImpl implements UserService {
             throw new BadCredentialsException("Invalid email or password");
         }
 
-        if ("student".equals(user.getRole()) && user.getInstitutionId() != null) {
+        boolean isStudentRole = "student".equals(user.getRole()) || "club_leader".equals(user.getRole());
+        if (isStudentRole && user.getInstitutionId() != null) {
             Institution institution = institutionRepository.findById(user.getInstitutionId()).orElse(null);
             if (institution != null && !"active".equals(institution.getStatus())) {
-                throw new BadCredentialsException("Your institution has not been approved yet. Please wait for admin approval.");
+                throw new BadCredentialsException("Your institution is not active. Please contact your administrator.");
             }
         }
 
@@ -75,6 +76,7 @@ public class UserServiceImpl implements UserService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role("student")
                 .institutionId(request.getInstitutionId())
+                .studentIdNumber(request.getStudentIdNumber())
                 .build();
 
         user = userRepository.save(user);

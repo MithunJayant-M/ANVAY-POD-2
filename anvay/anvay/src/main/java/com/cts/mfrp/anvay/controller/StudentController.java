@@ -43,4 +43,12 @@ public class StudentController {
     public ResponseEntity<List<User>> getAllStudents() {
         return ResponseEntity.ok(studentService.getAllStudents());
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> removeStudent(@PathVariable Long id) {
+        User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Student not found"));
+        user.setInstitutionId(null);
+        userRepository.save(user);
+        return ResponseEntity.noContent().build();
+    }
 }

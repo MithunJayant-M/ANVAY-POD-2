@@ -105,6 +105,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     @Override
     public List<InstitutionDto> getInstitutionLeaderboard() {
         return institutionRepository.findAll().stream()
+                .filter(i -> "active".equals(i.getStatus()))
                 .map(this::mapToDto)
                 .sorted(Comparator.comparingLong(InstitutionDto::getTotalPoints).reversed())
                 .collect(Collectors.toList());

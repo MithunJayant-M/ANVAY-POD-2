@@ -77,4 +77,7 @@ public class User {
 
     @Column(name = "leading_club_id")
     private Long leadingClubId;
+
+    @Column(name = "student_id_number")
+    private String studentIdNumber;
 }

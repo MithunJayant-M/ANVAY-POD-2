@@ -200,7 +200,7 @@ public class ClubServiceImpl implements ClubService {
     private ClubDashboardDTO buildClubDashboardDTO(Club club) {
         long membersCount = clubMemberRepository.countByClubIdAndStatus(club.getClubId(), "APPROVED");
         long joinRequestsCount = clubMemberRepository.countByClubIdAndStatus(club.getClubId(), "PENDING");
-        long leadershipAppsCount = leadershipApplicationRepository.countByClubId(club.getClubId());
+        long leadershipAppsCount = leadershipApplicationRepository.countByClubIdAndStatus(club.getClubId(), "pending");
 
         return ClubDashboardDTO.builder()
                 .clubId(club.getClubId())

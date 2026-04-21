@@ -17,4 +17,8 @@ public class EventFeedDTO {
     private Integer registeredCount;
     private Integer totalCapacity;
     private Boolean isRegistered;
+    private String startDate;
+    private String endDate;
+    private String status;
+    private Boolean hasWinners;
 }

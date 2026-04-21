@@ -9,14 +9,14 @@ interface Event {
   eventId: number; eventName: string; description: string; category: string;
   location: string; startDate: string; endDate: string; registrationDeadline: string;
   maxParticipants: number; registrationFee: number; status: string; eventRules: string;
-  participantType: string; clubId: number;
+  participantType: string; clubId: number; hasWinners?: boolean;
   winnersStatus?: string; winner1UserId?: number; winner2UserId?: number; winner3UserId?: number;
 }
 interface Club { clubId: number; clubName: string; category: string; membersCount: number; joinRequestsCount: number; leadershipAppsCount: number; createdDate: string; }
-interface ClubMember { id: number; userId: number; clubId: number; status: string; user?: {firstName: string; email: string}; }
+interface ClubMember { id: number; userId: number; clubId: number; status: string; user?: {firstName: string; lastName: string; email: string; role?: string; leadingClubId?: number}; }
 interface LeadershipApp { applicationId: number; userId: number; clubId: number; experience: string; status: string; appliedAt: string; user?: {firstName: string; lastName: string; email: string}; }
 interface EventParticipant { id: number; userId: number; eventId: number; status: string; points_earned?: number; user?: {firstName: string; lastName: string; email: string}; }
-interface Student { userId: number; firstName: string; lastName: string; email: string; totalPoints: number; registeredEventsCount: number; joinedClubsCount: number; achievements?: Achievement[]; }
+interface Student { userId: number; firstName: string; lastName: string; email: string; totalPoints: number; registeredEventsCount: number; joinedClubsCount: number; role?: string; achievements?: Achievement[]; }
 interface Achievement { title: string; description: string; badgeType: string; }
 interface InstitutionRank { institutionId: number; institutionName: string; totalPoints: number; studentCount: number; eventCount: number; }
 
@@ -71,6 +71,10 @@ export class InstitutionComponent implements OnInit {
 
   message = ''; messageType = '';
 
+  // Notifications
+  showNotifDropdown = false;
+  notifications: {text: string; type: 'info'|'warn'|'success'}[] = [];
+
   // Winners modal
   winnersModal = false;
   winnersEventId: number | null = null;
@@ -118,8 +122,9 @@ export class InstitutionComponent implements OnInit {
       maxParticipants: [100, [Validators.required, Validators.min(1)]],
       registrationFee: [0],
       eventRules: [''],
-      participantType: ['all'],  // always public
+      participantType: ['all'],
       status: ['active'],
+      hasWinners: [false],
       clubId: [null, Validators.required]
     });
     this.clubForm = this.fb.group({
@@ -169,14 +174,18 @@ export class InstitutionComponent implements OnInit {
   openCreateEvent() {
     this.editingEvent = null;
     const defaultClubId = this.clubs[0]?.clubId ?? null;
-    this.eventForm.reset({ maxParticipants: 100, registrationFee: 0, participantType: 'all', status: 'active', clubId: defaultClubId });
+    this.eventForm.reset({ maxParticipants: 100, registrationFee: 0, participantType: 'all', status: 'active', hasWinners: false, clubId: defaultClubId });
     this.showEventModal = true;
   }
   openEditEvent(ev: Event) { this.editingEvent = ev; this.eventForm.patchValue({ ...ev, startDate: ev.startDate?.substring(0,16), endDate: ev.endDate?.substring(0,16), registrationDeadline: ev.registrationDeadline?.substring(0,16) }); this.showEventModal = true; }
 
   saveEvent() {
     if (this.eventForm.invalid) return;
-    const data = this.eventForm.value;
+    const data = { ...this.eventForm.value, maxParticipants: +this.eventForm.value.maxParticipants };
+    // Validate end date is after start date
+    if (data.endDate && data.startDate && new Date(data.endDate) < new Date(data.startDate)) {
+      this.showMessage('End date cannot be before start date', 'error'); return;
+    }
     if (this.editingEvent) {
       this.http.put(`/api/events/${this.editingEvent.eventId}`, data).subscribe({
         next: () => { this.showMessage('Event updated!', 'success'); this.showEventModal = false; this.loadEvents(); },
@@ -190,6 +199,14 @@ export class InstitutionComponent implements OnInit {
     }
   }
 
+  endEvent(id: number) {
+    if (!confirm('Mark this event as ended? This action cannot be undone.')) return;
+    this.http.put(`/api/events/${id}/end`, {}).subscribe({
+      next: () => { this.showMessage('Event marked as ended', 'success'); this.loadEvents(); },
+      error: () => this.showMessage('Failed to end event', 'error')
+    });
+  }
+
   deleteEvent(id: number) {
     if (!confirm('Delete this event?')) return;
     this.http.delete(`/api/events/${id}`).subscribe({ next: () => { this.showMessage('Event deleted', 'success'); this.loadEvents(); }, error: () => this.showMessage('Failed to delete','error') });
@@ -201,6 +218,22 @@ export class InstitutionComponent implements OnInit {
     this.http.get<Club[]>(`/api/clubs/institution/${this.institutionId}`).subscribe({
       next: c => { this.clubs = c; this.clubsLoading = false; },
       error: () => this.clubsLoading = false
+    });
+  }
+
+  deleteClub(id: number) {
+    if (!confirm('Delete this club? All member data will be removed.')) return;
+    this.http.delete(`/api/clubs/${id}`).subscribe({
+      next: () => { this.showMessage('Club deleted', 'success'); this.loadClubs(); },
+      error: () => this.showMessage('Failed to delete club', 'error')
+    });
+  }
+
+  removeStudent(id: number) {
+    if (!confirm('Remove this student from your institution?')) return;
+    this.http.delete(`/api/students/${id}`).subscribe({
+      next: () => { this.showMessage('Student removed', 'success'); this.loadStudents(); },
+      error: () => this.showMessage('Failed to remove student', 'error')
     });
   }
 
@@ -330,6 +363,49 @@ export class InstitutionComponent implements OnInit {
       next: () => { this.showMessage('Winners submitted! Awaiting super admin approval.', 'success'); this.winnersModal = false; this.loadEvents(); },
       error: () => this.showMessage('Failed to submit winners', 'error')
     });
+  }
+
+  // ── Event section getters ──────────────────────────────
+  get upcomingEventsInst() {
+    const now = new Date();
+    return this.events.filter(e => e.startDate && new Date(e.startDate) > now && e.status !== 'ended');
+  }
+
+  get currentEventsInst() {
+    const now = new Date();
+    return this.events.filter(e => {
+      const start = e.startDate ? new Date(e.startDate) : null;
+      const end   = e.endDate   ? new Date(e.endDate)   : null;
+      if (!start) return false;
+      return start <= now && (!end || end >= now) && e.status !== 'ended';
+    });
+  }
+
+  get pastEventsInst() {
+    const now = new Date();
+    return this.events.filter(e => e.status === 'ended' || (e.endDate && new Date(e.endDate) < now));
+  }
+
+  toggleNotifications() {
+    this.showNotifDropdown = !this.showNotifDropdown;
+    if (this.showNotifDropdown) this.buildNotifications();
+  }
+
+  buildNotifications() {
+    this.notifications = [];
+    const totalJoinReqs = this.clubs.reduce((s, c) => s + (c.joinRequestsCount || 0), 0);
+    const totalLeadApps = this.clubs.reduce((s, c) => s + (c.leadershipAppsCount || 0), 0);
+    if (totalJoinReqs > 0) this.notifications.push({ text: `${totalJoinReqs} pending club join request${totalJoinReqs > 1 ? 's' : ''}`, type: 'warn' });
+    if (totalLeadApps > 0) this.notifications.push({ text: `${totalLeadApps} pending leadership application${totalLeadApps > 1 ? 's' : ''}`, type: 'info' });
+    const pendingWinners = this.events.filter(e => e.winnersStatus === 'pending').length;
+    if (pendingWinners > 0) this.notifications.push({ text: `${pendingWinners} event winner submission${pendingWinners > 1 ? 's' : ''} awaiting super admin approval`, type: 'info' });
+    if (this.notifications.length === 0) this.notifications.push({ text: 'No new notifications', type: 'success' });
+  }
+
+  get totalNotifCount(): number {
+    const totalJoinReqs = this.clubs.reduce((s, c) => s + (c.joinRequestsCount || 0), 0);
+    const totalLeadApps = this.clubs.reduce((s, c) => s + (c.leadershipAppsCount || 0), 0);
+    return totalJoinReqs + totalLeadApps;
   }
 
   showMessage(msg: string, type: string) { this.message = msg; this.messageType = type; setTimeout(() => this.message = '', 3000); }

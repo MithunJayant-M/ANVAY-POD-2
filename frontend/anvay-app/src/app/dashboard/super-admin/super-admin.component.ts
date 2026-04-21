@@ -85,7 +85,7 @@ interface Club {
 export class SuperAdminComponent implements OnInit {
   private readonly API = '/api/super-admin';
 
-  activeView: 'dashboard' | 'colleges' | 'analytics' | 'approvals' | 'settings' = 'dashboard';
+  activeView: 'dashboard' | 'colleges' | 'events' | 'analytics' | 'approvals' | 'settings' = 'dashboard';
   adminName = '';
   sidebarOpen = true;
 
@@ -115,6 +115,14 @@ export class SuperAdminComponent implements OnInit {
   pendingWinners: WinnersApproval[] = [];
   pendingWinnersLoading = false;
 
+  allEvents: Event[] = [];
+  allEventsLoading = false;
+  eventsSearch = '';
+
+  // Notifications
+  showNotifDropdown = false;
+  notifications: {text: string; type: 'info'|'warn'|'success'}[] = [];
+
   constructor(
     private http: HttpClient,
     private authService: AuthService,
@@ -128,14 +136,49 @@ export class SuperAdminComponent implements OnInit {
     this.loadPendingWinners();
   }
 
-  setView(view: 'dashboard' | 'colleges' | 'analytics' | 'approvals' | 'settings'): void {
+  setView(view: 'dashboard' | 'colleges' | 'events' | 'analytics' | 'approvals' | 'settings'): void {
     this.activeView = view;
     this.clearMessages();
     this.selectedInstitution = null;
     if (view === 'dashboard') this.loadDashboard();
     if (view === 'colleges') this.loadColleges();
+    if (view === 'events') this.loadAllEvents();
     if (view === 'analytics') this.loadAnalytics();
     if (view === 'approvals') this.loadPendingWinners();
+  }
+
+  loadAllEvents(): void {
+    this.allEventsLoading = true;
+    this.http.get<Event[]>('/api/events/').subscribe({
+      next: d => { this.allEvents = d; this.allEventsLoading = false; },
+      error: () => { this.allEventsLoading = false; }
+    });
+  }
+
+  get filteredAllEvents(): Event[] {
+    if (!this.eventsSearch) return this.allEvents;
+    const q = this.eventsSearch.toLowerCase();
+    return this.allEvents.filter(e => e.eventName?.toLowerCase().includes(q) || e.category?.toLowerCase().includes(q) || e.location?.toLowerCase().includes(q));
+  }
+
+  get upcomingEventsAdmin(): Event[] {
+    const now = new Date();
+    return this.filteredAllEvents.filter(e => e.startDate && new Date(e.startDate) > now && e.status !== 'ended');
+  }
+
+  get currentEventsAdmin(): Event[] {
+    const now = new Date();
+    return this.filteredAllEvents.filter(e => {
+      const start = e.startDate ? new Date(e.startDate) : null;
+      const end   = e.endDate   ? new Date(e.endDate)   : null;
+      if (!start) return false;
+      return start <= now && (!end || end >= now) && e.status !== 'ended';
+    });
+  }
+
+  get pastEventsAdmin(): Event[] {
+    const now = new Date();
+    return this.filteredAllEvents.filter(e => e.status === 'ended' || (e.endDate && new Date(e.endDate) < now));
   }
 
   loadPendingWinners(): void {
@@ -257,6 +300,24 @@ export class SuperAdminComponent implements OnInit {
 
   getRankLabel(i: number): string {
     return i === 0 ? '1st' : i === 1 ? '2nd' : i === 2 ? '3rd' : `#${i + 1}`;
+  }
+
+  toggleNotifications(): void {
+    this.showNotifDropdown = !this.showNotifDropdown;
+    if (this.showNotifDropdown) this.buildNotifications();
+  }
+
+  buildNotifications(): void {
+    this.notifications = [];
+    const pendingColleges = this.institutions.filter(i => i.status === 'pending').length;
+    if (pendingColleges > 0) this.notifications.push({ text: `${pendingColleges} institution${pendingColleges > 1 ? 's' : ''} awaiting approval`, type: 'warn' });
+    const pendingWinnersCount = this.pendingWinners.length;
+    if (pendingWinnersCount > 0) this.notifications.push({ text: `${pendingWinnersCount} event winner submission${pendingWinnersCount > 1 ? 's' : ''} awaiting review`, type: 'info' });
+    if (this.notifications.length === 0) this.notifications.push({ text: 'No new notifications', type: 'success' });
+  }
+
+  get totalNotifCount(): number {
+    return this.institutions.filter(i => i.status === 'pending').length + this.pendingWinners.length;
   }
 
   logout(): void { this.authService.logout(); this.router.navigate(['/login']); }

@@ -15,7 +15,11 @@ interface StudentDashboard {
 interface EventRecord { title: string; institution: string; dateTime: string; type: string; }
 interface ClubRecord { name: string; memberCount: number; category: string; }
 interface AchievementRecord { title: string; year: string; badgeType: string; }
-interface EventFeed { eventId: number; title: string; location: string; institution: string; institutionId: number; type: string; participantType: string; registeredCount: number; totalCapacity: number; isRegistered: boolean; }
+interface EventFeed {
+  eventId: number; title: string; location: string; institution: string; institutionId: number;
+  type: string; participantType: string; registeredCount: number; totalCapacity: number;
+  isRegistered: boolean; startDate?: string; endDate?: string; status?: string; hasWinners?: boolean;
+}
 interface BrowseClub { clubId: number; clubName: string; category: string; type: string; membersCount: number; memberCount: number; institutionId: number; }
 interface LeaderboardUser { userId: number; firstName: string; lastName: string; email: string; totalPoints: number; joinedClubsCount: number; registeredEventsCount: number; }
 interface InstitutionRank { institutionId: number; institutionName: string; totalPoints: number; studentCount: number; eventCount: number; }
@@ -52,11 +56,23 @@ export class ClubLeaderComponent implements OnInit {
   events: EventFeed[] = [];
   eventsLoading = false;
   searchEvent = '';
+  eventTab: 'feed' | 'registered' = 'feed';
+  myRegistrations: EventFeed[] = [];
+  myRegistrationsLoading = false;
 
   // Clubs browse
   allClubs: BrowseClub[] = [];
-  myClubIds: number[] = [];
+  myApprovedClubIds: number[] = [];
+  myPendingClubIds: number[] = [];
+  myLeadershipClubIds: number[] = [];
   clubsLoading = false;
+
+  // Leadership modal
+  showLeadershipModal = false;
+  leadershipClubId: number | null = null;
+  leadershipClubName = '';
+  leadershipExperience = '';
+  leadershipLoading = false;
 
   // Leaderboard
   leaderboard: LeaderboardUser[] = [];
@@ -70,6 +86,10 @@ export class ClubLeaderComponent implements OnInit {
   // Profile
   profile: UserProfile | null = null;
   profileLoading = false;
+
+  // Notifications
+  showNotifDropdown = false;
+  notifications: {text: string; type: 'info'|'warn'|'success'}[] = [];
 
   constructor(private http: HttpClient, private authService: AuthService, private router: Router) {}
 
@@ -160,11 +180,29 @@ export class ClubLeaderComponent implements OnInit {
     });
   }
 
-  get filteredEvents() {
-    if (!this.searchEvent) return this.events;
-    const q = this.searchEvent.toLowerCase();
-    return this.events.filter(e => e.title.toLowerCase().includes(q) || e.institution?.toLowerCase().includes(q) || e.type?.toLowerCase().includes(q));
+  switchEventTab(tab: 'feed' | 'registered') {
+    this.eventTab = tab;
+    if (tab === 'registered' && this.myRegistrations.length === 0) this.loadMyRegistrations();
   }
+
+  loadMyRegistrations() {
+    this.myRegistrationsLoading = true;
+    this.http.get<EventFeed[]>(`/api/events/my-registrations?userId=${this.studentId}`).subscribe({
+      next: e => { this.myRegistrations = e; this.myRegistrationsLoading = false; },
+      error: () => this.myRegistrationsLoading = false
+    });
+  }
+
+  get filteredEvents() {
+    const q = this.searchEvent.toLowerCase();
+    return this.events.filter(e => !q || e.title.toLowerCase().includes(q) || e.institution?.toLowerCase().includes(q) || e.type?.toLowerCase().includes(q));
+  }
+
+  get upcomingEvents() { const now = new Date(); return this.filteredEvents.filter(e => e.startDate && new Date(e.startDate) > now); }
+  get currentEvents() { const now = new Date(); return this.filteredEvents.filter(e => { const s = e.startDate ? new Date(e.startDate) : null; const en = e.endDate ? new Date(e.endDate) : null; return s && s <= now && (!en || en >= now) && e.status !== 'ended'; }); }
+  get pastEvents() { const now = new Date(); return this.filteredEvents.filter(e => e.status === 'ended' || (e.endDate && new Date(e.endDate) < now)); }
+
+  isEventOpen(ev: EventFeed) { if (ev.status === 'ended') return false; if (ev.endDate && new Date(ev.endDate) < new Date()) return false; return true; }
 
   registerEvent(eventId: number) {
     this.http.post('/api/events/register', { eventId, userId: this.studentId }).subscribe({
@@ -176,30 +214,43 @@ export class ClubLeaderComponent implements OnInit {
   loadClubs() {
     this.clubsLoading = true;
     this.http.get<any[]>(`/api/clubs/user/${this.studentId}`).subscribe({
-      next: memberships => { this.myClubIds = memberships.map(m => m.clubId); },
+      next: memberships => {
+        this.myApprovedClubIds = memberships.filter(m => m.status === 'APPROVED').map(m => m.clubId);
+        this.myPendingClubIds = memberships.filter(m => m.status === 'PENDING').map(m => m.clubId);
+      },
       error: () => {}
     });
     this.http.get<BrowseClub[]>(`/api/clubs/institution/${this.institutionId}`).subscribe({
       next: c => { this.allClubs = c; this.clubsLoading = false; },
       error: () => this.clubsLoading = false
     });
+    this.http.get<any[]>(`/api/leadership-applications/user/${this.studentId}`).subscribe({
+      next: apps => { this.myLeadershipClubIds = apps.map(a => a.clubId); },
+      error: () => {}
+    });
   }
 
   joinClub(clubId: number) {
     this.http.post(`/api/clubs/${clubId}/join`, { userId: this.studentId }).subscribe({
-      next: () => { this.showMessage('Join request sent!', 'success'); this.myClubIds.push(clubId); },
-      error: (e) => this.showMessage(e.error || 'Already requested', 'error')
+      next: () => { this.showMessage('Join request sent!', 'success'); this.myPendingClubIds.push(clubId); },
+      error: (e) => this.showMessage(e.error?.message || 'Request already sent', 'error')
     });
   }
 
-  isJoined(clubId: number) { return this.myClubIds.includes(clubId); }
+  isApproved(clubId: number) { return this.myApprovedClubIds.includes(clubId); }
+  isPending(clubId: number) { return this.myPendingClubIds.includes(clubId); }
+  hasAppliedLeadership(clubId: number) { return this.myLeadershipClubIds.includes(clubId); }
 
-  applyLeadership(clubId: number) {
-    const experience = prompt('Describe your experience for this leadership role:');
-    if (!experience) return;
-    this.http.post('/api/leadership-applications', { clubId, userId: this.studentId, experience }).subscribe({
-      next: () => this.showMessage('Leadership application submitted!', 'success'),
-      error: () => this.showMessage('Failed to apply', 'error')
+  openLeadershipModal(clubId: number, clubName: string) {
+    this.leadershipClubId = clubId; this.leadershipClubName = clubName; this.leadershipExperience = ''; this.showLeadershipModal = true;
+  }
+
+  submitLeadership() {
+    if (!this.leadershipExperience.trim()) { this.showMessage('Please describe your experience', 'error'); return; }
+    this.leadershipLoading = true;
+    this.http.post('/api/leadership-applications', { clubId: this.leadershipClubId, userId: this.studentId, experience: this.leadershipExperience }).subscribe({
+      next: () => { this.showMessage('Application submitted!', 'success'); if (this.leadershipClubId) this.myLeadershipClubIds.push(this.leadershipClubId); this.showLeadershipModal = false; this.leadershipLoading = false; },
+      error: () => { this.showMessage('Failed to apply', 'error'); this.leadershipLoading = false; }
     });
   }
 
@@ -239,9 +290,38 @@ export class ClubLeaderComponent implements OnInit {
       next: p => { this.profile = p; this.profileLoading = false; },
       error: () => this.profileLoading = false
     });
+    if (this.leaderboard.length === 0) this.loadLeaderboard();
   }
 
-  showMessage(msg: string, type: string) { this.message = msg; this.messageType = type; setTimeout(() => this.message = '', 3000); }
+  get myRankInInstitution(): number {
+    const idx = this.leaderboard.findIndex(u => u.userId === this.studentId);
+    return idx >= 0 ? idx + 1 : 0;
+  }
+
+  get profileRank(): number | string {
+    const idx = this.leaderboard.findIndex(u => u.userId === this.studentId);
+    return idx >= 0 ? idx + 1 : (this.profile?.rank || '–');
+  }
+
+  toggleNotifications() {
+    this.showNotifDropdown = !this.showNotifDropdown;
+    if (this.showNotifDropdown) this.buildNotifications();
+  }
+
+  buildNotifications() {
+    this.notifications = [];
+    const reqs = this.joinRequests.length;
+    if (reqs > 0) this.notifications.push({ text: `${reqs} pending join request${reqs > 1 ? 's' : ''} for your club`, type: 'warn' });
+    const pending = this.myPendingClubIds.length;
+    if (pending > 0) this.notifications.push({ text: `${pending} of your club join request${pending > 1 ? 's' : ''} awaiting approval`, type: 'info' });
+    if (this.notifications.length === 0) this.notifications.push({ text: 'No new notifications', type: 'success' });
+  }
+
+  get totalNotifCount(): number {
+    return this.joinRequests.length + this.myPendingClubIds.length;
+  }
+
+  showMessage(msg: string, type: string) { this.message = msg; this.messageType = type; setTimeout(() => this.message = '', 3500); }
   getRankLabel(i: number) { return i===0?'1st':i===1?'2nd':i===2?'3rd':`#${i+1}`; }
   getCapacityPct(r: number, t: number) { return t ? Math.min(100, Math.round((r/t)*100)) : 0; }
   logout() { this.authService.logout(); this.router.navigate(['/login']); }

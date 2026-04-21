@@ -72,6 +72,9 @@ public class EventServiceImpl implements EventService {
         if (event.getParticipantType() != null) existing.setParticipantType(event.getParticipantType());
         if (event.getMaxParticipants() != null) existing.setMaxParticipants(event.getMaxParticipants());
         if (event.getRegistrationFee() != null) existing.setRegistrationFee(event.getRegistrationFee());
+        if (event.getHasWinners() != null) existing.setHasWinners(event.getHasWinners());
+        if (event.getRegistrationDeadline() != null) existing.setRegistrationDeadline(event.getRegistrationDeadline());
+        if (event.getEventRules() != null) existing.setEventRules(event.getEventRules());
         existing.setUpdatedAt(LocalDateTime.now());
         return eventRepository.save(existing);
     }
@@ -195,6 +198,48 @@ public class EventServiceImpl implements EventService {
         });
     }
 
+    @Override
+    public void endEvent(Long eventId) {
+        Event event = getEventById(eventId);
+        event.setStatus("ended");
+        event.setUpdatedAt(LocalDateTime.now());
+        eventRepository.save(event);
+    }
+
+    @Override
+    public List<EventFeedDTO> getMyRegistrations(Long userId) {
+        List<EventParticipant> participants = participantRepository.findByUserIdWithEvent(userId);
+        return participants.stream().map(ep -> {
+            Event event = ep.getEvent();
+            String institutionName = "General";
+            Long institutionId = null;
+            try {
+                if (event.getClub() != null) {
+                    institutionId = event.getClub().getInstitutionId();
+                    if (event.getClub().getInstitution() != null) {
+                        institutionName = event.getClub().getInstitution().getName();
+                    }
+                }
+            } catch (Exception ignored) {}
+            return EventFeedDTO.builder()
+                    .eventId(event.getEventId())
+                    .title(event.getEventName())
+                    .institution(institutionName)
+                    .institutionId(institutionId)
+                    .location(event.getLocation())
+                    .type(event.getCategory())
+                    .participantType(event.getParticipantType())
+                    .registeredCount(event.getEr() != null ? event.getEr().size() : 0)
+                    .totalCapacity(event.getMaxParticipants())
+                    .isRegistered(true)
+                    .startDate(event.getStartDate() != null ? event.getStartDate().toString() : null)
+                    .endDate(event.getEndDate() != null ? event.getEndDate().toString() : null)
+                    .status(event.getStatus())
+                    .hasWinners(event.getHasWinners())
+                    .build();
+        }).collect(Collectors.toList());
+    }
+
     private List<EventFeedDTO> mapToFeedDTOs(List<Object[]> results) {
         return results.stream().map(result -> {
             Event event = (Event) result[0];
@@ -213,6 +258,10 @@ public class EventServiceImpl implements EventService {
                     .registeredCount(event.getEr() != null ? event.getEr().size() : 0)
                     .totalCapacity(event.getMaxParticipants())
                     .isRegistered(isRegistered)
+                    .startDate(event.getStartDate() != null ? event.getStartDate().toString() : null)
+                    .endDate(event.getEndDate() != null ? event.getEndDate().toString() : null)
+                    .status(event.getStatus())
+                    .hasWinners(event.getHasWinners())
                     .build();
         }).collect(Collectors.toList());
     }

@@ -13,6 +13,7 @@ public interface LeadershipApplicationRepository extends JpaRepository<Leadershi
     List<LeadershipApplication> findByUserId(Long userId);
     List<LeadershipApplication> findByStatus(String status);
     long countByClubId(Long clubId);
+    long countByClubIdAndStatus(Long clubId, String status);
 
     @Query("SELECT la FROM LeadershipApplication la JOIN FETCH la.user WHERE la.clubId = :clubId")
     List<LeadershipApplication> findByClubId(@Param("clubId") Long clubId);

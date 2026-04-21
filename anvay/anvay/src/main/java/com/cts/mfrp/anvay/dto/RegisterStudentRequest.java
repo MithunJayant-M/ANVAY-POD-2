@@ -17,4 +17,6 @@ public class RegisterStudentRequest {
     private String password;
 
     private Long institutionId;
+
+    private String studentIdNumber;
 }

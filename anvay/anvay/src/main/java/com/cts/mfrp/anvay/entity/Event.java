@@ -82,4 +82,13 @@ public class Event {
 
     @Column(name = "winners_status")
     private String winnersStatus;
+
+    @Column(name = "has_winners")
+    private Boolean hasWinners;
+
+    @Column(name = "registration_deadline")
+    private LocalDateTime registrationDeadline;
+
+    @Column(name = "event_rules")
+    private String eventRules;
 }
