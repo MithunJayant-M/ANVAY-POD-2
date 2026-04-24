@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 interface InstitutionDto {
@@ -126,17 +126,25 @@ export class SuperAdminComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     const user = this.authService.getCurrentUser();
     this.adminName = user?.name ?? 'Super Admin';
-    this.loadDashboard();
     this.loadPendingWinners();
+    this.route.queryParams.subscribe(params => {
+      const v = (params['view'] || 'dashboard') as 'dashboard'|'colleges'|'events'|'analytics'|'approvals'|'settings';
+      this.applyView(v);
+    });
   }
 
   setView(view: 'dashboard' | 'colleges' | 'events' | 'analytics' | 'approvals' | 'settings'): void {
+    this.router.navigate([], { queryParams: { view }, replaceUrl: false });
+  }
+
+  private applyView(view: 'dashboard' | 'colleges' | 'events' | 'analytics' | 'approvals' | 'settings'): void {
     this.activeView = view;
     this.clearMessages();
     this.selectedInstitution = null;

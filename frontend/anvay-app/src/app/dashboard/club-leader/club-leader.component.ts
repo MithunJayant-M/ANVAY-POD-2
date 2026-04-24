@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 interface ManagedClub { clubId: number; clubName: string; category: string; }
@@ -91,7 +91,7 @@ export class ClubLeaderComponent implements OnInit {
   showNotifDropdown = false;
   notifications: {text: string; type: 'info'|'warn'|'success'}[] = [];
 
-  constructor(private http: HttpClient, private authService: AuthService, private router: Router) {}
+  constructor(private http: HttpClient, private authService: AuthService, private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit() {
     const user = this.authService.getCurrentUser();
@@ -103,10 +103,17 @@ export class ClubLeaderComponent implements OnInit {
       this.loadManagedClub();
       this.loadJoinRequests();
     }
-    this.loadDashboard();
+    this.route.queryParams.subscribe(params => {
+      const v = (params['view'] || 'dashboard') as 'dashboard'|'events'|'clubs'|'leaderboard'|'profile'|'requests'|'members';
+      this.applyView(v);
+    });
   }
 
   setView(v: 'dashboard'|'events'|'clubs'|'leaderboard'|'profile'|'requests'|'members') {
+    this.router.navigate([], { queryParams: { view: v }, replaceUrl: false });
+  }
+
+  private applyView(v: 'dashboard'|'events'|'clubs'|'leaderboard'|'profile'|'requests'|'members') {
     this.activeView = v; this.message = '';
     if (v === 'dashboard') this.loadDashboard();
     if (v === 'events') this.loadEvents();

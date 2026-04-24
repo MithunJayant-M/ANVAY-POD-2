@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 interface Event {
@@ -90,13 +90,17 @@ export class InstitutionComponent implements OnInit {
   pendingClubId: number | null = null;
   pendingMemberId: number | null = null;
 
-  constructor(private http: HttpClient, private authService: AuthService, private router: Router, private fb: FormBuilder) {}
+  constructor(private http: HttpClient, private authService: AuthService, private router: Router, private route: ActivatedRoute, private fb: FormBuilder) {}
 
   ngOnInit() {
     const user = this.authService.getCurrentUser();
     this.adminName = user?.name ?? 'Admin';
     this.institutionId = user?.institutionId ?? 0;
     this.initForms();
+    this.route.queryParams.subscribe(params => {
+      const v = params['view'] as 'dashboard'|'events'|'clubs'|'students';
+      if (v && v !== this.activeView) this.applyView(v);
+    });
     if (this.institutionId) {
       this.http.get<any>(`/api/institutions/${this.institutionId}`).subscribe({
         next: inst => {
@@ -134,8 +138,13 @@ export class InstitutionComponent implements OnInit {
   }
 
   setView(v: 'dashboard'|'events'|'clubs'|'students') {
+    this.router.navigate([], { queryParams: { view: v }, replaceUrl: false });
+  }
+
+  private applyView(v: 'dashboard'|'events'|'clubs'|'students') {
     this.activeView = v;
     this.message = ''; this.selectedClub = null; this.selectedEvent = null;
+    if (v === 'dashboard') this.loadDashboardStats();
     if (v === 'events') { this.loadClubs(); this.loadEvents(); }
     if (v === 'clubs') this.loadClubs();
     if (v === 'students') this.loadStudents();
