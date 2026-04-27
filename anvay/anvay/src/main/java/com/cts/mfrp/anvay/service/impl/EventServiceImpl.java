@@ -236,6 +236,8 @@ public class EventServiceImpl implements EventService {
                     .endDate(event.getEndDate() != null ? event.getEndDate().toString() : null)
                     .status(event.getStatus())
                     .hasWinners(event.getHasWinners())
+                    .imageData(event.getImageData())
+                    .registrationDeadline(event.getRegistrationDeadline() != null ? event.getRegistrationDeadline().toString() : null)
                     .build();
         }).collect(Collectors.toList());
     }
@@ -262,6 +264,8 @@ public class EventServiceImpl implements EventService {
                     .endDate(event.getEndDate() != null ? event.getEndDate().toString() : null)
                     .status(event.getStatus())
                     .hasWinners(event.getHasWinners())
+                    .imageData(event.getImageData())
+                    .registrationDeadline(event.getRegistrationDeadline() != null ? event.getRegistrationDeadline().toString() : null)
                     .build();
         }).collect(Collectors.toList());
     }

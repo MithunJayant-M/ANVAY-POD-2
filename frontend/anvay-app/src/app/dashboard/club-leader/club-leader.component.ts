@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -19,6 +19,7 @@ interface EventFeed {
   eventId: number; title: string; location: string; institution: string; institutionId: number;
   type: string; participantType: string; registeredCount: number; totalCapacity: number;
   isRegistered: boolean; startDate?: string; endDate?: string; status?: string; hasWinners?: boolean;
+  imageData?: string; registrationDeadline?: string;
 }
 interface BrowseClub { clubId: number; clubName: string; category: string; type: string; membersCount: number; memberCount: number; institutionId: number; }
 interface LeaderboardUser { userId: number; firstName: string; lastName: string; email: string; totalPoints: number; joinedClubsCount: number; registeredEventsCount: number; }
@@ -32,7 +33,7 @@ interface UserProfile { userId: number; firstName: string; lastName: string; ema
   templateUrl: './club-leader.component.html',
   styleUrls: ['./club-leader.component.css']
 })
-export class ClubLeaderComponent implements OnInit {
+export class ClubLeaderComponent implements OnInit, OnDestroy {
   leaderName = '';
   studentId: number = 0;
   institutionId: number = 0;
@@ -41,6 +42,29 @@ export class ClubLeaderComponent implements OnInit {
   sidebarOpen = true;
   activeView: 'dashboard' | 'events' | 'clubs' | 'leaderboard' | 'profile' | 'requests' | 'members' = 'dashboard';
   message = ''; messageType = '';
+
+  // Wishlist
+  wishlist: number[] = [];
+
+  // Profile picture
+  profilePicture = '';
+
+  // Profile dropdown
+  showProfileMenu = false;
+
+  // Filters
+  filterCategory = '';
+  filterDateFrom = '';
+  filterDateTo = '';
+
+  // Search suggestions
+  searchSuggestions: string[] = [];
+  showSuggestions = false;
+
+  // Carousel
+  carouselIndex = 0;
+  carouselInterval: any = null;
+  hoveredCarouselEvent: EventFeed | null = null;
 
   // Club management
   joinRequests: ClubMember[] = [];
@@ -89,9 +113,18 @@ export class ClubLeaderComponent implements OnInit {
 
   // Notifications
   showNotifDropdown = false;
-  notifications: {text: string; type: 'info'|'warn'|'success'}[] = [];
+  notifications: {text: string; type: 'info'|'warn'|'success'; link?: string}[] = [];
 
-  constructor(private http: HttpClient, private authService: AuthService, private router: Router, private route: ActivatedRoute) {}
+  get availableCategories(): string[] {
+    const cats = this.events.map(e => e.type).filter(Boolean);
+    return [...new Set(cats)];
+  }
+
+  get featuredEvents(): EventFeed[] {
+    return this.events.filter(e => e.status !== 'ended' && e.startDate && new Date(e.startDate) > new Date()).slice(0, 6);
+  }
+
+  constructor(private http: HttpClient, private authService: AuthService, private router: Router, private route: ActivatedRoute, private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     const user = this.authService.getCurrentUser();
@@ -99,6 +132,8 @@ export class ClubLeaderComponent implements OnInit {
     this.studentId = user?.userId ?? 0;
     this.institutionId = user?.institutionId ?? 0;
     this.leadingClubId = (user as any)?.leadingClubId ?? 0;
+    this.wishlist = JSON.parse(localStorage.getItem(`wishlist_${this.studentId}`) || '[]');
+    this.profilePicture = localStorage.getItem(`profilePic_${this.studentId}`) || '';
     if (this.leadingClubId) {
       this.loadManagedClub();
       this.loadJoinRequests();
@@ -107,6 +142,10 @@ export class ClubLeaderComponent implements OnInit {
       const v = (params['view'] || 'dashboard') as 'dashboard'|'events'|'clubs'|'leaderboard'|'profile'|'requests'|'members';
       this.applyView(v);
     });
+  }
+
+  ngOnDestroy() {
+    if (this.carouselInterval) clearInterval(this.carouselInterval);
   }
 
   setView(v: 'dashboard'|'events'|'clubs'|'leaderboard'|'profile'|'requests'|'members') {
@@ -182,10 +221,55 @@ export class ClubLeaderComponent implements OnInit {
   loadEvents() {
     this.eventsLoading = true;
     this.http.get<EventFeed[]>(`/api/events/feed?userId=${this.studentId}&institutionId=${this.institutionId}`).subscribe({
-      next: e => { this.events = e; this.eventsLoading = false; },
+      next: e => { this.events = e; this.eventsLoading = false; this.startCarousel(); },
       error: () => this.eventsLoading = false
     });
   }
+
+  private get carouselMax(): number { return Math.max(0, this.featuredEvents.length - 4); }
+
+  startCarousel() {
+    if (this.carouselInterval) clearInterval(this.carouselInterval);
+    if (this.featuredEvents.length > 4) {
+      this.carouselInterval = setInterval(() => { this.carouselIndex = this.carouselIndex >= this.carouselMax ? 0 : this.carouselIndex + 1; this.cdr.detectChanges(); }, 3500);
+    }
+  }
+
+  prevCarousel() { this.carouselIndex = this.carouselIndex > 0 ? this.carouselIndex - 1 : this.carouselMax; }
+  nextCarousel() { this.carouselIndex = this.carouselIndex < this.carouselMax ? this.carouselIndex + 1 : 0; }
+
+  onSearchInput() {
+    const q = this.searchEvent.toLowerCase().trim();
+    if (!q) { this.searchSuggestions = []; this.showSuggestions = false; return; }
+    this.searchSuggestions = this.events.map(e => e.title).filter(t => t.toLowerCase().includes(q)).slice(0, 6);
+    this.showSuggestions = this.searchSuggestions.length > 0;
+  }
+
+  selectSuggestion(s: string) { this.searchEvent = s; this.showSuggestions = false; }
+
+  clearFilters() { this.filterCategory = ''; this.filterDateFrom = ''; this.filterDateTo = ''; this.searchEvent = ''; this.showSuggestions = false; }
+
+  isWishlisted(eventId: number) { return this.wishlist.includes(eventId); }
+
+  toggleWishlist(eventId: number) {
+    if (this.isWishlisted(eventId)) { this.wishlist = this.wishlist.filter(id => id !== eventId); }
+    else { this.wishlist.push(eventId); }
+    localStorage.setItem(`wishlist_${this.studentId}`, JSON.stringify(this.wishlist));
+  }
+
+  onProfilePicSelected(event: any) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e: any) => { this.profilePicture = e.target.result; localStorage.setItem(`profilePic_${this.studentId}`, this.profilePicture); };
+    reader.readAsDataURL(file);
+  }
+
+  removeProfilePic() { this.profilePicture = ''; localStorage.removeItem(`profilePic_${this.studentId}`); }
+
+  toggleProfileMenu() { this.showProfileMenu = !this.showProfileMenu; this.showNotifDropdown = false; }
+
+  navigateFromNotif(link?: string) { this.showNotifDropdown = false; if (link) this.setView(link as any); }
 
   switchEventTab(tab: 'feed' | 'registered') {
     this.eventTab = tab;
@@ -202,14 +286,21 @@ export class ClubLeaderComponent implements OnInit {
 
   get filteredEvents() {
     const q = this.searchEvent.toLowerCase();
-    return this.events.filter(e => !q || e.title.toLowerCase().includes(q) || e.institution?.toLowerCase().includes(q) || e.type?.toLowerCase().includes(q));
+    return this.events.filter(e => {
+      const matchQ = !q || e.title.toLowerCase().includes(q) || e.institution?.toLowerCase().includes(q) || e.type?.toLowerCase().includes(q);
+      const matchCat = !this.filterCategory || e.type === this.filterCategory;
+      const matchFrom = !this.filterDateFrom || (e.startDate && new Date(e.startDate) >= new Date(this.filterDateFrom));
+      const matchTo = !this.filterDateTo || (e.startDate && new Date(e.startDate) <= new Date(this.filterDateTo));
+      return matchQ && matchCat && matchFrom && matchTo;
+    });
   }
 
   get upcomingEvents() { const now = new Date(); return this.filteredEvents.filter(e => e.startDate && new Date(e.startDate) > now); }
   get currentEvents() { const now = new Date(); return this.filteredEvents.filter(e => { const s = e.startDate ? new Date(e.startDate) : null; const en = e.endDate ? new Date(e.endDate) : null; return s && s <= now && (!en || en >= now) && e.status !== 'ended'; }); }
   get pastEvents() { const now = new Date(); return this.filteredEvents.filter(e => e.status === 'ended' || (e.endDate && new Date(e.endDate) < now)); }
 
-  isEventOpen(ev: EventFeed) { if (ev.status === 'ended') return false; if (ev.endDate && new Date(ev.endDate) < new Date()) return false; return true; }
+  isEventOpen(ev: EventFeed) { if (ev.status === 'ended') return false; if (ev.endDate && new Date(ev.endDate) < new Date()) return false; if (ev.registrationDeadline && new Date(ev.registrationDeadline) < new Date()) return false; return true; }
+  isDeadlinePassed(ev: EventFeed): boolean { return !!(ev.registrationDeadline && new Date(ev.registrationDeadline) < new Date() && ev.endDate && new Date(ev.endDate) >= new Date()); }
 
   registerEvent(eventId: number) {
     this.http.post('/api/events/register', { eventId, userId: this.studentId }).subscribe({
@@ -318,9 +409,9 @@ export class ClubLeaderComponent implements OnInit {
   buildNotifications() {
     this.notifications = [];
     const reqs = this.joinRequests.length;
-    if (reqs > 0) this.notifications.push({ text: `${reqs} pending join request${reqs > 1 ? 's' : ''} for your club`, type: 'warn' });
+    if (reqs > 0) this.notifications.push({ text: `${reqs} pending join request${reqs > 1 ? 's' : ''} for your club`, type: 'warn', link: 'requests' });
     const pending = this.myPendingClubIds.length;
-    if (pending > 0) this.notifications.push({ text: `${pending} of your club join request${pending > 1 ? 's' : ''} awaiting approval`, type: 'info' });
+    if (pending > 0) this.notifications.push({ text: `${pending} of your club join request${pending > 1 ? 's' : ''} awaiting approval`, type: 'info', link: 'clubs' });
     if (this.notifications.length === 0) this.notifications.push({ text: 'No new notifications', type: 'success' });
   }
 

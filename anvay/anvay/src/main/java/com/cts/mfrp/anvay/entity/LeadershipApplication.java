@@ -1,5 +1,6 @@
 package com.cts.mfrp.anvay.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
@@ -29,6 +30,7 @@ public class LeadershipApplication {
     @Column(name = "status", length = 50)
     private String status;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Column(name = "applied_at")
     private LocalDateTime appliedAt;
 

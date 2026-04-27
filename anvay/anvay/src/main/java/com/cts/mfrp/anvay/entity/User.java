@@ -1,5 +1,6 @@
 package com.cts.mfrp.anvay.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
@@ -42,9 +43,11 @@ public class User {
     @Column(name = "role")
     private String role;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
@@ -80,4 +83,7 @@ public class User {
 
     @Column(name = "student_id_number")
     private String studentIdNumber;
+
+    @Column(name = "profile_picture", columnDefinition = "LONGTEXT")
+    private String profilePicture;
 }

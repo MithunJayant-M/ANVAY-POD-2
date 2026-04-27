@@ -11,6 +11,7 @@ interface Event {
   maxParticipants: number; registrationFee: number; status: string; eventRules: string;
   participantType: string; clubId: number; hasWinners?: boolean;
   winnersStatus?: string; winner1UserId?: number; winner2UserId?: number; winner3UserId?: number;
+  imageData?: string; contactNumber?: string;
 }
 interface Club { clubId: number; clubName: string; category: string; membersCount: number; joinRequestsCount: number; leadershipAppsCount: number; createdDate: string; }
 interface ClubMember { id: number; userId: number; clubId: number; status: string; user?: {firstName: string; lastName: string; email: string; role?: string; leadingClubId?: number}; }
@@ -50,6 +51,18 @@ export class InstitutionComponent implements OnInit {
   eventForm!: FormGroup;
   categories = ['Technical', 'Cultural', 'Sports', 'Academic', 'Workshop', 'Seminar', 'Hackathon', 'Other'];
 
+  // Event image upload
+  eventImageData = '';
+  eventImagePreview = '';
+
+  // Participants slider
+  participantsSlider = 100;
+
+  // Inline form errors
+  contactNumberError = '';
+  endDateError = '';
+  deadlineError = '';
+
   // Clubs
   clubs: Club[] = [];
   clubsLoading = false;
@@ -70,10 +83,14 @@ export class InstitutionComponent implements OnInit {
   collegeLbLoading = false;
 
   message = ''; messageType = '';
+  isSaving = false;
 
   // Notifications
   showNotifDropdown = false;
-  notifications: {text: string; type: 'info'|'warn'|'success'}[] = [];
+  notifications: {text: string; type: 'info'|'warn'|'success'; link?: string}[] = [];
+
+  // Profile dropdown
+  showProfileMenu = false;
 
   // Winners modal
   winnersModal = false;
@@ -119,6 +136,7 @@ export class InstitutionComponent implements OnInit {
       eventName: ['', Validators.required],
       description: [''],
       category: ['', Validators.required],
+      contactNumber: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
       location: ['', Validators.required],
       startDate: ['', Validators.required],
       endDate: [''],
@@ -184,26 +202,102 @@ export class InstitutionComponent implements OnInit {
     this.editingEvent = null;
     const defaultClubId = this.clubs[0]?.clubId ?? null;
     this.eventForm.reset({ maxParticipants: 100, registrationFee: 0, participantType: 'all', status: 'active', hasWinners: false, clubId: defaultClubId });
+    this.eventImageData = '';
+    this.eventImagePreview = '';
+    this.participantsSlider = 100;
+    this.contactNumberError = '';
+    this.endDateError = '';
+    this.deadlineError = '';
     this.showEventModal = true;
   }
-  openEditEvent(ev: Event) { this.editingEvent = ev; this.eventForm.patchValue({ ...ev, startDate: ev.startDate?.substring(0,16), endDate: ev.endDate?.substring(0,16), registrationDeadline: ev.registrationDeadline?.substring(0,16) }); this.showEventModal = true; }
+
+  openEditEvent(ev: Event) {
+    this.editingEvent = ev;
+    this.eventForm.patchValue({
+      ...ev,
+      startDate: ev.startDate?.substring(0, 16),
+      endDate: ev.endDate?.substring(0, 16),
+      registrationDeadline: ev.registrationDeadline?.substring(0, 16),
+      contactNumber: ev.contactNumber ?? ''
+    });
+    this.eventImageData = ev.imageData ?? '';
+    this.eventImagePreview = ev.imageData ?? '';
+    this.participantsSlider = ev.maxParticipants ?? 100;
+    this.contactNumberError = '';
+    this.endDateError = '';
+    this.deadlineError = '';
+    this.showEventModal = true;
+  }
+
+  onEventImageSelected(event: any) {
+    const file: File = event.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.eventImageData = e.target.result;
+      this.eventImagePreview = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  onSliderChange(val: number) {
+    this.participantsSlider = val;
+    this.eventForm.patchValue({ maxParticipants: val });
+  }
+
+  private toIsoSeconds(val: string | null | undefined): string | null {
+    if (!val) return null;
+    // datetime-local gives "yyyy-MM-ddTHH:mm" — append ":00" if seconds are missing
+    return val.length === 16 ? val + ':00' : val;
+  }
 
   saveEvent() {
+    // Clear all inline errors first
+    this.contactNumberError = '';
+    this.endDateError = '';
+    this.deadlineError = '';
+
     if (this.eventForm.invalid) return;
-    const data = { ...this.eventForm.value, maxParticipants: +this.eventForm.value.maxParticipants };
+
+    const v = this.eventForm.value;
+    const data = {
+      ...v,
+      startDate: this.toIsoSeconds(v.startDate),
+      endDate: this.toIsoSeconds(v.endDate),
+      registrationDeadline: this.toIsoSeconds(v.registrationDeadline),
+      maxParticipants: +v.maxParticipants,
+      imageData: this.eventImageData,
+      contactNumber: v.contactNumber
+    };
+
     // Validate end date is after start date
     if (data.endDate && data.startDate && new Date(data.endDate) < new Date(data.startDate)) {
-      this.showMessage('End date cannot be before start date', 'error'); return;
+      this.endDateError = 'End date must be after start date';
+      return;
     }
+
+    // Validate registration deadline is before start date
+    if (data.registrationDeadline && data.startDate && new Date(data.registrationDeadline) > new Date(data.startDate)) {
+      this.deadlineError = 'Deadline must be before the event start date';
+      return;
+    }
+
+    // Validate registration deadline is not in the past
+    if (data.registrationDeadline && new Date(data.registrationDeadline) < new Date()) {
+      this.deadlineError = 'Registration deadline has already passed';
+      return;
+    }
+
+    this.isSaving = true;
     if (this.editingEvent) {
       this.http.put(`/api/events/${this.editingEvent.eventId}`, data).subscribe({
-        next: () => { this.showMessage('Event updated!', 'success'); this.showEventModal = false; this.loadEvents(); },
-        error: () => this.showMessage('Failed to update event', 'error')
+        next: () => { this.isSaving = false; this.showMessage('Event updated!', 'success'); this.showEventModal = false; this.loadEvents(); },
+        error: () => { this.isSaving = false; this.showMessage('Failed to update event', 'error'); }
       });
     } else {
       this.http.post('/api/events', data).subscribe({
-        next: () => { this.showMessage('Event created!', 'success'); this.showEventModal = false; this.loadEvents(); },
-        error: () => this.showMessage('Failed to create event', 'error')
+        next: () => { this.isSaving = false; this.showMessage('Event created!', 'success'); this.showEventModal = false; this.loadEvents(); },
+        error: () => { this.isSaving = false; this.showMessage('Failed to create event', 'error'); }
       });
     }
   }
@@ -404,11 +498,22 @@ export class InstitutionComponent implements OnInit {
     this.notifications = [];
     const totalJoinReqs = this.clubs.reduce((s, c) => s + (c.joinRequestsCount || 0), 0);
     const totalLeadApps = this.clubs.reduce((s, c) => s + (c.leadershipAppsCount || 0), 0);
-    if (totalJoinReqs > 0) this.notifications.push({ text: `${totalJoinReqs} pending club join request${totalJoinReqs > 1 ? 's' : ''}`, type: 'warn' });
-    if (totalLeadApps > 0) this.notifications.push({ text: `${totalLeadApps} pending leadership application${totalLeadApps > 1 ? 's' : ''}`, type: 'info' });
+    if (totalJoinReqs > 0) this.notifications.push({ text: `${totalJoinReqs} pending club join request${totalJoinReqs > 1 ? 's' : ''}`, type: 'warn', link: '?view=clubs' });
+    if (totalLeadApps > 0) this.notifications.push({ text: `${totalLeadApps} pending leadership application${totalLeadApps > 1 ? 's' : ''}`, type: 'info', link: '?view=clubs' });
     const pendingWinners = this.events.filter(e => e.winnersStatus === 'pending').length;
     if (pendingWinners > 0) this.notifications.push({ text: `${pendingWinners} event winner submission${pendingWinners > 1 ? 's' : ''} awaiting super admin approval`, type: 'info' });
     if (this.notifications.length === 0) this.notifications.push({ text: 'No new notifications', type: 'success' });
+  }
+
+  navigateFromNotif(link?: string) {
+    if (link) {
+      this.router.navigate(['/dashboard/institution'], { queryParams: { view: link.replace('?view=', '') } });
+      this.showNotifDropdown = false;
+    }
+  }
+
+  toggleProfileMenu() {
+    this.showProfileMenu = !this.showProfileMenu;
   }
 
   get totalNotifCount(): number {
