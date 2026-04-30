@@ -21,3 +21,18 @@ export const authGuard: CanActivateFn = (route) => {
 
   return true;
 };
+
+export const noAuthGuard: CanActivateFn = () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (authService.isLoggedIn()) {
+    const role = authService.getRole();
+    if (role === 'super_admin') router.navigate(['/dashboard/super-admin']);
+    else if (role === 'institution') router.navigate(['/dashboard/institution']);
+    else if (role === 'club_leader') router.navigate(['/dashboard/leader']);
+    else router.navigate(['/dashboard/student']);
+    return false;
+  }
+  return true;
+};

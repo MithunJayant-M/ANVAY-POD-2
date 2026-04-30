@@ -1,5 +1,7 @@
 package com.cts.mfrp.anvay.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -33,9 +35,11 @@ public class Club {
     @Column(name = "member_count")
     private Integer memberCount;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
@@ -44,12 +48,15 @@ public class Club {
     @JsonIgnoreProperties("club")
     private Institution institution;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "club", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Event> events = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "club", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ClubMember> clubMembers = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "club", cascade = CascadeType.ALL)
-    private List<Achievement> achievements=new ArrayList<>();
+    private List<Achievement> achievements = new ArrayList<>();
 }

@@ -22,7 +22,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final ClubRepository clubRepository;
-    private final PaymentRepository paymentRepository;
     private final EventParticipantRepository eventParticipantRepository;
 
     @Override
@@ -33,9 +32,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         long inactiveColleges = institutionRepository.countByStatus("inactive");
         long totalEvents = eventRepository.count();
         long totalClubs = clubRepository.count();
-        long totalStudents = userRepository.countByRole("student");
+        long totalStudents = userRepository.countByRole("student") + userRepository.countByRole("club_leader");
 
-        // Top 5 institutions by student count
         List<Institution> institutions = institutionRepository.findAll();
         List<InstitutionDto> topColleges = institutions.stream()
                 .map(this::mapToDto)
@@ -43,7 +41,6 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                 .limit(5)
                 .collect(Collectors.toList());
 
-        // Event trends by month
         Map<String, Long> eventTrends = new LinkedHashMap<>();
         List<Object[]> monthlyData = eventRepository.countEventsByMonth();
         for (Object[] row : monthlyData) {
@@ -76,12 +73,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         }
         return institutions.stream()
                 .map(this::mapToDto)
-                .sorted(Comparator.comparing(InstitutionDto::getRegisteredAt).reversed())
+                .sorted(Comparator.comparing(InstitutionDto::getRegisteredAt, Comparator.nullsLast(Comparator.reverseOrder())))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public InstitutionDto getInstitutionById(Integer institutionId) {
+    public InstitutionDto getInstitutionById(Long institutionId) {
         Institution institution = institutionRepository.findById(institutionId)
                 .orElseThrow(() -> new RuntimeException("Institution not found: " + institutionId));
         return mapToDto(institution);
@@ -89,7 +86,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     @Transactional
-    public InstitutionDto approveInstitution(Integer institutionId) {
+    public InstitutionDto approveInstitution(Long institutionId) {
         Institution institution = institutionRepository.findById(institutionId)
                 .orElseThrow(() -> new RuntimeException("Institution not found: " + institutionId));
         institution.setStatus("active");
@@ -98,7 +95,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     @Transactional
-    public InstitutionDto deactivateInstitution(Integer institutionId) {
+    public InstitutionDto deactivateInstitution(Long institutionId) {
         Institution institution = institutionRepository.findById(institutionId)
                 .orElseThrow(() -> new RuntimeException("Institution not found: " + institutionId));
         institution.setStatus("inactive");
@@ -106,17 +103,22 @@ public class SuperAdminServiceImpl implements SuperAdminService {
     }
 
     @Override
+    public List<InstitutionDto> getInstitutionLeaderboard() {
+        return institutionRepository.findAll().stream()
+                .filter(i -> "active".equals(i.getStatus()))
+                .map(this::mapToDto)
+                .sorted(Comparator.comparingLong(InstitutionDto::getTotalPoints).reversed())
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public AnalyticsDto getAnalytics() {
         long totalUsers = userRepository.count();
-        long totalStudents = userRepository.countByRole("student");
+        long totalStudents = userRepository.countByRole("student") + userRepository.countByRole("club_leader");
         long totalInstitutions = institutionRepository.count();
         long totalEvents = eventRepository.count();
         long totalClubs = clubRepository.count();
-        long totalPayments = paymentRepository.count();
-        Double revenue = paymentRepository.sumCompletedPayments();
-        double totalRevenue = revenue != null ? revenue : 0.0;
 
-        // Institution rankings by total points earned in events
         List<Institution> institutions = institutionRepository.findAll();
         List<InstitutionDto> rankings = institutions.stream()
                 .map(this::mapToDto)
@@ -129,14 +131,14 @@ public class SuperAdminServiceImpl implements SuperAdminService {
                 .totalInstitutions(totalInstitutions)
                 .totalEvents(totalEvents)
                 .totalClubs(totalClubs)
-                .totalPayments(totalPayments)
-                .totalRevenue(totalRevenue)
+                .totalPayments(0L)
+                .totalRevenue(0.0)
                 .institutionRankings(rankings)
                 .build();
     }
 
     private InstitutionDto mapToDto(Institution institution) {
-        long studentCount = userRepository.countByInstitutionId(institution.getInstitutionId());
+        long studentCount = userRepository.countStudentsByInstitutionId(institution.getInstitutionId());
         long eventCount = eventRepository.countByInstitutionId(institution.getInstitutionId());
         long clubCount = clubRepository.countByInstitutionId(institution.getInstitutionId());
         Long points = eventParticipantRepository.sumPointsByInstitutionId(institution.getInstitutionId());
@@ -144,12 +146,12 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
         return InstitutionDto.builder()
                 .institutionId(institution.getInstitutionId())
-                .institutionName(institution.getInstitutionName())
-                .email(institution.getEmail())
-                .phone(institution.getPhone())
-                .address(institution.getAddress())
+                .institutionName(institution.getName())
+                .email(institution.getInstitutionEmail())
+                .phone(null)
+                .address(institution.getLocation())
                 .status(institution.getStatus())
-                .registeredAt(institution.getRegisteredAt())
+                .registeredAt(institution.getCreatedAt())
                 .studentCount(studentCount)
                 .eventCount(eventCount)
                 .clubCount(clubCount)

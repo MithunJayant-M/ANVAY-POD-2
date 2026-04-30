@@ -1,6 +1,7 @@
 package com.cts.mfrp.anvay.controller;
 
 import com.cts.mfrp.anvay.dto.EventFeedDTO;
+import com.cts.mfrp.anvay.dto.WinnersApprovalDTO;
 import com.cts.mfrp.anvay.entity.Event;
 import com.cts.mfrp.anvay.entity.EventParticipant;
 import com.cts.mfrp.anvay.repository.EventParticipantRepository;
@@ -37,6 +38,11 @@ public class EventController {
         return ResponseEntity.ok(eventService.getEventsByClubId(clubId));
     }
 
+    @GetMapping("/institution/{institutionId}")
+    public ResponseEntity<List<Event>> getEventsByInstitution(@PathVariable Long institutionId) {
+        return ResponseEntity.ok(eventService.getEventsByInstitutionId(institutionId));
+    }
+
     @PostMapping
     public ResponseEntity<Event> createEvent(@RequestBody Event event) {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(event));
@@ -55,9 +61,14 @@ public class EventController {
 
     @GetMapping("/all")
     public ResponseEntity<List<EventFeedDTO>> getAllEvents(@RequestParam(required = false) Long userId) {
-        // If no userId is provided (guest view), you can pass a null or 0
-        // But for your testing, ensure userId 101 is being passed
         return ResponseEntity.ok(eventService.getAllEventsWithStatus(userId));
+    }
+
+    @GetMapping("/feed")
+    public ResponseEntity<List<EventFeedDTO>> getEventsForStudent(
+            @RequestParam Long userId,
+            @RequestParam Long institutionId) {
+        return ResponseEntity.ok(eventService.getEventsForStudent(userId, institutionId));
     }
 
     @Autowired
@@ -67,6 +78,39 @@ public class EventController {
     public ResponseEntity<EventParticipant> registerParticipant(@RequestBody EventParticipant participant) {
         EventParticipant savedParticipant = eventService.registerParticipant(participant);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedParticipant);
+    }
+
+    @GetMapping("/{eventId}/participants")
+    public ResponseEntity<List<EventParticipant>> getParticipants(@PathVariable Long eventId) {
+        return ResponseEntity.ok(eventService.getEventParticipants(eventId));
+    }
+
+    @PostMapping("/{eventId}/award-winners")
+    public ResponseEntity<?> submitWinners(@PathVariable Long eventId, @RequestBody java.util.Map<String, Long> body) {
+        eventService.submitWinners(eventId, body.get("firstUserId"), body.get("secondUserId"), body.get("thirdUserId"));
+        return ResponseEntity.ok(java.util.Map.of("message", "Winners submitted for approval"));
+    }
+
+    @PostMapping("/{eventId}/approve-winners")
+    public ResponseEntity<?> approveWinners(@PathVariable Long eventId) {
+        eventService.approveWinners(eventId);
+        return ResponseEntity.ok(java.util.Map.of("message", "Winners approved and points awarded"));
+    }
+
+    @GetMapping("/pending-winners")
+    public ResponseEntity<List<WinnersApprovalDTO>> getPendingWinners() {
+        return ResponseEntity.ok(eventService.getPendingWinners());
+    }
+
+    @PutMapping("/{eventId}/end")
+    public ResponseEntity<?> endEvent(@PathVariable Long eventId) {
+        eventService.endEvent(eventId);
+        return ResponseEntity.ok(java.util.Map.of("message", "Event ended successfully"));
+    }
+
+    @GetMapping("/my-registrations")
+    public ResponseEntity<List<EventFeedDTO>> getMyRegistrations(@RequestParam Long userId) {
+        return ResponseEntity.ok(eventService.getMyRegistrations(userId));
     }
 
 }

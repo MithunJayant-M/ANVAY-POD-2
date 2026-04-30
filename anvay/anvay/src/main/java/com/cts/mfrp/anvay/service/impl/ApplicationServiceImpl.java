@@ -4,14 +4,12 @@ import com.cts.mfrp.anvay.entity.LeadershipApplication;
 import com.cts.mfrp.anvay.repository.LeadershipApplicationRepository;
 import com.cts.mfrp.anvay.service.ApplicationService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 @Service
-@Slf4j
 @RequiredArgsConstructor
 @Transactional
 public class ApplicationServiceImpl implements ApplicationService {
@@ -25,19 +23,19 @@ public class ApplicationServiceImpl implements ApplicationService {
 
     @Override
     @Transactional(readOnly = true)
-    public LeadershipApplication getApplicationById(Integer applicationId) {
+    public LeadershipApplication getApplicationById(Long applicationId) {
         return leadershipApplicationRepository.findById(applicationId)
                 .orElseThrow(() -> new IllegalArgumentException("Application not found"));
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<LeadershipApplication> getApplicationsByClubId(Integer clubId) {
+    public List<LeadershipApplication> getApplicationsByClubId(Long clubId) {
         return leadershipApplicationRepository.findByClubId(clubId);
     }
 
     @Override
-    public LeadershipApplication updateApplication(Integer applicationId, LeadershipApplication application) {
+    public LeadershipApplication updateApplication(Long applicationId, LeadershipApplication application) {
         LeadershipApplication existing = getApplicationById(applicationId);
         if (application.getStatus() != null) existing.setStatus(application.getStatus());
         if (application.getExperience() != null) existing.setExperience(application.getExperience());
@@ -45,7 +43,7 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public void deleteApplication(Integer applicationId) {
+    public void deleteApplication(Long applicationId) {
         leadershipApplicationRepository.deleteById(applicationId);
     }
 }

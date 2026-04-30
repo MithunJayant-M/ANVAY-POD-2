@@ -1,5 +1,6 @@
 package com.cts.mfrp.anvay.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -28,10 +29,11 @@ public class EventParticipant {
     @Column(name = "status")
     private String status;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Column(name = "registered_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "pointsEarned")
+    @Column(name = "points_earned")
     private Integer points_earned;
 
     @ManyToOne(fetch = FetchType.LAZY)

@@ -3,12 +3,16 @@ package com.cts.mfrp.anvay.controller;
 import com.cts.mfrp.anvay.dto.ClubDashboardDTO;
 import com.cts.mfrp.anvay.entity.Club;
 import com.cts.mfrp.anvay.entity.ClubMember;
+import com.cts.mfrp.anvay.repository.ClubMemberRepository;
+import com.cts.mfrp.anvay.repository.UserRepository;
 import com.cts.mfrp.anvay.service.ClubService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 
 import java.util.List;
 
@@ -26,6 +30,8 @@ import java.util.List;
 public class ClubController {
 
     private final ClubService clubService;
+    private final ClubMemberRepository clubMemberRepository;
+    private final UserRepository userRepository;
 
     @GetMapping("/all")
     public ResponseEntity<List<Club>> getAllClubs(){
@@ -182,6 +188,64 @@ public class ClubController {
      * @param clubId the club ID
      * @return ResponseEntity with no content on success
      */
+    @PostMapping("/{clubId}/join")
+    public ResponseEntity<?> joinClub(@PathVariable Long clubId, @RequestBody ClubMember request) {
+        if (clubMemberRepository.existsByClubIdAndUserId(clubId, request.getUserId())) {
+            return ResponseEntity.badRequest().body("Already a member or request pending");
+        }
+        request.setClubId(clubId);
+        request.setStatus("PENDING");
+        request.setCreatedAt(LocalDateTime.now());
+        request.setUpdatedAt(LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CREATED).body(clubMemberRepository.save(request));
+    }
+
+    @GetMapping("/{clubId}/join-requests")
+    public ResponseEntity<?> getJoinRequests(@PathVariable Long clubId) {
+        return ResponseEntity.ok(clubMemberRepository.findByClubIdAndStatus(clubId, "PENDING"));
+    }
+
+    @PutMapping("/{clubId}/join-requests/{memberId}/approve")
+    public ResponseEntity<?> approveJoinRequest(@PathVariable Long clubId, @PathVariable Long memberId) {
+        return clubMemberRepository.findById(memberId).map(m -> {
+            m.setStatus("APPROVED");
+            m.setUpdatedAt(LocalDateTime.now());
+            clubMemberRepository.save(m);
+            userRepository.findById(m.getUserId()).ifPresent(u -> {
+                u.setJoinedClubsCount((u.getJoinedClubsCount() != null ? u.getJoinedClubsCount() : 0) + 1);
+                userRepository.save(u);
+            });
+            return ResponseEntity.ok(m);
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{clubId}/join-requests/{memberId}/reject")
+    public ResponseEntity<?> rejectJoinRequest(@PathVariable Long clubId, @PathVariable Long memberId) {
+        return clubMemberRepository.findById(memberId).map(m -> {
+            m.setStatus("REJECTED");
+            m.setUpdatedAt(LocalDateTime.now());
+            return ResponseEntity.ok(clubMemberRepository.save(m));
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getClubsByUser(@PathVariable Long userId) {
+        return ResponseEntity.ok(clubMemberRepository.findByUserId(userId));
+    }
+
+    @DeleteMapping("/{clubId}/members/{memberId}")
+    public ResponseEntity<?> removeMember(@PathVariable Long clubId, @PathVariable Long memberId) {
+        return clubMemberRepository.findById(memberId).map(m -> {
+            clubMemberRepository.delete(m);
+            userRepository.findById(m.getUserId()).ifPresent(u -> {
+                int count = u.getJoinedClubsCount() != null ? u.getJoinedClubsCount() : 0;
+                u.setJoinedClubsCount(Math.max(0, count - 1));
+                userRepository.save(u);
+            });
+            return ResponseEntity.noContent().build();
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping("/{clubId}")
     public ResponseEntity<Void> deleteClub(@PathVariable Long clubId) {
         log.info("Received request to delete club: {}", clubId);

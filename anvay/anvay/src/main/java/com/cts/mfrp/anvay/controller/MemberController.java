@@ -21,12 +21,12 @@ public class MemberController {
     }
 
     @GetMapping("/{memberId}")
-    public ResponseEntity<User> getMember(@PathVariable Integer memberId) {
+    public ResponseEntity<User> getMember(@PathVariable Long memberId) {
         return ResponseEntity.ok(studentService.getStudentById(memberId));
     }
 
     @PutMapping("/{memberId}")
-    public ResponseEntity<User> updateMember(@PathVariable Integer memberId, @RequestBody User user) {
+    public ResponseEntity<User> updateMember(@PathVariable Long memberId, @RequestBody User user) {
         return ResponseEntity.ok(studentService.updateStudent(memberId, user));
     }
 }

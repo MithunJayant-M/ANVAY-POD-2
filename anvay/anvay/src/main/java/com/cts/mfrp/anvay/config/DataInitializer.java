@@ -30,7 +30,7 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         if (!userRepository.existsByEmail(superAdminEmail)) {
             User superAdmin = User.builder()
-                    .name(superAdminName)
+                    .firstName(superAdminName)
                     .email(superAdminEmail)
                     .password(passwordEncoder.encode(superAdminPassword))
                     .role("super_admin")
@@ -42,7 +42,7 @@ public class DataInitializer implements CommandLineRunner {
             // Update password every time to keep it in sync with properties
             User superAdmin = userRepository.findByEmail(superAdminEmail).get();
             superAdmin.setPassword(passwordEncoder.encode(superAdminPassword));
-            superAdmin.setName(superAdminName);
+            superAdmin.setFirstName(superAdminName);
             userRepository.save(superAdmin);
             log.info("Super Admin password updated: {}", superAdminEmail);
         }
