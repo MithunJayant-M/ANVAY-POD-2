@@ -4,3 +4,4 @@ frontend/anvay-app/node_modules/
 .angular/ 
 **/dist/ 
 **/node_modules/ 
+application.properties
