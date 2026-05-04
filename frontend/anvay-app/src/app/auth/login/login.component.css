@@ -82,4 +82,50 @@
 
 .loading-dots { display:inline-flex; gap:4px; align-items:center; }
 
-@media(max-width:768px) { .login-left { display:none; } .login-right { width:100%; } }
+/* ── Forgot password link ── */
+.forgot-link-wrap { text-align:center; margin-top:12px; }
+.forgot-link { background:none; border:none; color:#16a34a; font-size:.82rem; font-weight:600; cursor:pointer; font-family:inherit; padding:0; text-decoration:underline; }
+.forgot-link:hover { color:#15803d; }
+
+/* ── Forgot password modal ── */
+.fp-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000;
+  display:flex; align-items:center; justify-content:center; padding:16px;
+}
+.fp-modal {
+  background:#fff; border-radius:20px; padding:36px 32px;
+  width:100%; max-width:420px; position:relative;
+  box-shadow:0 20px 60px rgba(0,0,0,.2); max-height:90vh; overflow-y:auto;
+}
+.fp-close {
+  position:absolute; top:14px; right:16px; background:none; border:none;
+  font-size:1.4rem; color:#94a3b8; cursor:pointer; line-height:1; padding:4px;
+}
+.fp-close:hover { color:#0f172a; }
+.fp-title { font-size:1.25rem; font-weight:800; color:#0f172a; margin-bottom:6px; }
+.fp-sub { font-size:.82rem; color:#64748b; margin-bottom:20px; line-height:1.6; }
+.fp-error { background:#fee2e2; color:#dc2626; border-radius:8px; padding:10px 14px; font-size:.82rem; margin-bottom:14px; font-weight:500; }
+.fp-group { display:flex; flex-direction:column; gap:5px; margin-bottom:14px; }
+.fp-group label { font-size:.72rem; font-weight:700; color:#374151; text-transform:uppercase; letter-spacing:.4px; }
+.fp-input {
+  padding:11px 14px; border:1.5px solid #e2e8f0; border-radius:10px;
+  font-size:.88rem; color:#0f172a; outline:none; font-family:inherit;
+  background:#f8fafc; transition:.2s;
+}
+.fp-input:focus { border-color:#16a34a; box-shadow:0 0 0 3px rgba(22,163,74,.08); background:#fff; }
+.fp-btn {
+  width:100%; padding:13px; border:none; border-radius:12px;
+  background:linear-gradient(135deg,#052e16,#16a34a);
+  color:#fff; font-size:.9rem; font-weight:700; cursor:pointer;
+  transition:.2s; margin-top:6px;
+}
+.fp-btn:disabled { opacity:.5; cursor:not-allowed; }
+.fp-btn:hover:not(:disabled) { opacity:.9; }
+.fp-success { text-align:center; padding:8px 0; }
+.fp-success-icon { width:56px; height:56px; border-radius:50%; background:#dcfce7; color:#16a34a; font-size:1.6rem; font-weight:700; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; }
+
+@media(max-width:768px) {
+  .login-left { display:none; }
+  .login-right { width:100%; padding:24px 16px; }
+  .login-card { max-width:100%; }
+}

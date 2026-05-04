@@ -352,3 +352,26 @@
 .chart-sub { font-size:.75rem; color:#94a3b8; }
 .chart-wrap { overflow-x:auto; }
 .trend-chart { width:100%; display:block; }
+
+/* ── Responsive ── */
+@media(max-width:900px) {
+  .st-sidebar { width:200px; }
+  .st-main { margin-left:200px; }
+  .sidebar-collapsed .st-main { margin-left:0; }
+}
+@media(max-width:700px) {
+  .st-sidebar { width:0; overflow:hidden; position:fixed; }
+  .st-main { margin-left:0; }
+  .st-topbar { padding:0 14px; }
+  .st-page { padding:16px 12px; }
+  .dash-stats { grid-template-columns:1fr 1fr; gap:10px; }
+  .events-grid { grid-template-columns:1fr; }
+  .carousel-card { flex:0 0 calc(100% - 0px); }
+  .carousel-section { display:none; }
+  .filters-bar { flex-direction:column; align-items:stretch; gap:8px; }
+  .filter-date-group { flex-wrap:wrap; }
+  .data-table { font-size:.78rem; }
+  .modal-box { margin:8px; padding:18px 14px; max-width:100%; }
+  .form-row { flex-direction:column; }
+  .profile-chart-card { padding:14px; }
+}

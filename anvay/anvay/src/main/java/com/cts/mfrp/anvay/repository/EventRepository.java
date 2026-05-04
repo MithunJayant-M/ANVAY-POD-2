@@ -11,6 +11,7 @@ import java.util.List;
 @Repository
 public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findByClubId(Long clubId);
+    List<Event> findByStatusNot(String status);
 
     @Query("SELECT e, (CASE WHEN p.id IS NOT NULL THEN true ELSE false END) " +
            "FROM Event e LEFT JOIN EventParticipant p ON e.eventId = p.eventId AND p.userId = :userId")

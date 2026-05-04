@@ -25,7 +25,7 @@ export class RegisterInstitutionComponent implements OnInit {
       adminName:       ['', Validators.required],
       email:           ['', [Validators.required, Validators.email]],
       password:        ['', [Validators.required, Validators.minLength(6)]],
-      contactNumber:   ['', Validators.required],
+      contactNumber:   ['', [Validators.required, Validators.pattern('^[6-9][0-9]{9}$')]],
       address:         ['', Validators.required],
       description:     ['']
     });

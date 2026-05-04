@@ -4,6 +4,10 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -27,12 +31,15 @@ public class Event {
     @Column(name = "club_id")
     private Long clubId;
 
+    @NotBlank(message = "Event name is required")
+    @Pattern(regexp = "^(?=.*[a-zA-Z]).+$", message = "Event name must contain at least one letter")
     @Column(name = "event_name")
     private String eventName;
 
     @Column(name = "description")
     private String description;
 
+    @NotBlank(message = "Category is required")
     @Column(name="Category")
     private String category;
 
@@ -44,15 +51,18 @@ public class Event {
     @Column(name = "end_date")
     private LocalDateTime endDate;
 
+    @Pattern(regexp = "^$|^(?=.*[a-zA-Z]).+$", message = "Location must contain at least one letter")
     @Column(name = "location")
     private String location;
 
     @Column(name="participant_type")
     private String participantType;
 
+    @Min(value = 1, message = "Max participants must be at least 1")
     @Column(name="max_participants")
     private Integer maxParticipants;
 
+    @PositiveOrZero(message = "Registration fee cannot be negative")
     @Column(name="registration_fee")
     private Float registrationFee;
 
@@ -101,6 +111,7 @@ public class Event {
     @Column(name = "image_data", columnDefinition = "LONGTEXT")
     private String imageData;
 
+    @Pattern(regexp = "^$|^[6-9][0-9]{9}$", message = "Contact number must be a valid 10-digit Indian mobile number starting with 6-9")
     @Column(name = "contact_number")
     private String contactNumber;
 }

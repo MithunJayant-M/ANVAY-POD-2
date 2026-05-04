@@ -8,6 +8,7 @@ import com.cts.mfrp.anvay.repository.UserRepository;
 import com.cts.mfrp.anvay.service.ClubService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -76,7 +77,7 @@ public class ClubController {
     @PutMapping("/{clubId}")
     public ResponseEntity<Club> updateClub(
             @PathVariable Long clubId,
-            @RequestBody Club updatedClub) {
+            @Valid @RequestBody Club updatedClub) {
         log.info("Received request to update club: {}", clubId);
 
         try {
@@ -169,7 +170,7 @@ public class ClubController {
      * @return ResponseEntity containing the created Club entity
      */
     @PostMapping
-    public ResponseEntity<Club> createClub(@RequestBody Club club) {
+    public ResponseEntity<Club> createClub(@Valid @RequestBody Club club) {
         log.info("Received request to create new club with name: {}", club.getClubName());
 
         try {
@@ -243,6 +244,19 @@ public class ClubController {
                 userRepository.save(u);
             });
             return ResponseEntity.noContent().build();
+        }).orElse(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{clubId}/leader/{userId}")
+    public ResponseEntity<?> removeClubLeader(@PathVariable Long clubId, @PathVariable Long userId) {
+        return userRepository.findById(userId).map(u -> {
+            if (!clubId.equals(u.getLeadingClubId())) {
+                return ResponseEntity.badRequest().body("User is not the leader of this club");
+            }
+            u.setRole("student");
+            u.setLeadingClubId(null);
+            userRepository.save(u);
+            return ResponseEntity.ok().build();
         }).orElse(ResponseEntity.notFound().build());
     }
 

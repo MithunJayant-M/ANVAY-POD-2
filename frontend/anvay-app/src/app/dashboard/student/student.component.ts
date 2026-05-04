@@ -400,6 +400,8 @@ export class StudentComponent implements OnInit, OnDestroy {
       error: () => this.profileLoading = false
     });
     if (this.leaderboard.length === 0) this.loadLeaderboard();
+    // Chart reads from this.events — ensure it's populated regardless of nav order
+    if (this.events.length === 0) this.loadEvents();
   }
 
   get profileRank(): number | string {

@@ -6,6 +6,7 @@ import com.cts.mfrp.anvay.entity.Event;
 import com.cts.mfrp.anvay.entity.EventParticipant;
 import com.cts.mfrp.anvay.repository.EventParticipantRepository;
 import com.cts.mfrp.anvay.service.EventService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -44,12 +45,12 @@ public class EventController {
     }
 
     @PostMapping
-    public ResponseEntity<Event> createEvent(@RequestBody Event event) {
+    public ResponseEntity<Event> createEvent(@Valid @RequestBody Event event) {
         return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(event));
     }
 
     @PutMapping("/{eventId}")
-    public ResponseEntity<Event> updateEvent(@PathVariable Long eventId, @RequestBody Event event) {
+    public ResponseEntity<Event> updateEvent(@PathVariable Long eventId, @Valid @RequestBody Event event) {
         return ResponseEntity.ok(eventService.updateEvent(eventId, event));
     }
 
