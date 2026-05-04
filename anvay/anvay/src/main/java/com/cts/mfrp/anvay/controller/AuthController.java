@@ -51,4 +51,16 @@ public class AuthController {
             return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
         }
     }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> body) {
+        try {
+            userService.resetPassword(body.get("email"), body.get("oldPassword"), body.get("newPassword"));
+            return ResponseEntity.ok(Map.of("message", "Password reset successfully"));
+        } catch (BadCredentialsException e) {
+            return ResponseEntity.status(401).body(Map.of("message", e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
 }

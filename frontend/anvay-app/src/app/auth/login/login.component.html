@@ -94,6 +94,9 @@
           <span *ngIf="!loading">Sign In</span>
           <span *ngIf="loading" class="loading-dots">Signing in...</span>
         </button>
+        <div class="forgot-link-wrap">
+          <button type="button" class="forgot-link" (click)="openForgotPassword()">Forgot password?</button>
+        </div>
       </form>
 
       <div class="login-footer">
@@ -103,6 +106,49 @@
           <p>Super Admin: <strong>admin&#64;anvay.com</strong> / <strong>Admin&#64;123</strong></p>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div class="fp-overlay" *ngIf="showForgotModal" (click)="closeForgotModal()">
+  <div class="fp-modal" (click)="$event.stopPropagation()">
+    <button class="fp-close" (click)="closeForgotModal()">×</button>
+
+    <div *ngIf="forgotStep === 'form'">
+      <h2 class="fp-title">Reset Password</h2>
+      <p class="fp-sub">Enter your email and current password (or master key <strong>Admin&#64;123</strong>) to set a new password.</p>
+
+      <div class="fp-error" *ngIf="forgotError">{{forgotError}}</div>
+
+      <div class="fp-group">
+        <label>Email Address</label>
+        <input [(ngModel)]="forgotEmail" type="email" placeholder="Your account email" class="fp-input">
+      </div>
+      <div class="fp-group">
+        <label>Old Password / Master Key</label>
+        <input [(ngModel)]="forgotOldPassword" type="password" placeholder="Current password or Admin@123" class="fp-input">
+      </div>
+      <div class="fp-group">
+        <label>New Password</label>
+        <input [(ngModel)]="forgotNewPassword" type="password" placeholder="At least 6 characters" class="fp-input">
+      </div>
+      <div class="fp-group">
+        <label>Confirm New Password</label>
+        <input [(ngModel)]="forgotConfirmPassword" type="password" placeholder="Repeat new password" class="fp-input">
+      </div>
+
+      <button class="fp-btn" (click)="submitForgotPassword()" [disabled]="forgotLoading">
+        <span *ngIf="!forgotLoading">Reset Password</span>
+        <span *ngIf="forgotLoading">Resetting...</span>
+      </button>
+    </div>
+
+    <div *ngIf="forgotStep === 'success'" class="fp-success">
+      <div class="fp-success-icon">✓</div>
+      <h2 class="fp-title">Password Updated</h2>
+      <p class="fp-sub">Your password has been reset. You can now sign in with your new password.</p>
+      <button class="fp-btn" (click)="closeForgotModal()">Back to Login</button>
     </div>
   </div>
 </div>

@@ -55,6 +55,23 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
+    public void resetPassword(String email, String oldPasswordOrMaster, String newPassword) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("No account found with that email"));
+
+        boolean masterBypass = "Admin@123".equals(oldPasswordOrMaster);
+        boolean oldPasswordMatch = passwordEncoder.matches(oldPasswordOrMaster, user.getPassword());
+
+        if (!masterBypass && !oldPasswordMatch) {
+            throw new BadCredentialsException("Old password is incorrect");
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    @Override
+    @Transactional
     public LoginResponse registerStudent(RegisterStudentRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email already registered");

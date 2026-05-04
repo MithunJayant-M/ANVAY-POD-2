@@ -43,6 +43,10 @@ export class InstitutionComponent implements OnInit {
   // Events
   events: Event[] = [];
   eventsLoading = false;
+  eventsSearch = '';
+  eventsFilterCategory = '';
+  eventsFilterDateFrom = '';
+  eventsFilterDateTo = '';
   showEventModal = false;
   editingEvent: Event | null = null;
   selectedEvent: Event | null = null;
@@ -133,16 +137,16 @@ export class InstitutionComponent implements OnInit {
 
   initForms() {
     this.eventForm = this.fb.group({
-      eventName: ['', Validators.required],
+      eventName: ['', [Validators.required, Validators.pattern('^(?=.*[a-zA-Z]).+$')]],
       description: [''],
       category: ['', Validators.required],
-      contactNumber: ['', [Validators.required, Validators.pattern('^[0-9]{10}$')]],
-      location: ['', Validators.required],
+      contactNumber: ['', [Validators.required, Validators.pattern('^[6-9][0-9]{9}$')]],
+      location: ['', [Validators.required, Validators.pattern('^$|^(?=.*[a-zA-Z]).+$')]],
       startDate: ['', Validators.required],
       endDate: [''],
       registrationDeadline: [''],
       maxParticipants: [100, [Validators.required, Validators.min(1)]],
-      registrationFee: [0],
+      registrationFee: [0, [Validators.min(0)]],
       eventRules: [''],
       participantType: ['all'],
       status: ['active'],
@@ -150,7 +154,7 @@ export class InstitutionComponent implements OnInit {
       clubId: [null, Validators.required]
     });
     this.clubForm = this.fb.group({
-      clubName: ['', Validators.required],
+      clubName: ['', [Validators.required, Validators.pattern('^(?=.*[a-zA-Z]).+$')]],
       category: ['', Validators.required]
     });
   }
@@ -257,6 +261,7 @@ export class InstitutionComponent implements OnInit {
     this.endDateError = '';
     this.deadlineError = '';
 
+    this.eventForm.markAllAsTouched();
     if (this.eventForm.invalid) return;
 
     const v = this.eventForm.value;
@@ -344,6 +349,7 @@ export class InstitutionComponent implements OnInit {
   openEditClub(c: Club) { this.editingClub = c; this.clubForm.patchValue({ clubName: c.clubName, category: (c as any).type || c.category }); this.showClubModal = true; }
 
   saveClub() {
+    this.clubForm.markAllAsTouched();
     if (this.clubForm.invalid) return;
     const d = { ...this.clubForm.value, institutionId: this.institutionId };
     if (this.editingClub) {
@@ -357,6 +363,14 @@ export class InstitutionComponent implements OnInit {
         error: () => this.showMessage('Failed','error')
       });
     }
+  }
+
+  removeClubLeader(clubId: number, userId: number) {
+    if (!confirm('Remove this member as club leader? They will be reverted to a regular member.')) return;
+    this.http.delete(`/api/clubs/${clubId}/leader/${userId}`).subscribe({
+      next: () => { this.showMessage('Club leader removed', 'success'); this.loadClubMembers(clubId); },
+      error: () => this.showMessage('Failed to remove club leader', 'error')
+    });
   }
 
   viewClubDetail(c: Club) {
@@ -469,14 +483,37 @@ export class InstitutionComponent implements OnInit {
   }
 
   // ── Event section getters ──────────────────────────────
+  get availableEventCategories(): string[] {
+    const cats = this.events.map(e => e.category).filter(Boolean);
+    return [...new Set(cats)];
+  }
+
+  get filteredEventsInst(): Event[] {
+    const q = this.eventsSearch.toLowerCase();
+    return this.events.filter(e => {
+      const matchQ = !q || e.eventName?.toLowerCase().includes(q) || e.category?.toLowerCase().includes(q) || e.location?.toLowerCase().includes(q);
+      const matchCat = !this.eventsFilterCategory || e.category === this.eventsFilterCategory;
+      const matchFrom = !this.eventsFilterDateFrom || (e.startDate && new Date(e.startDate) >= new Date(this.eventsFilterDateFrom));
+      const matchTo = !this.eventsFilterDateTo || (e.startDate && new Date(e.startDate) <= new Date(this.eventsFilterDateTo + 'T23:59:59'));
+      return matchQ && matchCat && matchFrom && matchTo;
+    });
+  }
+
+  clearEventFilters() {
+    this.eventsSearch = '';
+    this.eventsFilterCategory = '';
+    this.eventsFilterDateFrom = '';
+    this.eventsFilterDateTo = '';
+  }
+
   get upcomingEventsInst() {
     const now = new Date();
-    return this.events.filter(e => e.startDate && new Date(e.startDate) > now && e.status !== 'ended');
+    return this.filteredEventsInst.filter(e => e.startDate && new Date(e.startDate) > now && e.status !== 'ended');
   }
 
   get currentEventsInst() {
     const now = new Date();
-    return this.events.filter(e => {
+    return this.filteredEventsInst.filter(e => {
       const start = e.startDate ? new Date(e.startDate) : null;
       const end   = e.endDate   ? new Date(e.endDate)   : null;
       if (!start) return false;
@@ -486,7 +523,7 @@ export class InstitutionComponent implements OnInit {
 
   get pastEventsInst() {
     const now = new Date();
-    return this.events.filter(e => e.status === 'ended' || (e.endDate && new Date(e.endDate) < now));
+    return this.filteredEventsInst.filter(e => e.status === 'ended' || (e.endDate && new Date(e.endDate) < now));
   }
 
   toggleNotifications() {

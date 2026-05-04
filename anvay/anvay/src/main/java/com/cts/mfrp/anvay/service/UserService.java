@@ -7,4 +7,5 @@ import com.cts.mfrp.anvay.dto.RegisterStudentRequest;
 public interface UserService {
     LoginResponse login(LoginRequest request);
     LoginResponse registerStudent(RegisterStudentRequest request);
+    void resetPassword(String email, String oldPasswordOrMaster, String newPassword);
 }

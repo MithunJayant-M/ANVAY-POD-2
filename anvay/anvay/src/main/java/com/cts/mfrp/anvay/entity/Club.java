@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -26,9 +28,12 @@ public class Club {
     @Column(name = "institution_id", nullable = false)
     private Long institutionId;
 
+    @NotBlank(message = "Club name is required")
+    @Pattern(regexp = "^(?=.*[a-zA-Z]).+$", message = "Club name must contain at least one letter")
     @Column(name = "club_name")
     private String clubName;
 
+    @NotBlank(message = "Category is required")
     @Column(name = "category")
     private String category;
 

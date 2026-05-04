@@ -221,6 +221,28 @@
           <div><h1>Event Management</h1><p>Create and manage events at your institution</p></div>
           <button class="btn-primary" (click)="openCreateEvent()">+ Create Event</button>
         </div>
+
+        <!-- Event filter toolbar -->
+        <div class="filters-bar">
+          <div class="search-wrap">
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+              <input [(ngModel)]="eventsSearch" placeholder="Search events..." class="search-input">
+            </div>
+          </div>
+          <select class="filter-select" [(ngModel)]="eventsFilterCategory">
+            <option value="">All Categories</option>
+            <option *ngFor="let c of availableEventCategories" [value]="c">{{c}}</option>
+          </select>
+          <div class="filter-date-group">
+            <label class="filter-date-label">From</label>
+            <input type="date" class="filter-date" [(ngModel)]="eventsFilterDateFrom">
+            <label class="filter-date-label">To</label>
+            <input type="date" class="filter-date" [(ngModel)]="eventsFilterDateTo">
+          </div>
+          <button class="btn-clear-filters" *ngIf="eventsSearch || eventsFilterCategory || eventsFilterDateFrom || eventsFilterDateTo" (click)="clearEventFilters()">&#10005; Clear</button>
+        </div>
+
         <div *ngIf="eventsLoading" class="loading-state"><div class="spinner"></div></div>
         <ng-container *ngIf="!eventsLoading">
 
@@ -394,7 +416,7 @@
         <div class="data-card">
           <div *ngIf="clubDetailTab==='members'">
             <table class="data-table">
-              <thead><tr><th>Member</th><th>Email</th><th>Role</th><th>Status</th></tr></thead>
+              <thead><tr><th>Member</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody>
                 <tr *ngFor="let m of clubMembers">
                   <td>
@@ -409,8 +431,13 @@
                     <span *ngIf="!(m.user?.role === 'club_leader' && m.user?.leadingClubId === selectedClub!.clubId)" class="badge-role-member">Member</span>
                   </td>
                   <td><span class="status-badge" [class.badge-active]="m.status==='APPROVED'" [class.badge-pending]="m.status==='PENDING'">{{m.status}}</span></td>
+                  <td>
+                    <button *ngIf="m.user?.role === 'club_leader' && m.user?.leadingClubId === selectedClub!.clubId"
+                            class="btn-sm btn-danger" (click)="removeClubLeader(selectedClub!.clubId, m.userId)">Remove Leader</button>
+                    <span *ngIf="!(m.user?.role === 'club_leader' && m.user?.leadingClubId === selectedClub!.clubId)">—</span>
+                  </td>
                 </tr>
-                <tr *ngIf="clubMembers.length===0"><td colspan="4" class="empty-cell">No members yet</td></tr>
+                <tr *ngIf="clubMembers.length===0"><td colspan="5" class="empty-cell">No members yet</td></tr>
               </tbody>
             </table>
           </div>
@@ -518,6 +545,8 @@
       <div class="form-group">
         <label>Event Title *</label>
         <input formControlName="eventName" class="input-field" placeholder="Enter event title">
+        <div class="field-error" *ngIf="eventForm.get('eventName')?.errors?.['required'] && eventForm.get('eventName')?.touched">Event title is required</div>
+        <div class="field-error" *ngIf="eventForm.get('eventName')?.errors?.['pattern'] && eventForm.get('eventName')?.touched">Please enter a valid name (letters required)</div>
       </div>
 
       <!-- Description -->
@@ -534,12 +563,14 @@
             <option value="">Select category</option>
             <option *ngFor="let c of categories" [value]="c">{{c}}</option>
           </select>
+          <div class="field-error" *ngIf="eventForm.get('category')?.errors?.['required'] && eventForm.get('category')?.touched">Category is required</div>
         </div>
         <div class="form-group">
           <label>Contact Number *</label>
           <input formControlName="contactNumber" class="input-field" placeholder="10-digit number" maxlength="10">
           <div class="field-error" *ngIf="contactNumberError">{{contactNumberError}}</div>
-          <div class="field-error" *ngIf="eventForm.get('contactNumber')?.invalid && eventForm.get('contactNumber')?.touched">Contact number must be exactly 10 digits</div>
+          <div class="field-error" *ngIf="eventForm.get('contactNumber')?.errors?.['required'] && eventForm.get('contactNumber')?.touched">Contact number is required</div>
+          <div class="field-error" *ngIf="eventForm.get('contactNumber')?.errors?.['pattern'] && eventForm.get('contactNumber')?.touched">Must be a 10-digit Indian number starting with 6–9</div>
         </div>
       </div>
 
@@ -560,6 +591,8 @@
       <div class="form-group">
         <label>Location</label>
         <input formControlName="location" class="input-field" placeholder="Event location">
+        <div class="field-error" *ngIf="eventForm.get('location')?.errors?.['required'] && eventForm.get('location')?.touched">Location is required</div>
+        <div class="field-error" *ngIf="eventForm.get('location')?.errors?.['pattern'] && eventForm.get('location')?.touched">Location must contain at least one letter</div>
       </div>
 
       <!-- Registration Deadline + Fee -->
@@ -572,6 +605,7 @@
         <div class="form-group">
           <label>Registration Fee (₹)</label>
           <input formControlName="registrationFee" type="number" class="input-field" placeholder="0">
+          <div class="field-error" *ngIf="eventForm.get('registrationFee')?.errors?.['min'] && eventForm.get('registrationFee')?.touched">Registration fee cannot be negative</div>
         </div>
       </div>
 
@@ -630,6 +664,8 @@
       <div class="form-group">
         <label>Club Name *</label>
         <input formControlName="clubName" class="input-field" placeholder="Enter club name">
+        <div class="field-error" *ngIf="clubForm.get('clubName')?.errors?.['required'] && clubForm.get('clubName')?.touched">Club name is required</div>
+        <div class="field-error" *ngIf="clubForm.get('clubName')?.errors?.['pattern'] && clubForm.get('clubName')?.touched">Please enter a valid name (letters required)</div>
       </div>
       <div class="form-group">
         <label>Category *</label>
@@ -637,6 +673,7 @@
           <option value="">Select category</option>
           <option *ngFor="let c of clubCategories" [value]="c">{{c}}</option>
         </select>
+        <div class="field-error" *ngIf="clubForm.get('category')?.errors?.['required'] && clubForm.get('category')?.touched">Category is required</div>
       </div>
       <div class="modal-actions">
         <button type="button" class="btn-cancel" (click)="showClubModal=false">Cancel</button>

@@ -118,10 +118,17 @@ export class SuperAdminComponent implements OnInit {
   allEvents: Event[] = [];
   allEventsLoading = false;
   eventsSearch = '';
+  eventsFilterCategory = '';
+  eventsFilterDateFrom = '';
+  eventsFilterDateTo = '';
+  eventsFilterStatus = '';
 
   // Notifications
   showNotifDropdown = false;
-  notifications: {text: string; type: 'info'|'warn'|'success'}[] = [];
+  notifications: {text: string; type: 'info'|'warn'|'success'; link?: string}[] = [];
+
+  // Profile dropdown
+  showProfileMenu = false;
 
   constructor(
     private http: HttpClient,
@@ -163,10 +170,39 @@ export class SuperAdminComponent implements OnInit {
     });
   }
 
+  get availableEventCategories(): string[] {
+    const cats = this.allEvents.map(e => e.category).filter(Boolean);
+    return [...new Set(cats)];
+  }
+
   get filteredAllEvents(): Event[] {
-    if (!this.eventsSearch) return this.allEvents;
     const q = this.eventsSearch.toLowerCase();
-    return this.allEvents.filter(e => e.eventName?.toLowerCase().includes(q) || e.category?.toLowerCase().includes(q) || e.location?.toLowerCase().includes(q));
+    const now = new Date();
+    return this.allEvents.filter(e => {
+      const matchQ = !q || e.eventName?.toLowerCase().includes(q) || e.category?.toLowerCase().includes(q) || e.location?.toLowerCase().includes(q);
+      const matchCat = !this.eventsFilterCategory || e.category === this.eventsFilterCategory;
+      const matchFrom = !this.eventsFilterDateFrom || (e.startDate && new Date(e.startDate) >= new Date(this.eventsFilterDateFrom));
+      const matchTo = !this.eventsFilterDateTo || (e.startDate && new Date(e.startDate) <= new Date(this.eventsFilterDateTo + 'T23:59:59'));
+      let matchStatus = true;
+      if (this.eventsFilterStatus === 'ended') {
+        matchStatus = e.status === 'ended' || (!!e.endDate && new Date(e.endDate) < now);
+      } else if (this.eventsFilterStatus === 'active') {
+        const start = e.startDate ? new Date(e.startDate) : null;
+        const end = e.endDate ? new Date(e.endDate) : null;
+        matchStatus = e.status !== 'ended' && !!start && start <= now && (!end || end >= now);
+      } else if (this.eventsFilterStatus === 'upcoming') {
+        matchStatus = e.status !== 'ended' && !!e.startDate && new Date(e.startDate) > now;
+      }
+      return matchQ && matchCat && matchFrom && matchTo && matchStatus;
+    });
+  }
+
+  clearEventFilters(): void {
+    this.eventsSearch = '';
+    this.eventsFilterCategory = '';
+    this.eventsFilterDateFrom = '';
+    this.eventsFilterDateTo = '';
+    this.eventsFilterStatus = '';
   }
 
   get upcomingEventsAdmin(): Event[] {
@@ -318,10 +354,20 @@ export class SuperAdminComponent implements OnInit {
   buildNotifications(): void {
     this.notifications = [];
     const pendingColleges = this.institutions.filter(i => i.status === 'pending').length;
-    if (pendingColleges > 0) this.notifications.push({ text: `${pendingColleges} institution${pendingColleges > 1 ? 's' : ''} awaiting approval`, type: 'warn' });
+    if (pendingColleges > 0) this.notifications.push({ text: `${pendingColleges} institution${pendingColleges > 1 ? 's' : ''} awaiting approval`, type: 'warn', link: 'colleges' });
     const pendingWinnersCount = this.pendingWinners.length;
-    if (pendingWinnersCount > 0) this.notifications.push({ text: `${pendingWinnersCount} event winner submission${pendingWinnersCount > 1 ? 's' : ''} awaiting review`, type: 'info' });
+    if (pendingWinnersCount > 0) this.notifications.push({ text: `${pendingWinnersCount} event winner submission${pendingWinnersCount > 1 ? 's' : ''} awaiting review`, type: 'info', link: 'approvals' });
     if (this.notifications.length === 0) this.notifications.push({ text: 'No new notifications', type: 'success' });
+  }
+
+  navigateFromNotif(link?: string): void {
+    this.showNotifDropdown = false;
+    if (link) this.setView(link as any);
+  }
+
+  toggleProfileMenu(): void {
+    this.showProfileMenu = !this.showProfileMenu;
+    this.showNotifDropdown = false;
   }
 
   get totalNotifCount(): number {
