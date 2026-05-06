@@ -33,16 +33,15 @@
   width:260px; min-height:100vh;
   background:linear-gradient(180deg,#052e16 0%,#14532d 100%);
   display:flex; flex-direction:column; position:fixed; top:0; left:0;
-  z-index:100; transition:width .3s;
+  z-index:100; transition:width .3s, transform .3s;
   box-shadow:4px 0 24px rgba(5,46,22,.25);
 }
 .sidebar-collapsed .inst-sidebar { width:0; overflow:hidden; }
 .inst-main { margin-left:260px; flex:1; transition:margin-left .3s; }
 .sidebar-collapsed .inst-main { margin-left:0; }
 
-.sb-brand { padding:28px 20px 22px; display:flex; align-items:center; gap:12px; border-bottom:1px solid rgba(255,255,255,.08); }
-.brand-name { font-family:'Space Grotesk',sans-serif; font-size:1.3rem; font-weight:700; color:#fff; letter-spacing:4px; }
-.brand-tag { font-size:.5rem; color:#6ee7b7; letter-spacing:2.5px; text-transform:uppercase; margin-top:4px; font-weight:600; }
+.sb-brand { padding:2px 30px 2px; display:flex; align-items:center; border-bottom:1px solid rgba(255,255,255,.08); }
+.sb-logo-img { height:90px; width:auto; max-width:180px; display:block; object-fit:contain; }
 
 .sb-role-badge { margin:16px 20px 8px; display:flex; align-items:center; gap:8px; font-size:.68rem; font-weight:700; color:#6ee7b7; text-transform:uppercase; letter-spacing:1.5px; }
 .role-dot { width:6px; height:6px; border-radius:50%; background:#34d399; flex-shrink:0; box-shadow:0 0 6px #34d399; }
@@ -303,7 +302,6 @@ textarea.input-field { resize:vertical; }
 .pts-num { color:#15803d; font-size:.95rem; }
 
 @media(max-width:1100px) { .stat-grid{grid-template-columns:repeat(2,1fr)} }
-@media(max-width:768px)  { .inst-sidebar{width:0;overflow:hidden} .inst-main{margin-left:0} }
 
 /* ── End Event button ── */
 .btn-end-event { background:#fffbeb; color:#b45309; border:1px solid #fde68a; border-radius:6px; padding:4px 9px; font-size:.75rem; font-weight:700; cursor:pointer; font-family:inherit; transition:.15s; }
@@ -364,15 +362,19 @@ textarea.input-field { resize:vertical; }
 .notif-clickable { cursor:pointer; }
 .notif-clickable:hover { background:#f0fdf4; }
 
+/* ── Mobile backdrop (hidden on desktop) ── */
+.mobile-sidebar-backdrop { display:none; }
+
 /* ── Responsive ── */
-@media(max-width:900px) {
-  .inst-sidebar { width:200px; }
-  .inst-main { margin-left:200px; }
+@media(max-width:1024px) {
+  /* Sidebar becomes a full drawer overlay on tablets + phones */
+  .inst-sidebar { width:260px; overflow:hidden; position:fixed; transform:translateX(0); }
+  .sidebar-collapsed .inst-sidebar { width:260px; overflow:hidden; transform:translateX(-100%); }
+  .inst-main { margin-left:0 !important; width:100%; max-width:100vw; }
   .sidebar-collapsed .inst-main { margin-left:0; }
+  .mobile-sidebar-backdrop { display:block; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:99; animation:backdrop-in .25s; }
 }
 @media(max-width:700px) {
-  .inst-sidebar { width:0; overflow:hidden; position:fixed; }
-  .inst-main { margin-left:0; }
   .inst-page { padding:16px 12px; }
   .dash-stats { grid-template-columns:1fr 1fr; gap:10px; }
   .filters-bar { flex-direction:column; align-items:stretch; gap:8px; }
@@ -382,11 +384,32 @@ textarea.input-field { resize:vertical; }
   .modal-box { margin:8px; padding:18px 14px; max-width:100vw; }
   .modal-box.small { max-width:100vw; }
   .modal-overlay { padding:8px; align-items:flex-start; padding-top:40px; }
+  .notif-dropdown { width:calc(100vw - 32px); right:-16px; }
+  .inst-topbar { padding:0 12px; }
+  .data-card { overflow-x:auto; }
 }
+@keyframes backdrop-in { from{opacity:0} to{opacity:1} }
 
 /* Slider */
 .slider-input { width:100%; accent-color:#16a34a; cursor:pointer; }
 .slider-val { font-weight:700; color:#16a34a; }
+.slider-with-input { display:flex; align-items:center; gap:12px; }
+.slider-with-input .slider-input { flex:1; }
+.participants-num { width:80px; flex-shrink:0; text-align:center; }
+
+/* Event rules counter */
+.rules-counter { font-size:.75rem; color:#94a3b8; text-align:right; margin-top:2px; }
+.rules-counter-warn { color:#d97706; font-weight:600; }
+
+/* Wider event modal */
+.modal-box.modal-wide { max-width:760px !important; }
+
+/* Danger button for destructive modal actions */
+.modal-btn-danger { padding:10px 22px; background:#ef4444; color:#fff; border:none; border-radius:10px; font-weight:700; font-size:.85rem; cursor:pointer; font-family:inherit; transition:.15s; }
+.modal-btn-danger:hover { background:#dc2626; }
+
+/* Warn icon variant for confirmation modals */
+.warn-icon { background:#fef3c7; color:#d97706; }
 
 /* Image upload */
 .file-input { display:none; }

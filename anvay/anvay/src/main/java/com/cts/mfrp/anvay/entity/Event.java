@@ -8,6 +8,7 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.PositiveOrZero;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -105,6 +106,7 @@ public class Event {
     @Column(name = "registration_deadline")
     private LocalDateTime registrationDeadline;
 
+    @Size(max = 2000, message = "Event rules must not exceed 2000 characters")
     @Column(name = "event_rules")
     private String eventRules;
 

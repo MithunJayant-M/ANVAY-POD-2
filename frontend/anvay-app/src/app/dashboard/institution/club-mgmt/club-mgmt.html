@@ -1,4 +1,4 @@
-<div class="mgmt-page">
+﻿<div class="mgmt-page">
   <header class="mgmt-header">
     <div class="header-left">
       <h1 class="brand-title">Club Management</h1>
@@ -10,7 +10,7 @@
   <section class="content-card">
     <h2 class="section-heading">Your Clubs</h2>
     
-    <table class="anvay-table">
+    <div class="table-responsive"><table class="anvay-table">
       <thead>
         <tr>
           <th>Club Name</th>
@@ -56,7 +56,7 @@
           </td>
         </tr>
       </tbody>
-    </table>
+    </table></div>
 
     <div *ngIf="clubs.length === 0" class="empty-state-placeholder">
       <p>No clubs currently registered.</p>

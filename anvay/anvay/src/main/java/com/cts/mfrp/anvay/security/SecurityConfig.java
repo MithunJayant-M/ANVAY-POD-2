@@ -40,7 +40,14 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/institutions/active").permitAll()
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
+                // Swagger UI + OpenAPI JSON + Actuator health — no auth required
+                .requestMatchers(
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/v3/api-docs/**",
+                        "/webjars/**",
+                        "/actuator/**"
+                ).permitAll()
                 .requestMatchers("/api/super-admin/**").hasRole("SUPER_ADMIN")
                 .anyRequest().authenticated()
             )

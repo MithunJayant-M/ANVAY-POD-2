@@ -23,4 +23,5 @@ public class EventFeedDTO {
     private Boolean hasWinners;
     private String imageData;
     private String registrationDeadline;
+    private String eventRules;
 }

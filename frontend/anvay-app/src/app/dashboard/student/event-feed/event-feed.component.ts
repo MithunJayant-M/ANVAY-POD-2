@@ -1,7 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { EventService } from '../.../../services/event.service'; // Adjust path based on your folder structure
+import { EventService } from '../.../../services/event.service';
 import { EventRecord } from '../.../../models/event.model';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-event-feed',
@@ -14,6 +15,7 @@ export class EventFeedComponent implements OnInit {
   // Initialize as an empty array to be populated by the service
   events: EventRecord[] = [];
   private eventService = inject(EventService);
+  private ns = inject(NotificationService);
 
   ngOnInit(): void {
     this.loadEvents();
@@ -65,7 +67,7 @@ export class EventFeedComponent implements OnInit {
       },
       error: (err) => {
         this.isSubmitting = false;
-        alert("Registration failed");
+        this.ns.showError('Registration failed. Please try again.');
       }
     });
   } else {

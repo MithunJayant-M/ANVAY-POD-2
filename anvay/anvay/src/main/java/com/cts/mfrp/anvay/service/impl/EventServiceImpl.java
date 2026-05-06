@@ -75,6 +75,8 @@ public class EventServiceImpl implements EventService {
         if (event.getHasWinners() != null) existing.setHasWinners(event.getHasWinners());
         if (event.getRegistrationDeadline() != null) existing.setRegistrationDeadline(event.getRegistrationDeadline());
         if (event.getEventRules() != null) existing.setEventRules(event.getEventRules());
+        if (event.getContactNumber() != null) existing.setContactNumber(event.getContactNumber());
+        if (event.getImageData() != null) existing.setImageData(event.getImageData());
         existing.setUpdatedAt(LocalDateTime.now());
         return eventRepository.save(existing);
     }
@@ -238,6 +240,7 @@ public class EventServiceImpl implements EventService {
                     .hasWinners(event.getHasWinners())
                     .imageData(event.getImageData())
                     .registrationDeadline(event.getRegistrationDeadline() != null ? event.getRegistrationDeadline().toString() : null)
+                    .eventRules(event.getEventRules())
                     .build();
         }).collect(Collectors.toList());
     }
@@ -266,6 +269,7 @@ public class EventServiceImpl implements EventService {
                     .hasWinners(event.getHasWinners())
                     .imageData(event.getImageData())
                     .registrationDeadline(event.getRegistrationDeadline() != null ? event.getRegistrationDeadline().toString() : null)
+                    .eventRules(event.getEventRules())
                     .build();
         }).collect(Collectors.toList());
     }

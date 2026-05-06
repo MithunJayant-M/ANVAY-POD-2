@@ -1,0 +1,62 @@
+[
+  {
+    "category": "register",
+    "keywords": ["register", "registration", "enroll", "signup", "sign up", "join event", "participate", "reg "],
+    "response": "To register for an event on Anvay:\n1. Go to Events in your Student Dashboard.\n2. Browse the event feed or search for a specific event.\n3. Click 'Register Now' on the event card.\n4. A confirmation popup shows the event details and rules — review them carefully.\n5. Click 'Confirm Registration' to finalize.\n\nYou can view all your registrations under the 'Registered Events' tab. Make sure to register before the deadline shown on the event card!"
+  },
+  {
+    "category": "leadership",
+    "keywords": ["leader", "leadership", "apply for leader", "club leader", "lead club", "become leader", "apply leadership", "leading"],
+    "response": "To apply for Club Leadership on Anvay:\n1. Go to Clubs in your Student Dashboard.\n2. Find the club you want to lead — you must already be an approved member.\n3. Click 'Apply for Leadership' on the club card.\n4. Fill in your experience and motivation in the application form.\n5. Submit your application.\n\nThe Institution Admin will review your application. You will be notified once a decision is made. Note: Only one application per club is allowed at a time."
+  },
+  {
+    "category": "create_event",
+    "keywords": ["create event", "new event", "host event", "add event", "make event", "publish event", "create an event", "event creation", "how to create"],
+    "response": "To create an event (Institution Admin only):\n1. Log in to the Institution Admin Dashboard.\n2. Click 'Event Management' in the sidebar.\n3. Click '+ Create New Event'.\n4. Fill in: Event Name, Category, Start/End Date, Location, Max Participants, and Registration Deadline.\n5. Optionally add Event Rules (up to 2000 characters), Registration Fee, and a Banner Image.\n6. Set participant type: All (public) or Institution-only (private).\n7. Toggle 'Has Winners' if you want to award points to top performers.\n8. Click 'Save Event' to publish.\n\nThe event will immediately appear in the student event feed."
+  },
+  {
+    "category": "rules",
+    "keywords": ["rules", "event rules", "guidelines", "regulations", "terms", "rule", "conditions", "policy"],
+    "response": "How to view Event Rules on Anvay:\n\nFor Students:\n1. Go to the Events section in your Student Dashboard.\n2. Click 'Register Now' on any event.\n3. A confirmation popup will display the full event rules before you confirm your registration.\n\nFor Institution Admins (when creating events):\n- Add rules in the 'Event Rules' field during event creation or editing.\n- Maximum 2000 characters. A live character counter is shown.\n\nRules are set by the Institution Admin who created the event."
+  },
+  {
+    "category": "clubs",
+    "keywords": ["club", "clubs", "join club", "club membership", "membership", "club join", "how to join"],
+    "response": "To join a Club on Anvay:\n1. Go to the Clubs section in your Student Dashboard.\n2. Browse all available clubs for your institution.\n3. Click 'Join' on the club you are interested in.\n4. Your request is sent to the Club Leader or Institution Admin for approval.\n5. Once approved, you will become a member and can participate in club activities.\n\nMembership Status:\n- Pending: Your request is under review.\n- Approved: You are an active member.\n\nTip: You can apply for Club Leadership once you are an approved member!"
+  },
+  {
+    "category": "points",
+    "keywords": ["points", "leaderboard", "score", "rank", "ranking", "achievement", "achievements", "rewards", "prize points"],
+    "response": "The Anvay Points and Leaderboard System:\n\nEarning Points:\n- 1st Place in an event = +100 points\n- 2nd Place in an event = +75 points\n- 3rd Place in an event = +50 points\n\nHow Points are Awarded:\n1. Institution Admin selects winners after the event ends.\n2. Super Admin reviews and approves the winners.\n3. Points are automatically credited to winners' profiles.\n\nLeaderboard Types:\n- Institution Leaderboard: Your rank within your institution.\n- Global Leaderboard: Your rank across all institutions.\n- College Leaderboard: Institutions ranked by total student points.\n\nView your rank in the Profile or Leaderboard section of your dashboard."
+  },
+  {
+    "category": "winners",
+    "keywords": ["winner", "winners", "award winner", "first place", "second place", "third place", "prize", "podium"],
+    "response": "How Event Winners are Awarded on Anvay:\n1. After an event ends, the Institution Admin selects winners: 1st, 2nd, and 3rd Place (all are optional).\n2. The Institution Admin submits the winners for review.\n3. The Super Admin reviews and approves the submission.\n4. Points are automatically credited: 1st = 100 pts, 2nd = 75 pts, 3rd = 50 pts.\n\nNote: Winners can only be submitted once per event and only for events where 'Has Winners' was enabled during creation."
+  },
+  {
+    "category": "dashboard",
+    "keywords": ["dashboard", "navigate", "navigation", "how to use", "anvay", "platform", "features", "home", "overview"],
+    "response": "Anvay Platform Overview — Pod 2:\n\nThere are 4 dashboards based on your role:\n\nStudent Dashboard: Browse events, register, join clubs, apply for leadership, view leaderboard, manage profile and wishlist.\n\nInstitution Admin Dashboard: Manage events and clubs, approve join requests, award winners, view institution analytics.\n\nClub Leader Dashboard: Manage club members, events, and handle join and leave requests.\n\nSuper Admin Dashboard: Approve or deactivate institutions, approve event winners, view platform-wide analytics.\n\nUse the Sidebar Navigation to switch between sections."
+  },
+  {
+    "category": "profile",
+    "keywords": ["profile", "account", "my profile", "profile photo", "picture", "wishlist", "my account"],
+    "response": "Your Anvay Profile:\nAccess your profile from the 'Profile' section in the sidebar.\n\nWhat you can do:\n- View your total points, rank, events registered, and clubs joined.\n- Upload or change your profile photo.\n- View your Event Participation Trend chart.\n- Browse your Wishlist — events you saved using the heart button on event cards.\n\nWishlist Feature:\n- Click the heart icon on any event card to save it to your wishlist.\n- View all saved events in the Wishlist section of your Profile.\n- Register for events directly from your wishlist!\n\nNote: Profile pictures are stored locally in your browser."
+  },
+  {
+    "category": "password",
+    "keywords": ["password", "forgot password", "reset password", "change password", "login issue", "cant login", "lost password"],
+    "response": "Password Reset on Anvay:\n1. Go to the Login page.\n2. Click 'Forgot password?' below the Sign In button.\n3. Enter your registered email address.\n4. Enter your old password (or the master key provided by your admin).\n5. Enter and confirm your new password.\n6. Click 'Reset Password'.\n\nYour password will be updated immediately and you can log in with the new credentials.\n\nIf you have completely forgotten your password, contact your Institution Admin or the Super Admin at admin@anvay.com."
+  },
+  {
+    "category": "event_end",
+    "keywords": ["end event", "ended", "event ended", "close event", "stop event", "mark ended"],
+    "response": "How to End an Event (Institution Admin):\n1. Go to Event Management in the Institution Admin Dashboard.\n2. Find the event in the Active Events table.\n3. Click the 'End' button next to the event.\n4. The event status changes to 'Ended' and registration closes.\n\nOnce ended:\n- Students can no longer register.\n- If 'Has Winners' was enabled, you can now submit the winner selection.\n- Ended events appear in the Past Events table."
+  },
+  {
+    "category": "institution",
+    "keywords": ["institution", "college", "university", "school", "register institution", "institution registration", "institution admin", "pending approval"],
+    "response": "Institution Registration on Anvay:\n1. Go to the registration page and choose 'Register as Institution'.\n2. Fill in the institution details and admin credentials.\n3. Submit the registration.\n4. Your account will be in 'Pending' status until the Super Admin approves it.\n5. Once approved, the Institution Admin can access the full dashboard.\n\nPending Status: You will see an 'Awaiting Approval' screen after registration. The Super Admin reviews all institution applications before granting access."
+  }
+]

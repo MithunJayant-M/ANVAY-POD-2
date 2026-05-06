@@ -1,9 +1,10 @@
-<div class="sa-shell" [class.sidebar-collapsed]="!sidebarOpen">
+﻿<div class="sa-shell" [class.sidebar-collapsed]="!sidebarOpen">
+  <div class="mobile-sidebar-backdrop" *ngIf="sidebarOpen" (click)="sidebarOpen=false"></div>
 
   <!-- SIDEBAR -->
   <aside class="sa-sidebar">
     <div class="sb-brand">
-      <div><div class="brand-name">ANVAY</div><div class="brand-tag">DISCOVER. JOIN. HOST.</div></div>
+      <img src="assets/anvaylogo1.png" class="sb-logo-img" alt="Anvay">
     </div>
 
     <div class="sb-role-badge">
@@ -141,11 +142,13 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="20" height="20"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
               </div>
               <div class="stat-body">
-                <div class="stat-num">{{stats.totalColleges}}</div>
-                <div class="stat-label">Total Colleges</div>
+                <div class="stat-num">{{stats.activeColleges}}</div>
+                <div class="stat-label">Active Colleges</div>
                 <div class="stat-sub">
-                  <span class="badge-active">{{stats.activeColleges}} active</span>
-                  <span class="badge-pending ml-8">{{stats.pendingColleges}} pending</span>
+                  <span *ngIf="stats.pendingColleges > 0" class="pending-action-link" (click)="setView('colleges')">
+                    &#9888; Action Required: {{stats.pendingColleges}} pending request{{stats.pendingColleges !== 1 ? 's' : ''}}
+                  </span>
+                  <span *ngIf="stats.pendingColleges === 0" class="trend">All institutions active</span>
                 </div>
               </div>
             </div>
@@ -246,7 +249,7 @@
           <div *ngIf="collegesLoading" class="loading-state"><div class="spinner"></div></div>
 
           <div *ngIf="!collegesLoading" class="data-card">
-            <table class="data-table">
+            <div class="table-responsive"><table class="data-table">
               <thead>
                 <tr>
                   <th>Institution</th>
@@ -280,7 +283,7 @@
                   <td colspan="7" class="empty-cell">No institutions found</td>
                 </tr>
               </tbody>
-            </table>
+            </table></div>
           </div>
         </div>
 
@@ -312,7 +315,7 @@
           <div *ngIf="institutionDetailLoading" class="loading-state"><div class="spinner"></div></div>
 
           <div *ngIf="!institutionDetailLoading && institutionDetailTab==='events'" class="data-card">
-            <table class="data-table">
+            <div class="table-responsive"><table class="data-table">
               <thead><tr><th>Event Name</th><th>Category</th><th>Location</th><th>Start Date</th><th>Status</th></tr></thead>
               <tbody>
                 <tr *ngFor="let ev of institutionEvents">
@@ -324,11 +327,11 @@
                 </tr>
                 <tr *ngIf="institutionEvents.length===0"><td colspan="5" class="empty-cell">No events found</td></tr>
               </tbody>
-            </table>
+            </table></div>
           </div>
 
           <div *ngIf="!institutionDetailLoading && institutionDetailTab==='clubs'" class="data-card">
-            <table class="data-table">
+            <div class="table-responsive"><table class="data-table">
               <thead><tr><th>Club Name</th><th>Category</th><th>Members</th><th>Pending Requests</th><th>Created</th></tr></thead>
               <tbody>
                 <tr *ngFor="let cl of institutionClubs">
@@ -340,7 +343,7 @@
                 </tr>
                 <tr *ngIf="institutionClubs.length===0"><td colspan="5" class="empty-cell">No clubs found</td></tr>
               </tbody>
-            </table>
+            </table></div>
           </div>
         </div>
       </div>
@@ -383,7 +386,7 @@
           <div class="ev-section" *ngIf="currentEventsAdmin.length > 0">
             <div class="ev-section-header"><span class="ev-section-dot current-dot"></span>Happening Now <span class="ev-section-count">{{currentEventsAdmin.length}}</span></div>
             <div class="data-card">
-              <table class="data-table">
+              <div class="table-responsive"><table class="data-table">
                 <thead><tr><th>Event Name</th><th>Category</th><th>Location</th><th>Start Date</th><th>End Date</th><th>Capacity</th></tr></thead>
                 <tbody>
                   <tr *ngFor="let ev of currentEventsAdmin">
@@ -395,7 +398,7 @@
                     <td>{{ev.maxParticipants || '—'}}</td>
                   </tr>
                 </tbody>
-              </table>
+              </table></div>
             </div>
           </div>
 
@@ -403,7 +406,7 @@
           <div class="ev-section" *ngIf="upcomingEventsAdmin.length > 0">
             <div class="ev-section-header"><span class="ev-section-dot upcoming-dot"></span>Upcoming <span class="ev-section-count">{{upcomingEventsAdmin.length}}</span></div>
             <div class="data-card">
-              <table class="data-table">
+              <div class="table-responsive"><table class="data-table">
                 <thead><tr><th>Event Name</th><th>Category</th><th>Location</th><th>Start Date</th><th>End Date</th><th>Capacity</th></tr></thead>
                 <tbody>
                   <tr *ngFor="let ev of upcomingEventsAdmin">
@@ -415,7 +418,7 @@
                     <td>{{ev.maxParticipants || '—'}}</td>
                   </tr>
                 </tbody>
-              </table>
+              </table></div>
             </div>
           </div>
 
@@ -423,7 +426,7 @@
           <div class="ev-section" *ngIf="pastEventsAdmin.length > 0">
             <div class="ev-section-header"><span class="ev-section-dot past-dot"></span>Past / Ended <span class="ev-section-count">{{pastEventsAdmin.length}}</span></div>
             <div class="data-card">
-              <table class="data-table">
+              <div class="table-responsive"><table class="data-table">
                 <thead><tr><th>Event Name</th><th>Category</th><th>Location</th><th>Start Date</th><th>End Date</th><th>Capacity</th><th>Status</th></tr></thead>
                 <tbody>
                   <tr *ngFor="let ev of pastEventsAdmin" class="row-past">
@@ -436,7 +439,7 @@
                     <td><span class="status-badge" [class.badge-active]="ev.status==='active'" [class.badge-pending]="ev.status==='ended'" [class.badge-inactive]="ev.status==='cancelled'">{{ev.status || 'ended'}}</span></td>
                   </tr>
                 </tbody>
-              </table>
+              </table></div>
             </div>
           </div>
 
@@ -485,7 +488,7 @@
             <div class="chart-header">
               <div><h3>Institution Rankings</h3><p>Ranked by total points earned</p></div>
             </div>
-            <table class="data-table">
+            <div class="table-responsive"><table class="data-table">
               <thead><tr><th>Rank</th><th>Institution</th><th>Students</th><th>Events</th><th>Clubs</th><th>Points</th><th>Status</th></tr></thead>
               <tbody>
                 <tr *ngFor="let r of analytics.institutionRankings; let i=index">
@@ -498,7 +501,7 @@
                   <td><span [class]="getStatusClass(r.status)" class="status-badge">{{r.status}}</span></td>
                 </tr>
               </tbody>
-            </table>
+            </table></div>
           </div>
         </ng-container>
       </div>
@@ -611,3 +614,6 @@
     </div>
   </div>
 </div>
+
+<!-- Anvay AI Assistant -->
+<app-chat-widget></app-chat-widget>

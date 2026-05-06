@@ -4,6 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { ChatWidgetComponent } from '../../shared/chat-widget/chat-widget.component';
 
 interface StudentDashboard {
   firstName: string; institutionName: string; totalPoints: number; rank: number;
@@ -17,7 +20,7 @@ interface EventFeed {
   eventId: number; title: string; location: string; institution: string; institutionId: number;
   type: string; participantType: string; registeredCount: number; totalCapacity: number;
   isRegistered: boolean; startDate?: string; endDate?: string; status?: string; hasWinners?: boolean;
-  imageData?: string; registrationDeadline?: string;
+  imageData?: string; registrationDeadline?: string; eventRules?: string;
 }
 interface Club { clubId: number; clubName: string; category: string; type: string; membersCount: number; memberCount: number; institutionId: number; }
 interface LeadershipApp { applicationId: number; clubId: number; status: string; }
@@ -28,13 +31,13 @@ interface UserProfile { userId: number; firstName: string; lastName: string; ema
 @Component({
   selector: 'app-student',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ChatWidgetComponent],
   templateUrl: './student.component.html',
   styleUrls: ['./student.component.css']
 })
 export class StudentComponent implements OnInit, OnDestroy {
   activeView: 'dashboard' | 'events' | 'clubs' | 'leaderboard' | 'profile' = 'dashboard';
-  sidebarOpen = true;
+  sidebarOpen = window.innerWidth > 1024;
   studentId: number = 0;
   institutionId: number = 0;
 
@@ -60,8 +63,15 @@ export class StudentComponent implements OnInit, OnDestroy {
     return [...new Set(cats)];
   }
 
+  // Registration confirmation modal
+  showRegisterModal = false;
+  registerConfirmEvent: EventFeed | null = null;
+
   // Wishlist
   wishlist: number[] = [];
+
+  // Search debounce
+  private searchSubject = new Subject<string>();
 
   // Carousel
   carouselIndex = 0;
@@ -120,6 +130,18 @@ export class StudentComponent implements OnInit, OnDestroy {
     this.institutionId = user?.institutionId ?? 0;
     this.wishlist = JSON.parse(localStorage.getItem(`wishlist_${this.studentId}`) || '[]');
     this.profilePicture = localStorage.getItem(`profilePic_${this.studentId}`) || '';
+    if (this.studentId) {
+      this.http.get<any[]>(`/api/clubs/user/${this.studentId}`).subscribe({
+        next: ms => { this.myPendingClubIds = ms.filter(m => m.status === 'PENDING').map(m => m.clubId); },
+        error: () => {}
+      });
+    }
+    this.searchSubject.pipe(debounceTime(300), distinctUntilChanged()).subscribe(q => {
+      const lower = q.toLowerCase().trim();
+      if (!lower) { this.searchSuggestions = []; this.showSuggestions = false; return; }
+      this.searchSuggestions = this.events.map(e => e.title).filter(t => t.toLowerCase().includes(lower)).slice(0, 6);
+      this.showSuggestions = this.searchSuggestions.length > 0;
+    });
     this.route.queryParams.subscribe(params => {
       const v = (params['view'] || 'dashboard') as 'dashboard'|'events'|'clubs'|'leaderboard'|'profile';
       this.applyView(v);
@@ -128,6 +150,7 @@ export class StudentComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     if (this.carouselInterval) clearInterval(this.carouselInterval);
+    this.searchSubject.complete();
   }
 
   setView(v: 'dashboard'|'events'|'clubs'|'leaderboard'|'profile') {
@@ -240,13 +263,7 @@ export class StudentComponent implements OnInit, OnDestroy {
   }
 
   onSearchInput() {
-    const q = this.searchEvent.toLowerCase().trim();
-    if (!q) { this.searchSuggestions = []; this.showSuggestions = false; return; }
-    this.searchSuggestions = this.events
-      .map(e => e.title)
-      .filter(t => t.toLowerCase().includes(q))
-      .slice(0, 6);
-    this.showSuggestions = this.searchSuggestions.length > 0;
+    this.searchSubject.next(this.searchEvent);
   }
 
   selectSuggestion(s: string) {
@@ -263,6 +280,26 @@ export class StudentComponent implements OnInit, OnDestroy {
     this.showSuggestions = false;
   }
 
+  openRegistrationConfirm(ev: EventFeed) {
+    this.registerConfirmEvent = ev;
+    this.showRegisterModal = true;
+  }
+
+  confirmRegistration() {
+    if (!this.registerConfirmEvent) return;
+    const ev = this.registerConfirmEvent;
+    this.showRegisterModal = false;
+    this.registerConfirmEvent = null;
+    this.http.post('/api/events/register', { eventId: ev.eventId, userId: this.studentId }).subscribe({
+      next: () => {
+        this.showMessage('Registered successfully!', 'success');
+        const found = this.events.find(e => e.eventId === ev.eventId);
+        if (found) { found.isRegistered = true; found.registeredCount = (found.registeredCount || 0) + 1; }
+      },
+      error: () => this.showMessage('Registration failed', 'error')
+    });
+  }
+
   registerEvent(eventId: number) {
     this.http.post('/api/events/register', { eventId, userId: this.studentId }).subscribe({
       next: () => {
@@ -272,6 +309,10 @@ export class StudentComponent implements OnInit, OnDestroy {
       },
       error: () => this.showMessage('Registration failed', 'error')
     });
+  }
+
+  get wishlistedEvents(): EventFeed[] {
+    return this.events.filter(e => this.wishlist.includes(e.eventId));
   }
 
   isEventOpen(ev: EventFeed): boolean {
