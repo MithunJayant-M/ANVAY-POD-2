@@ -1,8 +1,9 @@
-<div class="leader-shell" [class.sidebar-collapsed]="!sidebarOpen">
+﻿<div class="leader-shell" [class.sidebar-collapsed]="!sidebarOpen">
+  <div class="mobile-sidebar-backdrop" *ngIf="sidebarOpen" (click)="sidebarOpen=false"></div>
   <!-- SIDEBAR -->
   <aside class="leader-sidebar">
     <div class="sb-brand">
-      <div><div class="brand-name">ANVAY</div><div class="brand-tag">DISCOVER. JOIN. HOST.</div></div>
+      <img src="assets/anvaylogo1.png" class="sb-logo-img" alt="Anvay">
     </div>
     <div class="sb-role-badge"><span class="role-dot"></span>Club Leader</div>
     <nav class="sb-nav">
@@ -323,7 +324,7 @@
         <div *ngIf="lbTab==='institution'">
           <div *ngIf="lbLoading" class="loading-state"><div class="spinner"></div></div>
           <div *ngIf="!lbLoading" class="data-card">
-            <table class="data-table">
+            <div class="table-responsive"><table class="data-table">
               <thead><tr><th>Rank</th><th>Student</th><th>Email</th><th>Points</th><th>Clubs</th><th>Events</th></tr></thead>
               <tbody>
                 <tr *ngFor="let u of leaderboard; let i=index" [class.my-row]="u.userId===studentId">
@@ -341,14 +342,14 @@
                 </tr>
                 <tr *ngIf="leaderboard.length===0"><td colspan="6" class="empty-cell">No data available</td></tr>
               </tbody>
-            </table>
+            </table></div>
           </div>
         </div>
 
         <div *ngIf="lbTab==='global'">
           <div *ngIf="globalLbLoading" class="loading-state"><div class="spinner"></div></div>
           <div *ngIf="!globalLbLoading" class="data-card">
-            <table class="data-table">
+            <div class="table-responsive"><table class="data-table">
               <thead><tr><th>Rank</th><th>Student</th><th>Email</th><th>Points</th><th>Clubs</th><th>Events</th></tr></thead>
               <tbody>
                 <tr *ngFor="let u of globalLeaderboard; let i=index" [class.my-row]="u.userId===studentId">
@@ -366,14 +367,14 @@
                 </tr>
                 <tr *ngIf="globalLeaderboard.length===0"><td colspan="6" class="empty-cell">No data available</td></tr>
               </tbody>
-            </table>
+            </table></div>
           </div>
         </div>
 
         <div *ngIf="lbTab==='colleges'">
           <div *ngIf="collegeLbLoading" class="loading-state"><div class="spinner"></div></div>
           <div *ngIf="!collegeLbLoading" class="data-card">
-            <table class="data-table">
+            <div class="table-responsive"><table class="data-table">
               <thead><tr><th>Rank</th><th>Institution</th><th>Total Points</th><th>Students</th><th>Events</th></tr></thead>
               <tbody>
                 <tr *ngFor="let c of collegeLb; let i=index" [class.my-row]="c.institutionId===institutionId">
@@ -390,7 +391,7 @@
                 </tr>
                 <tr *ngIf="collegeLb.length===0"><td colspan="5" class="empty-cell">No data available</td></tr>
               </tbody>
-            </table>
+            </table></div>
           </div>
         </div>
       </div>
@@ -436,7 +437,7 @@
           <div class="empty-text">No pending join requests</div>
         </div>
         <div *ngIf="!requestsLoading && joinRequests.length > 0" class="data-card">
-          <table class="data-table">
+          <div class="table-responsive"><table class="data-table">
             <thead><tr><th>Student</th><th>Email</th><th>Actions</th></tr></thead>
             <tbody>
               <tr *ngFor="let r of joinRequests">
@@ -455,7 +456,7 @@
                 </td>
               </tr>
             </tbody>
-          </table>
+          </table></div>
         </div>
       </div>
 
@@ -468,7 +469,7 @@
           <div class="empty-text">No approved members yet</div>
         </div>
         <div *ngIf="!membersLoading && members.length > 0" class="data-card">
-          <table class="data-table">
+          <div class="table-responsive"><table class="data-table">
             <thead><tr><th>#</th><th>Student</th><th>Email</th><th>Actions</th></tr></thead>
             <tbody>
               <tr *ngFor="let m of members; let i=index">
@@ -485,7 +486,7 @@
                 </td>
               </tr>
             </tbody>
-          </table>
+          </table></div>
         </div>
       </div>
 
@@ -553,3 +554,6 @@
     </div>
   </div>
 </div>
+
+<!-- Anvay AI Assistant -->
+<app-chat-widget></app-chat-widget>

@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { ChatWidgetComponent } from '../../shared/chat-widget/chat-widget.component';
 
 interface InstitutionDto {
   institutionId: number;
@@ -78,7 +79,7 @@ interface Club {
 @Component({
   selector: 'app-super-admin',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ChatWidgetComponent],
   templateUrl: './super-admin.component.html',
   styleUrls: ['./super-admin.component.css']
 })
@@ -87,7 +88,7 @@ export class SuperAdminComponent implements OnInit {
 
   activeView: 'dashboard' | 'colleges' | 'events' | 'analytics' | 'approvals' | 'settings' = 'dashboard';
   adminName = '';
-  sidebarOpen = true;
+  sidebarOpen = window.innerWidth > 1024;
 
   stats: DashboardStats | null = null;
   dashboardLoading = false;
@@ -141,6 +142,7 @@ export class SuperAdminComponent implements OnInit {
     const user = this.authService.getCurrentUser();
     this.adminName = user?.name ?? 'Super Admin';
     this.loadPendingWinners();
+    this.loadColleges();
     this.route.queryParams.subscribe(params => {
       const v = (params['view'] || 'dashboard') as 'dashboard'|'colleges'|'events'|'analytics'|'approvals'|'settings';
       this.applyView(v);

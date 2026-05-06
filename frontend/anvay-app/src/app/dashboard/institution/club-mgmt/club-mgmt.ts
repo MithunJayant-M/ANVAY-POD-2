@@ -1,8 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ClubService } from '../../../services/club.service';
-import { LeadershipService } from '../../../services/leadership.service'; 
+import { LeadershipService } from '../../../services/leadership.service';
 import { ClubDashboardDTO, LeadershipApplication } from '../../../models/club.model';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-club-mgmt',
@@ -18,7 +19,8 @@ export class ClubMgmtComponent implements OnInit {
 
   constructor(
     private clubService: ClubService,
-    private leadershipService: LeadershipService
+    private leadershipService: LeadershipService,
+    private ns: NotificationService
   ) {}
 
   ngOnInit(): void {
@@ -92,7 +94,7 @@ export class ClubMgmtComponent implements OnInit {
         console.log('Application Approved');
         this.refreshDashboard(); 
       },
-      error: (err) => alert('Could not approve application.')
+      error: (err) => this.ns.showError('Could not approve application.')
     });
   }
 

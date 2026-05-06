@@ -7,16 +7,15 @@
   width:240px; min-height:100vh;
   background:linear-gradient(180deg,#052e16 0%,#14532d 100%);
   display:flex; flex-direction:column; position:fixed; top:0; left:0;
-  z-index:100; transition:width .3s;
+  z-index:100; transition:width .3s, transform .3s;
   box-shadow:4px 0 24px rgba(5,46,22,.25);
 }
 .sidebar-collapsed .st-sidebar { width:0; overflow:hidden; }
 .st-main { margin-left:240px; flex:1; transition:margin-left .3s; }
 .sidebar-collapsed .st-main { margin-left:0; }
 
-.sb-brand { padding:28px 20px 22px; border-bottom:1px solid rgba(255,255,255,.08); }
-.brand-name { font-family:'Space Grotesk',sans-serif; font-size:1.25rem; font-weight:700; color:#fff; letter-spacing:4px; }
-.brand-tag { font-size:.5rem; color:#6ee7b7; letter-spacing:2.5px; text-transform:uppercase; margin-top:5px; font-weight:600; }
+.sb-brand { padding:2px 30px 2px; display:flex; align-items:center; border-bottom:1px solid rgba(255,255,255,.08); }
+.sb-logo-img { height:90px; width:auto; max-width:180px; display:block; object-fit:contain; }
 
 .sb-role-badge { margin:16px 20px 8px; display:flex; align-items:center; gap:8px; font-size:.68rem; font-weight:700; color:#6ee7b7; text-transform:uppercase; letter-spacing:1.5px; }
 .role-dot { width:6px; height:6px; border-radius:50%; background:#34d399; flex-shrink:0; box-shadow:0 0 6px #34d399; }
@@ -188,7 +187,6 @@
 .clg-avatar { background:#eff6ff; font-size:1rem; display:flex; align-items:center; justify-content:center; }
 
 @media(max-width:1100px) { .stat-grid{grid-template-columns:repeat(2,1fr)} .dash-row{grid-template-columns:1fr} }
-@media(max-width:768px)  { .st-sidebar{width:0;overflow:hidden} .st-main{margin-left:0} }
 
 /* ── Event tabs ── */
 .ev-tabs { display:flex; gap:4px; background:#f1f5f9; padding:4px; border-radius:12px; width:fit-content; margin-bottom:24px; }
@@ -353,15 +351,19 @@
 .chart-wrap { overflow-x:auto; }
 .trend-chart { width:100%; display:block; }
 
+/* ── Mobile backdrop (hidden on desktop) ── */
+.mobile-sidebar-backdrop { display:none; }
+
 /* ── Responsive ── */
-@media(max-width:900px) {
-  .st-sidebar { width:200px; }
-  .st-main { margin-left:200px; }
+@media(max-width:1024px) {
+  /* Sidebar becomes a full drawer overlay on tablets + phones */
+  .st-sidebar { width:240px; overflow:hidden; position:fixed; transform:translateX(0); }
+  .sidebar-collapsed .st-sidebar { width:240px; overflow:hidden; transform:translateX(-100%); }
+  .st-main { margin-left:0 !important; width:100%; max-width:100vw; }
   .sidebar-collapsed .st-main { margin-left:0; }
+  .mobile-sidebar-backdrop { display:block; position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:99; animation:backdrop-in .25s; }
 }
 @media(max-width:700px) {
-  .st-sidebar { width:0; overflow:hidden; position:fixed; }
-  .st-main { margin-left:0; }
   .st-topbar { padding:0 14px; }
   .st-page { padding:16px 12px; }
   .dash-stats { grid-template-columns:1fr 1fr; gap:10px; }
@@ -374,4 +376,38 @@
   .modal-box { margin:8px; padding:18px 14px; max-width:100%; }
   .form-row { flex-direction:column; }
   .profile-chart-card { padding:14px; }
+  .notif-dropdown { width:calc(100vw - 32px); right:-16px; }
+  .data-card { overflow-x:auto; }
 }
+@keyframes backdrop-in { from{opacity:0} to{opacity:1} }
+
+/* ── Registration Confirmation Modal ── */
+.reg-confirm-box { max-width:480px; }
+.reg-event-title { font-size:1.05rem; font-weight:700; color:#0f172a; margin-bottom:10px; }
+.reg-event-meta { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:14px; }
+.reg-event-meta span { display:flex; align-items:center; gap:5px; font-size:.78rem; color:#64748b; background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:4px 9px; }
+.reg-rules-section { background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px; padding:14px; margin-bottom:14px; }
+.reg-rules-label { font-size:.72rem; font-weight:700; color:#374151; text-transform:uppercase; letter-spacing:.4px; margin-bottom:6px; }
+.reg-rules-body { font-size:.83rem; color:#475569; line-height:1.6; max-height:120px; overflow-y:auto; white-space:pre-wrap; }
+.reg-confirm-note { font-size:.77rem; color:#94a3b8; font-style:italic; }
+
+/* ── Wishlist Section (Profile) ── */
+.wishlist-section { margin-top:32px; }
+.wishlist-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.wishlist-title { display:flex; align-items:center; gap:8px; font-size:1.1rem; font-weight:700; color:#0f172a; margin:0; }
+.wishlist-title svg { color:#ef4444; }
+.wishlist-count { font-size:.8rem; background:#fee2e2; color:#b91c1c; border-radius:20px; padding:3px 10px; font-weight:700; }
+.wishlist-empty { text-align:center; color:#94a3b8; padding:32px; background:#f8fafc; border:1.5px dashed #e2e8f0; border-radius:12px; font-size:.875rem; }
+.wishlist-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:16px; }
+.wishlist-card { background:#fff; border:1.5px solid #e2e8f0; border-radius:14px; overflow:hidden; transition:.2s; }
+.wishlist-card:hover { border-color:#86efac; box-shadow:0 4px 16px rgba(0,0,0,.07); }
+.wl-img { height:100px; overflow:hidden; }
+.wl-img img { width:100%; height:100%; object-fit:cover; }
+.wl-body { padding:12px; }
+.wl-title { font-size:.9rem; font-weight:700; color:#0f172a; margin:6px 0 4px; }
+.wl-meta { display:flex; flex-wrap:wrap; gap:6px; font-size:.75rem; color:#64748b; margin-bottom:10px; }
+.wl-actions { display:flex; align-items:center; gap:8px; }
+.wl-actions .btn-register { padding:7px 14px; font-size:.78rem; flex:1; }
+.wl-actions .btn-registered { padding:7px 14px; font-size:.78rem; flex:1; }
+.wl-remove { background:none; border:none; cursor:pointer; padding:4px; color:#ef4444; display:flex; border-radius:6px; transition:.15s; }
+.wl-remove:hover { background:#fee2e2; }

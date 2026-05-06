@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } 
 import { HttpClient } from '@angular/common/http';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { ChatWidgetComponent } from '../../shared/chat-widget/chat-widget.component';
 
 interface Event {
   eventId: number; eventName: string; description: string; category: string;
@@ -24,13 +25,13 @@ interface InstitutionRank { institutionId: number; institutionName: string; tota
 @Component({
   selector: 'app-institution',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, ChatWidgetComponent],
   templateUrl: './institution.component.html',
   styleUrls: ['./institution.component.css']
 })
 export class InstitutionComponent implements OnInit {
   activeView: 'dashboard' | 'events' | 'clubs' | 'students' = 'dashboard';
-  sidebarOpen = true;
+  sidebarOpen = window.innerWidth > 1024;
   adminName = '';
   institutionName = '';
   institutionId: number = 0;
@@ -61,11 +62,18 @@ export class InstitutionComponent implements OnInit {
 
   // Participants slider
   participantsSlider = 100;
+  participantsInput = 100;
+  readonly eventRulesMaxLength = 2000;
 
   // Inline form errors
   contactNumberError = '';
   endDateError = '';
   deadlineError = '';
+
+  // Remove leader confirmation modal
+  removeLeaderModal = false;
+  pendingRemoveClubId: number | null = null;
+  pendingRemoveUserId: number | null = null;
 
   // Clubs
   clubs: Club[] = [];
@@ -147,7 +155,7 @@ export class InstitutionComponent implements OnInit {
       registrationDeadline: [''],
       maxParticipants: [100, [Validators.required, Validators.min(1)]],
       registrationFee: [0, [Validators.min(0)]],
-      eventRules: [''],
+      eventRules: ['', [Validators.maxLength(this.eventRulesMaxLength)]],
       participantType: ['all'],
       status: ['active'],
       hasWinners: [false],
@@ -175,7 +183,7 @@ export class InstitutionComponent implements OnInit {
   loadDashboardStats() {
     if (!this.institutionId) return;
     this.http.get<Event[]>(`/api/events/institution/${this.institutionId}`).subscribe({ next: d => this.dashStats.totalEvents = d.length, error: () => {} });
-    this.http.get<Club[]>(`/api/clubs/institution/${this.institutionId}`).subscribe({ next: d => this.dashStats.totalClubs = d.length, error: () => {} });
+    this.http.get<Club[]>(`/api/clubs/institution/${this.institutionId}`).subscribe({ next: d => { this.clubs = d; this.dashStats.totalClubs = d.length; }, error: () => {} });
     this.http.get<Student[]>(`/api/students/institution/${this.institutionId}/leaderboard`).subscribe({ next: d => { this.dashStats.totalStudents = d.length; this.dashStats.totalPoints = d.reduce((s, st) => s + (st.totalPoints||0), 0); }, error: () => {} });
     this.loadCollegeLeaderboard();
   }
@@ -209,6 +217,7 @@ export class InstitutionComponent implements OnInit {
     this.eventImageData = '';
     this.eventImagePreview = '';
     this.participantsSlider = 100;
+    this.participantsInput = 100;
     this.contactNumberError = '';
     this.endDateError = '';
     this.deadlineError = '';
@@ -227,6 +236,7 @@ export class InstitutionComponent implements OnInit {
     this.eventImageData = ev.imageData ?? '';
     this.eventImagePreview = ev.imageData ?? '';
     this.participantsSlider = ev.maxParticipants ?? 100;
+    this.participantsInput = ev.maxParticipants ?? 100;
     this.contactNumberError = '';
     this.endDateError = '';
     this.deadlineError = '';
@@ -246,7 +256,19 @@ export class InstitutionComponent implements OnInit {
 
   onSliderChange(val: number) {
     this.participantsSlider = val;
+    this.participantsInput = val;
     this.eventForm.patchValue({ maxParticipants: val });
+  }
+
+  onParticipantsInputChange(val: number) {
+    const clamped = Math.min(1000, Math.max(1, val || 1));
+    this.participantsSlider = clamped;
+    this.participantsInput = clamped;
+    this.eventForm.patchValue({ maxParticipants: clamped });
+  }
+
+  get eventRulesLength(): number {
+    return this.eventForm.get('eventRules')?.value?.length || 0;
   }
 
   private toIsoSeconds(val: string | null | undefined): string | null {
@@ -366,11 +388,28 @@ export class InstitutionComponent implements OnInit {
   }
 
   removeClubLeader(clubId: number, userId: number) {
-    if (!confirm('Remove this member as club leader? They will be reverted to a regular member.')) return;
+    this.pendingRemoveClubId = clubId;
+    this.pendingRemoveUserId = userId;
+    this.removeLeaderModal = true;
+  }
+
+  confirmRemoveLeader() {
+    if (this.pendingRemoveClubId == null || this.pendingRemoveUserId == null) return;
+    const clubId = this.pendingRemoveClubId;
+    const userId = this.pendingRemoveUserId;
+    this.removeLeaderModal = false;
+    this.pendingRemoveClubId = null;
+    this.pendingRemoveUserId = null;
     this.http.delete(`/api/clubs/${clubId}/leader/${userId}`).subscribe({
       next: () => { this.showMessage('Club leader removed', 'success'); this.loadClubMembers(clubId); },
       error: () => this.showMessage('Failed to remove club leader', 'error')
     });
+  }
+
+  cancelRemoveLeader() {
+    this.removeLeaderModal = false;
+    this.pendingRemoveClubId = null;
+    this.pendingRemoveUserId = null;
   }
 
   viewClubDetail(c: Club) {
@@ -535,18 +574,16 @@ export class InstitutionComponent implements OnInit {
     this.notifications = [];
     const totalJoinReqs = this.clubs.reduce((s, c) => s + (c.joinRequestsCount || 0), 0);
     const totalLeadApps = this.clubs.reduce((s, c) => s + (c.leadershipAppsCount || 0), 0);
-    if (totalJoinReqs > 0) this.notifications.push({ text: `${totalJoinReqs} pending club join request${totalJoinReqs > 1 ? 's' : ''}`, type: 'warn', link: '?view=clubs' });
-    if (totalLeadApps > 0) this.notifications.push({ text: `${totalLeadApps} pending leadership application${totalLeadApps > 1 ? 's' : ''}`, type: 'info', link: '?view=clubs' });
+    if (totalJoinReqs > 0) this.notifications.push({ text: `${totalJoinReqs} pending club join request${totalJoinReqs > 1 ? 's' : ''}`, type: 'warn', link: 'clubs' });
+    if (totalLeadApps > 0) this.notifications.push({ text: `${totalLeadApps} pending leadership application${totalLeadApps > 1 ? 's' : ''}`, type: 'info', link: 'clubs' });
     const pendingWinners = this.events.filter(e => e.winnersStatus === 'pending').length;
     if (pendingWinners > 0) this.notifications.push({ text: `${pendingWinners} event winner submission${pendingWinners > 1 ? 's' : ''} awaiting super admin approval`, type: 'info' });
     if (this.notifications.length === 0) this.notifications.push({ text: 'No new notifications', type: 'success' });
   }
 
   navigateFromNotif(link?: string) {
-    if (link) {
-      this.router.navigate(['/dashboard/institution'], { queryParams: { view: link.replace('?view=', '') } });
-      this.showNotifDropdown = false;
-    }
+    this.showNotifDropdown = false;
+    if (link) this.setView(link as any);
   }
 
   toggleProfileMenu() {

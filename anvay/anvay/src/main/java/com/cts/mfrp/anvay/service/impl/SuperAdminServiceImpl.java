@@ -26,8 +26,8 @@ public class SuperAdminServiceImpl implements SuperAdminService {
 
     @Override
     public DashboardStatsDto getDashboardStats() {
-        long totalColleges = institutionRepository.count();
         long activeColleges = institutionRepository.countByStatus("active");
+        long totalColleges = activeColleges;
         long pendingColleges = institutionRepository.countByStatus("pending");
         long inactiveColleges = institutionRepository.countByStatus("inactive");
         long totalEvents = eventRepository.count();
@@ -119,7 +119,7 @@ public class SuperAdminServiceImpl implements SuperAdminService {
         long totalEvents = eventRepository.count();
         long totalClubs = clubRepository.count();
 
-        List<Institution> institutions = institutionRepository.findAll();
+        List<Institution> institutions = institutionRepository.findByStatus("active");
         List<InstitutionDto> rankings = institutions.stream()
                 .map(this::mapToDto)
                 .sorted(Comparator.comparingLong(InstitutionDto::getTotalPoints).reversed())

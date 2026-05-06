@@ -1,4 +1,4 @@
-<!-- PENDING APPROVAL SCREEN -->
+﻿<!-- PENDING APPROVAL SCREEN -->
 <div class="pending-shell" *ngIf="isPending">
   <div class="pending-card">
     <div class="pending-icon-wrap">
@@ -58,11 +58,12 @@
 </div>
 
 <div class="inst-shell" [class.sidebar-collapsed]="!sidebarOpen" *ngIf="!isPending">
+  <div class="mobile-sidebar-backdrop" *ngIf="sidebarOpen" (click)="sidebarOpen=false"></div>
 
   <!-- SIDEBAR -->
   <aside class="inst-sidebar">
     <div class="sb-brand">
-      <div><div class="brand-name">ANVAY</div><div class="brand-tag">DISCOVER. JOIN. HOST.</div></div>
+      <img src="assets/anvaylogo1.png" class="sb-logo-img" alt="Anvay">
     </div>
     <div class="sb-role-badge"><span class="role-dot"></span>Institution Admin</div>
     <nav class="sb-nav">
@@ -189,7 +190,7 @@
           </div>
           <div *ngIf="collegeLbLoading" class="loading-state"><div class="spinner"></div></div>
           <div *ngIf="!collegeLbLoading" class="data-card">
-            <table class="data-table">
+            <div class="table-responsive"><table class="data-table">
               <thead><tr><th>Rank</th><th>Institution</th><th>Total Points</th><th>Students</th><th>Events</th></tr></thead>
               <tbody>
                 <tr *ngFor="let c of collegeLb; let i=index" [class.my-inst-row]="c.institutionId===institutionId">
@@ -210,7 +211,7 @@
                 </tr>
                 <tr *ngIf="collegeLb.length===0"><td colspan="5" class="empty-cell">No data yet</td></tr>
               </tbody>
-            </table>
+            </table></div>
           </div>
         </div>
       </div>
@@ -250,7 +251,7 @@
           <div class="ev-section" *ngIf="currentEventsInst.length > 0">
             <div class="ev-section-header"><span class="ev-section-dot current-dot"></span>Happening Now <span class="ev-section-count">{{currentEventsInst.length}}</span></div>
             <div class="data-card">
-              <table class="data-table">
+              <div class="table-responsive"><table class="data-table">
                 <thead><tr><th>Event Name</th><th>Category</th><th>Date</th><th>Location</th><th>Capacity</th><th>Actions</th></tr></thead>
                 <tbody>
                   <tr *ngFor="let ev of currentEventsInst">
@@ -267,7 +268,7 @@
                     </div></td>
                   </tr>
                 </tbody>
-              </table>
+              </table></div>
             </div>
           </div>
 
@@ -275,7 +276,7 @@
           <div class="ev-section" *ngIf="upcomingEventsInst.length > 0">
             <div class="ev-section-header"><span class="ev-section-dot upcoming-dot"></span>Upcoming <span class="ev-section-count">{{upcomingEventsInst.length}}</span></div>
             <div class="data-card">
-              <table class="data-table">
+              <div class="table-responsive"><table class="data-table">
                 <thead><tr><th>Event Name</th><th>Category</th><th>Date</th><th>Location</th><th>Capacity</th><th>Actions</th></tr></thead>
                 <tbody>
                   <tr *ngFor="let ev of upcomingEventsInst">
@@ -292,7 +293,7 @@
                     </div></td>
                   </tr>
                 </tbody>
-              </table>
+              </table></div>
             </div>
           </div>
 
@@ -300,7 +301,7 @@
           <div class="ev-section" *ngIf="pastEventsInst.length > 0">
             <div class="ev-section-header"><span class="ev-section-dot past-dot"></span>Past / Ended <span class="ev-section-count">{{pastEventsInst.length}}</span></div>
             <div class="data-card">
-              <table class="data-table">
+              <div class="table-responsive"><table class="data-table">
                 <thead><tr><th>Event Name</th><th>Category</th><th>Date</th><th>Location</th><th>Capacity</th><th>Actions</th></tr></thead>
                 <tbody>
                   <tr *ngFor="let ev of pastEventsInst" class="row-past">
@@ -319,7 +320,7 @@
                     </div></td>
                   </tr>
                 </tbody>
-              </table>
+              </table></div>
             </div>
           </div>
 
@@ -338,7 +339,7 @@
         </div>
         <div *ngIf="selectedEventParticipantsLoading" class="loading-state"><div class="spinner"></div></div>
         <div *ngIf="!selectedEventParticipantsLoading" class="data-card">
-          <table class="data-table">
+          <div class="table-responsive"><table class="data-table">
             <thead><tr><th>#</th><th>Student</th><th>Email</th><th>Status</th><th>Points Earned</th></tr></thead>
             <tbody>
               <tr *ngFor="let p of selectedEventParticipants; let i=index">
@@ -358,7 +359,7 @@
               </tr>
               <tr *ngIf="selectedEventParticipants.length===0"><td colspan="5" class="empty-cell">No participants registered yet</td></tr>
             </tbody>
-          </table>
+          </table></div>
         </div>
       </div>
 
@@ -372,7 +373,7 @@
         <div *ngIf="!clubsLoading">
           <div class="data-card" style="margin-bottom:24px">
             <div class="section-title">Your Clubs</div>
-            <table class="data-table">
+            <div class="table-responsive"><table class="data-table">
               <thead><tr><th>Club Name</th><th>Type</th><th>Members</th><th>Join Requests</th><th>Leadership Apps</th><th>Created</th><th>Actions</th></tr></thead>
               <tbody>
                 <tr *ngFor="let cl of clubs" (click)="viewClubDetail(cl)" class="table-row-hover">
@@ -395,7 +396,7 @@
                 </tr>
                 <tr *ngIf="clubs.length===0"><td colspan="7" class="empty-cell">No clubs yet.</td></tr>
               </tbody>
-            </table>
+            </table></div>
           </div>
         </div>
       </div>
@@ -415,7 +416,7 @@
         </div>
         <div class="data-card">
           <div *ngIf="clubDetailTab==='members'">
-            <table class="data-table">
+            <div class="table-responsive"><table class="data-table">
               <thead><tr><th>Member</th><th>Email</th><th>Role</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody>
                 <tr *ngFor="let m of clubMembers">
@@ -439,10 +440,10 @@
                 </tr>
                 <tr *ngIf="clubMembers.length===0"><td colspan="5" class="empty-cell">No members yet</td></tr>
               </tbody>
-            </table>
+            </table></div>
           </div>
           <div *ngIf="clubDetailTab==='requests'">
-            <table class="data-table">
+            <div class="table-responsive"><table class="data-table">
               <thead><tr><th>Member</th><th>Email</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody>
                 <tr *ngFor="let m of clubMembers">
@@ -463,7 +464,7 @@
                 </tr>
                 <tr *ngIf="clubMembers.length===0"><td colspan="3" class="empty-cell">No pending requests</td></tr>
               </tbody>
-            </table>
+            </table></div>
           </div>
           <div *ngIf="clubDetailTab==='leadership'">
             <div class="leadership-list">
@@ -493,7 +494,7 @@
         <div *ngIf="!studentsLoading">
           <div class="data-card" style="margin-bottom:24px">
             <div class="section-title">Institution Leaderboard</div>
-            <table class="data-table">
+            <div class="table-responsive"><table class="data-table">
               <thead><tr><th>Rank</th><th>Student</th><th>Email</th><th>Total Points</th><th>Clubs Joined</th><th>Events</th><th>Actions</th></tr></thead>
               <tbody>
                 <tr *ngFor="let s of students; let i=index">
@@ -514,7 +515,7 @@
                 </tr>
                 <tr *ngIf="students.length===0"><td colspan="7" class="empty-cell">No students registered yet</td></tr>
               </tbody>
-            </table>
+            </table></div>
           </div>
 
         </div>
@@ -525,7 +526,7 @@
 
 <!-- EVENT MODAL -->
 <div class="modal-overlay" *ngIf="showEventModal" (click)="showEventModal=false">
-  <div class="modal-box" (click)="$event.stopPropagation()">
+  <div class="modal-box modal-wide" (click)="$event.stopPropagation()">
     <div class="modal-header">
       <h2>{{editingEvent ? 'Edit Event' : 'Create New Event'}}</h2>
       <button class="modal-close" (click)="showEventModal=false">×</button>
@@ -609,10 +610,15 @@
         </div>
       </div>
 
-      <!-- Max Participants Slider -->
+      <!-- Max Participants Slider + Number Input -->
       <div class="form-group">
-        <label>Max Participants *: <strong class="slider-val">{{participantsSlider}}</strong></label>
-        <input type="range" min="1" max="1000" step="1" [value]="participantsSlider" (input)="onSliderChange(+$any($event.target).value)" class="slider-input">
+        <label>Max Participants *</label>
+        <div class="slider-with-input">
+          <input type="range" min="1" max="1000" step="1" [value]="participantsSlider"
+            (input)="onSliderChange(+$any($event.target).value)" class="slider-input">
+          <input type="number" min="1" max="1000" class="input-field participants-num"
+            [value]="participantsInput" (input)="onParticipantsInputChange(+$any($event.target).value)">
+        </div>
       </div>
 
       <!-- Event Banner Image -->
@@ -629,7 +635,15 @@
       <!-- Event Rules -->
       <div class="form-group">
         <label>Event Rules</label>
-        <textarea formControlName="eventRules" class="input-field" rows="2" placeholder="Enter event rules and guidelines"></textarea>
+        <textarea formControlName="eventRules" class="input-field" rows="3"
+          placeholder="Enter event rules and guidelines"
+          [maxlength]="eventRulesMaxLength"></textarea>
+        <div class="rules-counter" [class.rules-counter-warn]="eventRulesLength > eventRulesMaxLength * 0.9">
+          {{eventRulesLength}} / {{eventRulesMaxLength}}
+        </div>
+        <div class="field-error" *ngIf="eventForm.get('eventRules')?.errors?.['maxlength'] && eventForm.get('eventRules')?.touched">
+          Event rules must not exceed {{eventRulesMaxLength}} characters
+        </div>
       </div>
 
       <!-- Has Winners -->
@@ -706,6 +720,24 @@
   </div>
 </div>
 
+<!-- Remove Club Leader Confirmation Modal -->
+<div class="modal-overlay" *ngIf="removeLeaderModal" (click)="cancelRemoveLeader()">
+  <div class="modal-box small" (click)="$event.stopPropagation()">
+    <div class="modal-icon warn-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="28" height="28">
+        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+    </div>
+    <h2 class="modal-title">Remove Club Leader</h2>
+    <p class="modal-desc">Are you sure you want to remove this member as club leader? They will be reverted to a regular student.</p>
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" (click)="cancelRemoveLeader()">Cancel</button>
+      <button class="modal-btn-danger" (click)="confirmRemoveLeader()">Remove Leader</button>
+    </div>
+  </div>
+</div>
+
 <!-- Winners Modal -->
 <div class="modal-overlay" *ngIf="winnersModal" (click)="winnersModal=false">
   <div class="winners-modal" (click)="$event.stopPropagation()">
@@ -757,3 +789,6 @@
     </div>
   </div>
 </div>
+
+<!-- Anvay AI Assistant -->
+<app-chat-widget [institutionId]="institutionId"></app-chat-widget>

@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Router, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { ChatWidgetComponent } from '../../shared/chat-widget/chat-widget.component';
 
 interface ManagedClub { clubId: number; clubName: string; category: string; }
 interface ClubMember { id: number; userId: number; clubId: number; status: string; user?: { firstName: string; lastName: string; email: string }; }
@@ -29,7 +30,7 @@ interface UserProfile { userId: number; firstName: string; lastName: string; ema
 @Component({
   selector: 'app-club-leader',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ChatWidgetComponent],
   templateUrl: './club-leader.component.html',
   styleUrls: ['./club-leader.component.css']
 })
@@ -39,7 +40,7 @@ export class ClubLeaderComponent implements OnInit, OnDestroy {
   institutionId: number = 0;
   leadingClubId: number = 0;
   managedClub: ManagedClub | null = null;
-  sidebarOpen = true;
+  sidebarOpen = window.innerWidth > 1024;
   activeView: 'dashboard' | 'events' | 'clubs' | 'leaderboard' | 'profile' | 'requests' | 'members' = 'dashboard';
   message = ''; messageType = '';
 
