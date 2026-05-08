@@ -2,12 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { LeadershipApplication } from '../models/club.model';
-
+import { environment } from 'src/environments/environment';
 @Injectable({ providedIn: 'root' })
 export class LeadershipService {
   // Matching your 9092 port for Anvay Backend
-  private baseUrl = 'http://localhost:9092/api/applications'; 
-
+  private baseUrl = `${environment.apiBaseUrl}/api/applications`; 
   constructor(private http: HttpClient) {}
 
   /**

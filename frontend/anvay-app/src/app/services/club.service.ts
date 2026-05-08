@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { ClubDashboardDTO } from '../models/club.model';
-
+import { environment } from 'src/environments/environment';
 @Injectable({ providedIn: 'root' })
 export class ClubService {
-  private baseUrl = 'http://localhost:9092/api/clubs'; // Ensure port 9092
+  private baseUrl = `${environment.apiBaseUrl}/api/clubs`; // Ensure port 9092
 
   constructor(private http: HttpClient) {}
 
