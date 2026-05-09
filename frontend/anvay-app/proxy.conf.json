@@ -1,6 +1,6 @@
 {
   "/api": {
-    "target": "http://localhost:8081",
+    "target": "https://anvay-pod-2.onrender.com",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
