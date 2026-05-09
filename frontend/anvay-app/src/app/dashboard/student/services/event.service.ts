@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { EventRecord, EventParticipant } from '../models/event.model';
-
+import { environment } from 'src/environments/environment';
 @Injectable({
   providedIn: 'root'
 })
@@ -11,7 +11,7 @@ export class EventService {
   private http = inject(HttpClient);
   
   // This matches your @RequestMapping("/api/events") in Spring Boot
-  private apiUrl = 'http://localhost:8081/api/events';
+  private apiUrl = `${environment.apiBaseUrl}/api/events`;
 
   // Fetches all records from your EventController's @GetMapping("/all")
   getAllEvents(userId: number): Observable<EventRecord[]> {
