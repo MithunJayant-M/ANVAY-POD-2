@@ -1,5 +1,6 @@
 package com.cts.mfrp.anvay.exception;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -18,6 +19,11 @@ import java.util.Map;
 @RestControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
+
+    // Set DEBUG_EXPOSE_ERRORS=true on Render to surface the real exception
+    // message in 500 responses. Leave false in production.
+    @Value("${app.debug.expose-errors:false}")
+    private boolean exposeErrors;
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationException(MethodArgumentNotValidException ex) {
@@ -71,9 +77,13 @@ public class GlobalExceptionHandler {
             WebRequest request) {
         log.error("Unexpected exception: {}", ex.getMessage(), ex);
 
+        String clientMessage = exposeErrors
+                ? ex.getClass().getSimpleName() + ": " + ex.getMessage()
+                : "An unexpected error occurred. Please try again later.";
+
         ErrorResponse errorResponse = ErrorResponse.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .message("An unexpected error occurred. Please try again later.")
+                .message(clientMessage)
                 .timestamp(System.currentTimeMillis())
                 .build();
 
