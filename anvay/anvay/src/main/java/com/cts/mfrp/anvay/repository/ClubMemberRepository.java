@@ -11,10 +11,13 @@ import java.util.Optional;
 
 @Repository
 public interface ClubMemberRepository extends JpaRepository<ClubMember, Long> {
-    @Query("SELECT cm FROM ClubMember cm JOIN FETCH cm.user WHERE cm.clubId = :clubId")
+    // LEFT JOIN FETCH (not INNER) so members are returned even when the
+    // referenced user row is missing — otherwise orphan refs silently
+    // filter the entire result set, making the table look empty.
+    @Query("SELECT cm FROM ClubMember cm LEFT JOIN FETCH cm.user WHERE cm.clubId = :clubId")
     List<ClubMember> findByClubId(@Param("clubId") Long clubId);
 
-    @Query("SELECT cm FROM ClubMember cm JOIN FETCH cm.user WHERE cm.clubId = :clubId AND cm.status = :status")
+    @Query("SELECT cm FROM ClubMember cm LEFT JOIN FETCH cm.user WHERE cm.clubId = :clubId AND cm.status = :status")
     List<ClubMember> findByClubIdAndStatus(@Param("clubId") Long clubId, @Param("status") String status);
     List<ClubMember> findByUserId(Long userId);
     Optional<ClubMember> findByClubIdAndUserId(Long clubId, Long userId);

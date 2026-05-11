@@ -25,7 +25,7 @@ public class User {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "institution_id", insertable = false, updatable = false)
-    @JsonIgnoreProperties({"users", "club"})
+    @JsonIgnoreProperties({"users", "club", "hibernateLazyInitializer", "handler"})
     private Institution institution;
 
     @Column(name = "email", unique = true)

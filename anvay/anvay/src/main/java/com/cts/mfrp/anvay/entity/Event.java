@@ -80,7 +80,7 @@ public class Event {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_id", insertable = false, updatable = false)
-    @JsonIgnoreProperties("events")
+    @JsonIgnoreProperties({"events", "hibernateLazyInitializer", "handler"})
     private Club club;
 
     @JsonIgnore
