@@ -35,13 +35,14 @@ public class StudentController {
     }
 
     @GetMapping("/institution/{institutionId}/leaderboard")
-    public ResponseEntity<List<User>> getInstitutionLeaderboard(@PathVariable Long institutionId) {
-        return ResponseEntity.ok(userRepository.findStudentsByInstitutionId(institutionId));
+    public ResponseEntity<List<StudentSummaryDTO>> getInstitutionLeaderboard(@PathVariable Long institutionId) {
+        // DTO projection — skips profilePicture LONGTEXT to keep response small enough for Render free tier
+        return ResponseEntity.ok(userRepository.findStudentSummaryLeaderboard(institutionId));
     }
 
     @GetMapping("/leaderboard")
-    public ResponseEntity<List<User>> getGlobalLeaderboard() {
-        return ResponseEntity.ok(userRepository.findAllStudents());
+    public ResponseEntity<List<StudentSummaryDTO>> getGlobalLeaderboard() {
+        return ResponseEntity.ok(userRepository.findAllStudentSummaries());
     }
 
     @GetMapping

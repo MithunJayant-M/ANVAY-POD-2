@@ -38,6 +38,16 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     @Query("SELECT MONTH(e.startDate), COUNT(e) FROM Event e WHERE e.startDate IS NOT NULL GROUP BY MONTH(e.startDate) ORDER BY MONTH(e.startDate)")
     List<Object[]> countEventsByMonth();
 
+    // Institution event list — DTO projection avoids loading imageData LONGTEXT
+    @Query("SELECT new com.cts.mfrp.anvay.dto.EventSummaryDTO(" +
+           "  e.eventId, e.clubId, e.eventName, e.category, e.location, " +
+           "  e.startDate, e.endDate, e.status, e.maxParticipants, " +
+           "  e.registrationFee, e.participantType, e.registrationDeadline) " +
+           "FROM Event e JOIN Club c ON e.clubId = c.clubId " +
+           "WHERE c.institutionId = :institutionId " +
+           "ORDER BY e.startDate DESC")
+    List<com.cts.mfrp.anvay.dto.EventSummaryDTO> findEventSummariesByInstitutionList(@Param("institutionId") Long institutionId);
+
     // ── Paginated summary projections (new, non-breaking) ──────────────────
     // JPQL constructor projection: selects scalar columns directly into a DTO.
     // Avoids loading the Event entity, skips lazy `club` resolution, and never

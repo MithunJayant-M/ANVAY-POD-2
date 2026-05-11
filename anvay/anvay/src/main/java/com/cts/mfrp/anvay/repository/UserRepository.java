@@ -33,6 +33,24 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("SELECT COUNT(u) FROM User u WHERE u.institutionId = :institutionId AND u.role IN ('student', 'club_leader')")
     long countStudentsByInstitutionId(@Param("institutionId") Long institutionId);
 
+    // Leaderboard view — DTO projection avoids loading profilePicture LONGTEXT
+    @Query("SELECT new com.cts.mfrp.anvay.dto.StudentSummaryDTO(" +
+           "  u.userId, u.institutionId, u.email, u.firstName, u.lastName, u.role, " +
+           "  u.totalPoints, u.rankInLeaderboard, u.registeredEventsCount, " +
+           "  u.joinedClubsCount, u.leadingClubId, u.studentIdNumber) " +
+           "FROM User u WHERE u.institutionId = :institutionId " +
+           "  AND u.role IN ('student', 'club_leader') " +
+           "ORDER BY u.totalPoints DESC NULLS LAST")
+    List<com.cts.mfrp.anvay.dto.StudentSummaryDTO> findStudentSummaryLeaderboard(@Param("institutionId") Long institutionId);
+
+    @Query("SELECT new com.cts.mfrp.anvay.dto.StudentSummaryDTO(" +
+           "  u.userId, u.institutionId, u.email, u.firstName, u.lastName, u.role, " +
+           "  u.totalPoints, u.rankInLeaderboard, u.registeredEventsCount, " +
+           "  u.joinedClubsCount, u.leadingClubId, u.studentIdNumber) " +
+           "FROM User u WHERE u.role IN ('student', 'club_leader') " +
+           "ORDER BY u.totalPoints DESC NULLS LAST")
+    List<com.cts.mfrp.anvay.dto.StudentSummaryDTO> findAllStudentSummaries();
+
     // ── Paginated summary projections (new, non-breaking) ──────────────────
     // Skips `profilePicture` (LONGTEXT) and `password`. The User entity's
     // `institution` association is EAGER-fetched normally; constructor

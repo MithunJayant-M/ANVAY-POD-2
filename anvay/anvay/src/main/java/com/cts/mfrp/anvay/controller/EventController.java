@@ -65,8 +65,9 @@ public class EventController {
     }
 
     @GetMapping("/institution/{institutionId}")
-    public ResponseEntity<List<Event>> getEventsByInstitution(@PathVariable Long institutionId) {
-        return ResponseEntity.ok(eventService.getEventsByInstitutionId(institutionId));
+    public ResponseEntity<List<EventSummaryDTO>> getEventsByInstitution(@PathVariable Long institutionId) {
+        // DTO projection — skips imageData LONGTEXT to keep response small enough for Render free tier
+        return ResponseEntity.ok(eventRepository.findEventSummariesByInstitutionList(institutionId));
     }
 
     @PostMapping
