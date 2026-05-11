@@ -48,6 +48,15 @@ public interface EventRepository extends JpaRepository<Event, Long> {
            "ORDER BY e.startDate DESC")
     List<com.cts.mfrp.anvay.dto.EventSummaryDTO> findEventSummariesByInstitutionList(@Param("institutionId") Long institutionId);
 
+    // Global event list — same projection. Ordered by startDate DESC so the
+    // super-admin "all events" view shows recent activity first.
+    @Query("SELECT new com.cts.mfrp.anvay.dto.EventSummaryDTO(" +
+           "  e.eventId, e.clubId, e.eventName, e.category, e.location, " +
+           "  e.startDate, e.endDate, e.status, e.maxParticipants, " +
+           "  e.registrationFee, e.participantType, e.registrationDeadline) " +
+           "FROM Event e ORDER BY e.startDate DESC")
+    List<com.cts.mfrp.anvay.dto.EventSummaryDTO> findAllEventSummaries();
+
     // ── Paginated summary projections (new, non-breaking) ──────────────────
     // JPQL constructor projection: selects scalar columns directly into a DTO.
     // Avoids loading the Event entity, skips lazy `club` resolution, and never

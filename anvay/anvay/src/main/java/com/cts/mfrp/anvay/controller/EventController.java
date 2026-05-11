@@ -31,9 +31,12 @@ public class EventController {
     private final EventService eventService;
     private final EventRepository eventRepository;
 
-    @GetMapping("/")
-    public ResponseEntity<List<Event>> getEvents(){
-        return ResponseEntity.ok(eventService.getEvents());
+    // Accepts both /api/events and /api/events/ (Spring Boot 4 no longer
+    // auto-matches trailing slashes). Returns DTO projection — skips
+    // imageData LONGTEXT so the response stays small enough for the dataset.
+    @GetMapping(value = {"", "/"})
+    public ResponseEntity<List<EventSummaryDTO>> getEvents(){
+        return ResponseEntity.ok(eventRepository.findAllEventSummaries());
     }
 
     /**
