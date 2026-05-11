@@ -1,10 +1,15 @@
 package com.cts.mfrp.anvay.controller;
 
 import com.cts.mfrp.anvay.dto.StudentDashboardDTO;
+import com.cts.mfrp.anvay.dto.StudentSummaryDTO;
 import com.cts.mfrp.anvay.entity.User;
 import com.cts.mfrp.anvay.repository.UserRepository;
 import com.cts.mfrp.anvay.service.StudentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,6 +47,24 @@ public class StudentController {
     @GetMapping
     public ResponseEntity<List<User>> getAllStudents() {
         return ResponseEntity.ok(studentService.getAllStudents());
+    }
+
+    /**
+     * Paginated, lean projection — preferred for list views.
+     * Skips profilePicture (LONGTEXT) to avoid OOM on large institutions.
+     * Query params: ?page=0&size=20&sort=totalPoints,desc
+     */
+    @GetMapping("/page")
+    public ResponseEntity<Page<StudentSummaryDTO>> getStudentsPage(
+            @PageableDefault(size = 20, sort = "totalPoints", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(userRepository.findStudentSummaries(pageable));
+    }
+
+    @GetMapping("/institution/{institutionId}/page")
+    public ResponseEntity<Page<StudentSummaryDTO>> getStudentsByInstitutionPage(
+            @PathVariable Long institutionId,
+            @PageableDefault(size = 20, sort = "totalPoints", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(userRepository.findStudentSummariesByInstitution(institutionId, pageable));
     }
 
     @DeleteMapping("/{id}")

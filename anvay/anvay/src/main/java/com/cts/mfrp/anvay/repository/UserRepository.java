@@ -1,6 +1,9 @@
 package com.cts.mfrp.anvay.repository;
 
+import com.cts.mfrp.anvay.dto.StudentSummaryDTO;
 import com.cts.mfrp.anvay.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -29,4 +32,32 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.institutionId = :institutionId AND u.role IN ('student', 'club_leader')")
     long countStudentsByInstitutionId(@Param("institutionId") Long institutionId);
+
+    // ── Paginated summary projections (new, non-breaking) ──────────────────
+    // Skips `profilePicture` (LONGTEXT) and `password`. The User entity's
+    // `institution` association is EAGER-fetched normally; constructor
+    // projection bypasses that, avoiding a per-row institution lookup (N+1).
+
+    @Query(
+        value = "SELECT new com.cts.mfrp.anvay.dto.StudentSummaryDTO(" +
+                "  u.userId, u.institutionId, u.email, u.firstName, u.lastName, u.role, " +
+                "  u.totalPoints, u.rankInLeaderboard, u.registeredEventsCount, " +
+                "  u.joinedClubsCount, u.leadingClubId, u.studentIdNumber) " +
+                "FROM User u WHERE u.role IN ('student', 'club_leader')",
+        countQuery = "SELECT COUNT(u) FROM User u WHERE u.role IN ('student', 'club_leader')"
+    )
+    Page<StudentSummaryDTO> findStudentSummaries(Pageable pageable);
+
+    @Query(
+        value = "SELECT new com.cts.mfrp.anvay.dto.StudentSummaryDTO(" +
+                "  u.userId, u.institutionId, u.email, u.firstName, u.lastName, u.role, " +
+                "  u.totalPoints, u.rankInLeaderboard, u.registeredEventsCount, " +
+                "  u.joinedClubsCount, u.leadingClubId, u.studentIdNumber) " +
+                "FROM User u WHERE u.institutionId = :institutionId " +
+                "  AND u.role IN ('student', 'club_leader')",
+        countQuery = "SELECT COUNT(u) FROM User u WHERE u.institutionId = :institutionId " +
+                     "  AND u.role IN ('student', 'club_leader')"
+    )
+    Page<StudentSummaryDTO> findStudentSummariesByInstitution(@Param("institutionId") Long institutionId,
+                                                              Pageable pageable);
 }

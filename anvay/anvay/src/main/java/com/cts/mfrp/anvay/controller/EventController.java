@@ -1,14 +1,20 @@
 package com.cts.mfrp.anvay.controller;
 
 import com.cts.mfrp.anvay.dto.EventFeedDTO;
+import com.cts.mfrp.anvay.dto.EventSummaryDTO;
 import com.cts.mfrp.anvay.dto.WinnersApprovalDTO;
 import com.cts.mfrp.anvay.entity.Event;
 import com.cts.mfrp.anvay.entity.EventParticipant;
 import com.cts.mfrp.anvay.repository.EventParticipantRepository;
+import com.cts.mfrp.anvay.repository.EventRepository;
 import com.cts.mfrp.anvay.service.EventService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,10 +29,29 @@ import java.util.List;
 public class EventController {
 
     private final EventService eventService;
+    private final EventRepository eventRepository;
 
     @GetMapping("/")
     public ResponseEntity<List<Event>> getEvents(){
         return ResponseEntity.ok(eventService.getEvents());
+    }
+
+    /**
+     * Paginated, lean projection — preferred for list views.
+     * Query params: ?page=0&size=20&sort=startDate,desc
+     * Response shape: Spring's standard Page (content, totalElements, totalPages, ...)
+     */
+    @GetMapping("/page")
+    public ResponseEntity<Page<EventSummaryDTO>> getEventsPage(
+            @PageableDefault(size = 20, sort = "startDate", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(eventRepository.findAllSummaries(pageable));
+    }
+
+    @GetMapping("/institution/{institutionId}/page")
+    public ResponseEntity<Page<EventSummaryDTO>> getEventsByInstitutionPage(
+            @PathVariable Long institutionId,
+            @PageableDefault(size = 20, sort = "startDate", direction = Sort.Direction.DESC) Pageable pageable) {
+        return ResponseEntity.ok(eventRepository.findSummariesByInstitution(institutionId, pageable));
     }
 
     @GetMapping("/{eventId}")
