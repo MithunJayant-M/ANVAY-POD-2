@@ -166,7 +166,7 @@ export class SuperAdminComponent implements OnInit {
 
   loadAllEvents(): void {
     this.allEventsLoading = true;
-    this.http.get<Event[]>('/api/events/').subscribe({
+    this.http.get<Event[]>('/api/events').subscribe({
       next: d => { this.allEvents = d; this.allEventsLoading = false; },
       error: () => { this.allEventsLoading = false; }
     });
