@@ -210,26 +210,15 @@ public class ClubController {
     }
 
     @PutMapping("/{clubId}/join-requests/{memberId}/approve")
-    public ResponseEntity<?> approveJoinRequest(@PathVariable Long clubId, @PathVariable Long memberId) {
-        return clubMemberRepository.findById(memberId).map(m -> {
-            m.setStatus("APPROVED");
-            m.setUpdatedAt(LocalDateTime.now());
-            clubMemberRepository.save(m);
-            userRepository.findById(m.getUserId()).ifPresent(u -> {
-                u.setJoinedClubsCount((u.getJoinedClubsCount() != null ? u.getJoinedClubsCount() : 0) + 1);
-                userRepository.save(u);
-            });
-            return ResponseEntity.ok(m);
-        }).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ClubMemberSummaryDTO> approveJoinRequest(@PathVariable Long clubId,
+                                                                   @PathVariable Long memberId) {
+        return ResponseEntity.ok(clubService.approveJoinRequest(clubId, memberId));
     }
 
     @PutMapping("/{clubId}/join-requests/{memberId}/reject")
-    public ResponseEntity<?> rejectJoinRequest(@PathVariable Long clubId, @PathVariable Long memberId) {
-        return clubMemberRepository.findById(memberId).map(m -> {
-            m.setStatus("REJECTED");
-            m.setUpdatedAt(LocalDateTime.now());
-            return ResponseEntity.ok(clubMemberRepository.save(m));
-        }).orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ClubMemberSummaryDTO> rejectJoinRequest(@PathVariable Long clubId,
+                                                                  @PathVariable Long memberId) {
+        return ResponseEntity.ok(clubService.rejectJoinRequest(clubId, memberId));
     }
 
     @GetMapping("/user/{userId}")

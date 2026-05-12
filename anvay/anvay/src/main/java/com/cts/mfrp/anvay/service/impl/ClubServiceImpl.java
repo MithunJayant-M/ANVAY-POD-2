@@ -176,6 +176,63 @@ public class ClubServiceImpl implements ClubService {
         );
     }
 
+    @Override
+    @Transactional
+    public ClubMemberSummaryDTO approveJoinRequest(Long clubId, Long memberId) {
+        ClubMember cm = clubMemberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("Join request not found: " + memberId));
+
+        if (!clubId.equals(cm.getClubId())) {
+            throw new IllegalArgumentException("Request " + memberId + " does not belong to club " + clubId);
+        }
+
+        // Idempotency: re-clicking Approve should not double-increment counters.
+        if ("APPROVED".equalsIgnoreCase(cm.getStatus())) {
+            throw new IllegalArgumentException("Request is already approved.");
+        }
+
+        cm.setStatus("APPROVED");
+        cm.setUpdatedAt(LocalDateTime.now());
+        clubMemberRepository.save(cm);
+
+        // Only bump joinedClubsCount when transitioning from PENDING/REJECTED.
+        // If user was deleted (orphan FK), skip silently rather than 500.
+        userRepository.findById(cm.getUserId()).ifPresent(u -> {
+            int curr = u.getJoinedClubsCount() != null ? u.getJoinedClubsCount() : 0;
+            u.setJoinedClubsCount(curr + 1);
+            userRepository.save(u);
+        });
+
+        // Re-fetch with user JOIN FETCH for DTO mapping (otherwise the saved
+        // entity has a lazy user proxy that we can't touch outside the tx).
+        ClubMember reloaded = clubMemberRepository.findByClubIdAndStatus(clubId, "APPROVED").stream()
+                .filter(x -> x.getId().equals(memberId))
+                .findFirst()
+                .orElse(cm);
+        return toSummary(reloaded);
+    }
+
+    @Override
+    @Transactional
+    public ClubMemberSummaryDTO rejectJoinRequest(Long clubId, Long memberId) {
+        ClubMember cm = clubMemberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("Join request not found: " + memberId));
+
+        if (!clubId.equals(cm.getClubId())) {
+            throw new IllegalArgumentException("Request " + memberId + " does not belong to club " + clubId);
+        }
+
+        if ("REJECTED".equalsIgnoreCase(cm.getStatus())) {
+            throw new IllegalArgumentException("Request is already rejected.");
+        }
+
+        cm.setStatus("REJECTED");
+        cm.setUpdatedAt(LocalDateTime.now());
+        clubMemberRepository.save(cm);
+
+        return toSummary(cm);
+    }
+
     /**
      * Get a club by ID.
      *

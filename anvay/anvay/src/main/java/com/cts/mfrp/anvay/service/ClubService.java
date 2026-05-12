@@ -52,6 +52,11 @@ public interface ClubService {
     List<ClubMemberSummaryDTO> getApprovedMembersSummary(Long clubId);
     List<ClubMemberSummaryDTO> getJoinRequestsSummary(Long clubId);
 
+    // Idempotent state transitions, transactional. Both status + user counter
+    // update happen in one tx — either both commit or both roll back.
+    ClubMemberSummaryDTO approveJoinRequest(Long clubId, Long memberId);
+    ClubMemberSummaryDTO rejectJoinRequest(Long clubId, Long memberId);
+
     /**
      * Get approved members of a specific club.
      *
