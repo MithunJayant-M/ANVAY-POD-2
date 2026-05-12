@@ -15,4 +15,10 @@ public interface ClubRepository extends JpaRepository<Club, Long> {
 
     @Query("SELECT SUM(c.memberCount) FROM Club c WHERE c.institutionId = :institutionId")
     Long sumMemberCountByInstitutionId(@Param("institutionId") Long institutionId);
+
+    // Clubs that the given user has joined (status APPROVED). Single SQL with
+    // a sub-select avoids N+1 lookups when building the student dashboard.
+    @Query("SELECT c FROM Club c WHERE c.clubId IN " +
+           "(SELECT cm.clubId FROM ClubMember cm WHERE cm.userId = :userId AND cm.status = 'APPROVED')")
+    List<Club> findApprovedClubsByUserId(@Param("userId") Long userId);
 }
