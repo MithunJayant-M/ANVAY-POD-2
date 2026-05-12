@@ -1,6 +1,7 @@
 package com.cts.mfrp.anvay.controller;
 
 import com.cts.mfrp.anvay.dto.ClubDashboardDTO;
+import com.cts.mfrp.anvay.dto.ClubMemberSummaryDTO;
 import com.cts.mfrp.anvay.entity.Club;
 import com.cts.mfrp.anvay.entity.ClubMember;
 import com.cts.mfrp.anvay.repository.ClubMemberRepository;
@@ -102,12 +103,12 @@ public class ClubController {
      * @apiNote Used for Club Action Management - View members (US16P2_13)
      */
     @GetMapping("/{clubId}/members")
-    public ResponseEntity<List<ClubMember>> getClubMembers(
+    public ResponseEntity<List<ClubMemberSummaryDTO>> getClubMembers(
             @PathVariable Long clubId) {
         log.info("Received request to fetch members for club: {}", clubId);
 
         try {
-            List<ClubMember> members = clubService.getClubMembers(clubId);
+            List<ClubMemberSummaryDTO> members = clubService.getClubMembersSummary(clubId);
             log.info("Successfully fetched {} members for club: {}", members.size(), clubId);
             return ResponseEntity.ok(members);
         } catch (IllegalArgumentException e) {
@@ -126,12 +127,12 @@ public class ClubController {
      * @return ResponseEntity containing list of approved ClubMember entities
      */
     @GetMapping("/{clubId}/members/approved")
-    public ResponseEntity<List<ClubMember>> getApprovedMembers(
+    public ResponseEntity<List<ClubMemberSummaryDTO>> getApprovedMembers(
             @PathVariable Long clubId) {
         log.info("Received request to fetch approved members for club: {}", clubId);
 
         try {
-            List<ClubMember> members = clubService.getApprovedMembers(clubId);
+            List<ClubMemberSummaryDTO> members = clubService.getApprovedMembersSummary(clubId);
             log.info("Successfully fetched {} approved members for club: {}", members.size(), clubId);
             return ResponseEntity.ok(members);
         } catch (Exception e) {
@@ -192,7 +193,9 @@ public class ClubController {
     @PostMapping("/{clubId}/join")
     public ResponseEntity<?> joinClub(@PathVariable Long clubId, @RequestBody ClubMember request) {
         if (clubMemberRepository.existsByClubIdAndUserId(clubId, request.getUserId())) {
-            return ResponseEntity.badRequest().body("Already a member or request pending");
+            // 409 Conflict is the correct status for "resource already exists"
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(java.util.Map.of("message", "You have already requested to join or are a member of this club."));
         }
         request.setClubId(clubId);
         request.setStatus("PENDING");
@@ -202,8 +205,8 @@ public class ClubController {
     }
 
     @GetMapping("/{clubId}/join-requests")
-    public ResponseEntity<?> getJoinRequests(@PathVariable Long clubId) {
-        return ResponseEntity.ok(clubMemberRepository.findByClubIdAndStatus(clubId, "PENDING"));
+    public ResponseEntity<List<ClubMemberSummaryDTO>> getJoinRequests(@PathVariable Long clubId) {
+        return ResponseEntity.ok(clubService.getJoinRequestsSummary(clubId));
     }
 
     @PutMapping("/{clubId}/join-requests/{memberId}/approve")

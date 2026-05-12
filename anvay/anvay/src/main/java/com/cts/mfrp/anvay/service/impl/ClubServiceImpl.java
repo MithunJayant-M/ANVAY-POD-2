@@ -1,11 +1,15 @@
 package com.cts.mfrp.anvay.service.impl;
 
 import com.cts.mfrp.anvay.dto.ClubDashboardDTO;
+import com.cts.mfrp.anvay.dto.ClubMemberSummaryDTO;
+import com.cts.mfrp.anvay.dto.MemberUserDTO;
 import com.cts.mfrp.anvay.entity.Club;
 import com.cts.mfrp.anvay.entity.ClubMember;
+import com.cts.mfrp.anvay.entity.User;
 import com.cts.mfrp.anvay.repository.ClubRepository;
 import com.cts.mfrp.anvay.repository.ClubMemberRepository;
 import com.cts.mfrp.anvay.repository.LeadershipApplicationRepository;
+import com.cts.mfrp.anvay.repository.UserRepository;
 import com.cts.mfrp.anvay.service.ClubService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +34,7 @@ public class ClubServiceImpl implements ClubService {
     private final ClubRepository clubRepository;
     private final ClubMemberRepository clubMemberRepository;
     private final LeadershipApplicationRepository leadershipApplicationRepository;
+    private final UserRepository userRepository;
 
     /**
      * Retrieve all clubs for an institution with dashboard information.
@@ -133,6 +138,44 @@ public class ClubServiceImpl implements ClubService {
         return clubMemberRepository.findByClubIdAndStatus(clubId, "APPROVED");
     }
 
+    // ── DTO mappers — invoked inside the transaction so getUser() is safe ──
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ClubMemberSummaryDTO> getClubMembersSummary(Long clubId) {
+        return clubMemberRepository.findByClubId(clubId).stream()
+                .map(this::toSummary)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ClubMemberSummaryDTO> getApprovedMembersSummary(Long clubId) {
+        return clubMemberRepository.findByClubIdAndStatus(clubId, "APPROVED").stream()
+                .map(this::toSummary)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ClubMemberSummaryDTO> getJoinRequestsSummary(Long clubId) {
+        return clubMemberRepository.findByClubIdAndStatus(clubId, "PENDING").stream()
+                .map(this::toSummary)
+                .toList();
+    }
+
+    private ClubMemberSummaryDTO toSummary(ClubMember cm) {
+        User u = cm.getUser();
+        MemberUserDTO userDto = (u == null) ? null : new MemberUserDTO(
+                u.getUserId(), u.getFirstName(), u.getLastName(),
+                u.getEmail(), u.getRole(), u.getLeadingClubId()
+        );
+        return new ClubMemberSummaryDTO(
+                cm.getId(), cm.getClubId(), cm.getUserId(),
+                cm.getStatus(), cm.getCreatedAt(), userDto
+        );
+    }
+
     /**
      * Get a club by ID.
      *
@@ -185,6 +228,13 @@ public class ClubServiceImpl implements ClubService {
                     log.error("Club not found with ID: {}", clubId);
                     return new IllegalArgumentException("Club not found with ID: " + clubId);
                 });
+
+        // Demote any leaders of this club back to 'student' BEFORE the delete.
+        // Otherwise users keep leadingClubId pointing at a non-existent club, and
+        // every subsequent /api/clubs/{leadingClubId} call from the leader's
+        // dashboard 404s.
+        int demoted = userRepository.revokeLeadershipsForClub(clubId);
+        if (demoted > 0) log.info("Demoted {} leader(s) when deleting club {}", demoted, clubId);
 
         clubRepository.delete(club);
         log.info("Club deleted successfully with ID: {}", clubId);

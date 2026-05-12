@@ -5,6 +5,7 @@ import com.cts.mfrp.anvay.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -32,6 +33,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.institutionId = :institutionId AND u.role IN ('student', 'club_leader')")
     long countStudentsByInstitutionId(@Param("institutionId") Long institutionId);
+
+    // Demote all leaders of a soon-to-be-deleted club back to 'student' in one
+    // UPDATE — keeps orphan leader rows from causing 404s on /api/clubs/{id}.
+    @Modifying
+    @Query("UPDATE User u SET u.role = 'student', u.leadingClubId = null WHERE u.leadingClubId = :clubId")
+    int revokeLeadershipsForClub(@Param("clubId") Long clubId);
 
     // Leaderboard view — DTO projection avoids loading profilePicture LONGTEXT
     @Query("SELECT new com.cts.mfrp.anvay.dto.StudentSummaryDTO(" +

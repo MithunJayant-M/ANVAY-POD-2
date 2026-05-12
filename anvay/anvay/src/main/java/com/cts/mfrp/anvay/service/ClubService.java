@@ -1,6 +1,7 @@
 package com.cts.mfrp.anvay.service;
 
 import com.cts.mfrp.anvay.dto.ClubDashboardDTO;
+import com.cts.mfrp.anvay.dto.ClubMemberSummaryDTO;
 import com.cts.mfrp.anvay.entity.Club;
 import com.cts.mfrp.anvay.entity.ClubMember;
 
@@ -44,6 +45,12 @@ public interface ClubService {
      * @throws IllegalArgumentException if club ID is invalid
      */
     List<ClubMember> getClubMembers(Long clubId);
+
+    // DTO variants — mapping done inside the transaction so Jackson never
+    // touches User entity proxies / lazy collections at serialization time.
+    List<ClubMemberSummaryDTO> getClubMembersSummary(Long clubId);
+    List<ClubMemberSummaryDTO> getApprovedMembersSummary(Long clubId);
+    List<ClubMemberSummaryDTO> getJoinRequestsSummary(Long clubId);
 
     /**
      * Get approved members of a specific club.

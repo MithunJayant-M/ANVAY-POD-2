@@ -1,6 +1,7 @@
 package com.cts.mfrp.anvay.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
@@ -51,16 +52,24 @@ public class User {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    // @JsonIgnore on all three: these are lazy collections; touching them during
+    // JSON serialization (with spring.jpa.open-in-view=false) throws
+    // LazyInitializationException → 500 on every User-returning endpoint.
+    // Frontend doesn't consume these directly — counts come from dashboard DTOs.
+
+    @JsonIgnore
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonIgnoreProperties("user")
     private List<EventParticipant> eventRegistrations = new ArrayList<>();
 
+    @JsonIgnore
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonIgnoreProperties("user")
     private List<ClubMember> clubMembers = new ArrayList<>();
 
+    @JsonIgnore
     @Builder.Default
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @JsonIgnoreProperties("user")
