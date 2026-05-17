@@ -57,6 +57,9 @@ public interface ClubService {
     ClubMemberSummaryDTO approveJoinRequest(Long clubId, Long memberId);
     ClubMemberSummaryDTO rejectJoinRequest(Long clubId, Long memberId);
 
+    // All memberships (any status) for a single user, as DTOs.
+    List<ClubMemberSummaryDTO> getMembershipsByUserSummary(Long userId);
+
     /**
      * Get approved members of a specific club.
      *

@@ -213,6 +213,14 @@ public class ClubServiceImpl implements ClubService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<ClubMemberSummaryDTO> getMembershipsByUserSummary(Long userId) {
+        return clubMemberRepository.findMembershipsByUserWithUser(userId).stream()
+                .map(this::toSummary)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public ClubMemberSummaryDTO rejectJoinRequest(Long clubId, Long memberId) {
         ClubMember cm = clubMemberRepository.findById(memberId)

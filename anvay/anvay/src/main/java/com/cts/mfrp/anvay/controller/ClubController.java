@@ -222,8 +222,10 @@ public class ClubController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<?> getClubsByUser(@PathVariable Long userId) {
-        return ResponseEntity.ok(clubMemberRepository.findByUserId(userId));
+    public ResponseEntity<List<ClubMemberSummaryDTO>> getClubsByUser(@PathVariable Long userId) {
+        // Returns DTOs (not raw ClubMember entities) — Jackson never touches
+        // lazy associations, so this can't 500 from LazyInitializationException.
+        return ResponseEntity.ok(clubService.getMembershipsByUserSummary(userId));
     }
 
     @DeleteMapping("/{clubId}/members/{memberId}")
