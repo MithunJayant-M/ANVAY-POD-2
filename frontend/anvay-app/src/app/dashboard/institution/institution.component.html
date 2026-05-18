@@ -489,7 +489,39 @@
 
       <!-- STUDENTS -->
       <div *ngIf="activeView==='students'">
-        <div class="page-header"><h1>Student Management</h1><p>View and track student performance</p></div>
+        <div class="page-header"><h1>Student Management</h1><p>Review pending registrations and track student performance</p></div>
+
+        <!-- Pending Approval — appears only when there are pending students -->
+        <div class="data-card" style="margin-bottom:24px" *ngIf="pendingStudents.length > 0 || pendingStudentsLoading">
+          <div class="section-title">
+            Pending Approval
+            <span class="req-badge" *ngIf="pendingStudents.length > 0">{{pendingStudents.length}}</span>
+          </div>
+          <div *ngIf="pendingStudentsLoading" class="loading-state"><div class="spinner"></div></div>
+          <div *ngIf="!pendingStudentsLoading" class="table-responsive"><table class="data-table">
+            <thead><tr><th>Student</th><th>Email</th><th>Student ID</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr *ngFor="let s of pendingStudents">
+                <td>
+                  <div class="student-cell">
+                    <div class="student-avatar">{{displayName(s).charAt(0)}}</div>
+                    <div class="cell-primary">{{displayName(s)}}</div>
+                  </div>
+                </td>
+                <td>{{s.email || '—'}}</td>
+                <td>{{s.studentIdNumber || '—'}}</td>
+                <td>
+                  <div class="action-btns">
+                    <button class="btn-sm btn-success" (click)="approvePendingStudent(s.userId)">Approve</button>
+                    <button class="btn-sm btn-danger" (click)="rejectPendingStudent(s.userId)">Reject</button>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="pendingStudents.length===0"><td colspan="4" class="empty-cell">No pending registrations</td></tr>
+            </tbody>
+          </table></div>
+        </div>
+
         <div *ngIf="studentsLoading" class="loading-state"><div class="spinner"></div></div>
         <div *ngIf="!studentsLoading">
           <div class="data-card" style="margin-bottom:24px">
@@ -501,9 +533,9 @@
                   <td><span class="rank-badge" [class.rank-top]="i<3">{{getRankLabel(i)}}</span></td>
                   <td>
                     <div class="student-cell">
-                      <div class="student-avatar">{{s.firstName?.charAt(0)||'?'}}</div>
+                      <div class="student-avatar">{{displayName(s).charAt(0)}}</div>
                       <div>
-                        <div class="cell-primary">{{s.firstName}} {{s.lastName}} <span *ngIf="s.role==='club_leader'" class="badge-leader-crown" title="Club Leader">👑</span></div>
+                        <div class="cell-primary">{{displayName(s)}} <span *ngIf="s.role==='club_leader'" class="badge-leader-crown" title="Club Leader">👑</span></div>
                       </div>
                     </div>
                   </td>

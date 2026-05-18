@@ -90,6 +90,8 @@ export class InstitutionComponent implements OnInit {
   // Students
   students: Student[] = [];
   studentsLoading = false;
+  pendingStudents: Student[] = [];
+  pendingStudentsLoading = false;
 
   collegeLb: InstitutionRank[] = [];
   collegeLbLoading = false;
@@ -483,6 +485,47 @@ export class InstitutionComponent implements OnInit {
       next: s => { this.students = s.sort((a,b) => (b.totalPoints||0)-(a.totalPoints||0)); this.studentsLoading = false; },
       error: () => this.studentsLoading = false
     });
+    this.loadPendingStudents();
+  }
+
+  loadPendingStudents() {
+    this.pendingStudentsLoading = true;
+    this.http.get<Student[]>(`/api/students/institution/${this.institutionId}/pending`).subscribe({
+      next: s => { this.pendingStudents = s; this.pendingStudentsLoading = false; },
+      error: () => this.pendingStudentsLoading = false
+    });
+  }
+
+  approvePendingStudent(id: number) {
+    this.http.put(`/api/students/${id}/approve`, {}).subscribe({
+      next: () => { this.showMessage('Student approved', 'success'); this.loadStudents(); },
+      error: () => this.showMessage('Failed to approve student', 'error')
+    });
+  }
+
+  rejectPendingStudent(id: number) {
+    if (!confirm('Reject this student? They will not be able to log in.')) return;
+    this.http.put(`/api/students/${id}/reject`, {}).subscribe({
+      next: () => { this.showMessage('Student rejected', 'success'); this.loadPendingStudents(); },
+      error: () => this.showMessage('Failed to reject student', 'error')
+    });
+  }
+
+  /**
+   * Fallback name for legacy / pre-validation rows where firstName is empty,
+   * just dashes, or accidentally contains an email. Falls back to the email
+   * prefix, then "Unknown Student" as a last resort.
+   */
+  displayName(s: { firstName?: string; lastName?: string; email?: string }): string {
+    const raw = (s.firstName || '').trim();
+    const looksValid = raw.length >= 2 && !raw.includes('@') && !/^-+$/.test(raw);
+    if (looksValid) {
+      const last = (s.lastName || '').trim();
+      return last ? `${raw} ${last}` : raw;
+    }
+    const email = s.email || '';
+    const prefix = email.split('@')[0];
+    return prefix && prefix.length >= 2 ? prefix : 'Unknown Student';
   }
 
   viewEventParticipants(ev: Event) {
