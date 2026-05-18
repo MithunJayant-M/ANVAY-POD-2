@@ -74,7 +74,7 @@
           </div>
           <div class="field-err" *ngIf="form.get('email')?.touched && form.get('email')?.errors as e">
             <ng-container *ngIf="e['required']">Email is required</ng-container>
-            <ng-container *ngIf="!e['required'] && (e['email'] || e['pattern'])">Email must end with @gmail.com, @anvay.com, or @anvay.in</ng-container>
+            <ng-container *ngIf="!e['required'] && (e['email'] || e['pattern'])">Email must end with &#64;gmail.com, &#64;anvay.com, or &#64;anvay.in</ng-container>
           </div>
         </div>
       </div>
