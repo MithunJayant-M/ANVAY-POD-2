@@ -5,6 +5,13 @@ import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 
+// Patterns mirror the backend DTO validators exactly — keep them in sync.
+// Module-level consts must live BEFORE the @Component decorator, never
+// between the decorator and the class (TS1206: decorators are not valid here).
+const EMAIL_PATTERN = /^[A-Za-z0-9._%+-]+@(gmail\.com|anvay\.com|anvay\.in)$/;
+const NAME_PATTERN = /^[A-Za-z][A-Za-z\s.'-]{1,49}$/;
+const STUDENT_ID_PATTERN = /^\d{2,4}[A-Za-z]{2,5}\d{2,5}$/;
+
 @Component({
   selector: 'app-register-student',
   standalone: true,
@@ -12,11 +19,6 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './register-student.component.html',
   styleUrls: ['./register-student.component.css']
 })
-// Patterns mirror the backend DTO validators exactly — keep them in sync.
-const EMAIL_PATTERN  = /^[A-Za-z0-9._%+-]+@(gmail\.com|anvay\.com|anvay\.in)$/;
-const NAME_PATTERN   = /^[A-Za-z][A-Za-z\s.'-]{1,49}$/;
-const STUDENT_ID_PATTERN = /^\d{2,4}[A-Za-z]{2,5}\d{2,5}$/;
-
 export class RegisterStudentComponent implements OnInit {
   form!: FormGroup;
   institutions: { institutionId: number; institutionName: string }[] = [];
