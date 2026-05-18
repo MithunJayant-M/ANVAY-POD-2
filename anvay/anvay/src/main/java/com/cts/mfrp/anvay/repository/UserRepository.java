@@ -51,13 +51,17 @@ public interface UserRepository extends JpaRepository<User, Long> {
     )
     List<StudentSummaryDTO> findPendingStudentsByInstitution(@Param("institutionId") Long institutionId);
 
-    // Leaderboard view — DTO projection avoids loading profilePicture LONGTEXT
+    // Leaderboard view — DTO projection avoids loading profilePicture LONGTEXT.
+    // Filters to active accounts only: NULL (legacy / pre-status-column) or 'active'
+    // (approved by institution admin). Pending and rejected accounts are excluded
+    // from the leaderboard and the Institution Admin's main "Students" table.
     @Query("SELECT new com.cts.mfrp.anvay.dto.StudentSummaryDTO(" +
            "  u.userId, u.institutionId, u.email, u.firstName, u.lastName, u.role, " +
            "  u.totalPoints, u.rankInLeaderboard, u.registeredEventsCount, " +
            "  u.joinedClubsCount, u.leadingClubId, u.studentIdNumber) " +
            "FROM User u WHERE u.institutionId = :institutionId " +
            "  AND u.role IN ('student', 'club_leader') " +
+           "  AND (u.status IS NULL OR u.status = 'active') " +
            "ORDER BY u.totalPoints DESC NULLS LAST")
     List<com.cts.mfrp.anvay.dto.StudentSummaryDTO> findStudentSummaryLeaderboard(@Param("institutionId") Long institutionId);
 
@@ -66,6 +70,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
            "  u.totalPoints, u.rankInLeaderboard, u.registeredEventsCount, " +
            "  u.joinedClubsCount, u.leadingClubId, u.studentIdNumber) " +
            "FROM User u WHERE u.role IN ('student', 'club_leader') " +
+           "  AND (u.status IS NULL OR u.status = 'active') " +
            "ORDER BY u.totalPoints DESC NULLS LAST")
     List<com.cts.mfrp.anvay.dto.StudentSummaryDTO> findAllStudentSummaries();
 
@@ -79,8 +84,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
                 "  u.userId, u.institutionId, u.email, u.firstName, u.lastName, u.role, " +
                 "  u.totalPoints, u.rankInLeaderboard, u.registeredEventsCount, " +
                 "  u.joinedClubsCount, u.leadingClubId, u.studentIdNumber) " +
-                "FROM User u WHERE u.role IN ('student', 'club_leader')",
-        countQuery = "SELECT COUNT(u) FROM User u WHERE u.role IN ('student', 'club_leader')"
+                "FROM User u WHERE u.role IN ('student', 'club_leader') " +
+                "  AND (u.status IS NULL OR u.status = 'active')",
+        countQuery = "SELECT COUNT(u) FROM User u WHERE u.role IN ('student', 'club_leader') " +
+                     "  AND (u.status IS NULL OR u.status = 'active')"
     )
     Page<StudentSummaryDTO> findStudentSummaries(Pageable pageable);
 
@@ -90,9 +97,11 @@ public interface UserRepository extends JpaRepository<User, Long> {
                 "  u.totalPoints, u.rankInLeaderboard, u.registeredEventsCount, " +
                 "  u.joinedClubsCount, u.leadingClubId, u.studentIdNumber) " +
                 "FROM User u WHERE u.institutionId = :institutionId " +
-                "  AND u.role IN ('student', 'club_leader')",
+                "  AND u.role IN ('student', 'club_leader') " +
+                "  AND (u.status IS NULL OR u.status = 'active')",
         countQuery = "SELECT COUNT(u) FROM User u WHERE u.institutionId = :institutionId " +
-                     "  AND u.role IN ('student', 'club_leader')"
+                     "  AND u.role IN ('student', 'club_leader') " +
+                     "  AND (u.status IS NULL OR u.status = 'active')"
     )
     Page<StudentSummaryDTO> findStudentSummariesByInstitution(@Param("institutionId") Long institutionId,
                                                               Pageable pageable);
