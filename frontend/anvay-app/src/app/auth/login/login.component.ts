@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 
@@ -12,9 +12,10 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   errorMessage = '';
+  infoMessage = '';
   loading = false;
 
   // Forgot password modal state
@@ -31,11 +32,26 @@ export class LoginComponent {
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
-    private http: HttpClient
+    private http: HttpClient,
+    private route: ActivatedRoute
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
+    });
+  }
+
+  ngOnInit(): void {
+    // Show a contextual banner when the login page was reached from a
+    // post-registration redirect or a pending/rejected-account bounce.
+    this.route.queryParams.subscribe(params => {
+      if (params['registered'] === 'pending') {
+        this.infoMessage = 'Registration successful — please wait for your institution administrator to approve your account before signing in.';
+      } else if (params['reason'] === 'pending') {
+        this.infoMessage = 'Your account is awaiting approval. Please try again after your institution administrator has approved you.';
+      } else if (params['reason'] === 'rejected') {
+        this.infoMessage = 'Your registration was rejected. Please contact your institution administrator.';
+      }
     });
   }
 

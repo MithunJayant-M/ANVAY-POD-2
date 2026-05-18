@@ -75,5 +75,13 @@ export class RegisterStudentComponent implements OnInit {
   }
 
   back() { this.router.navigate(['/register']); }
-  goToLogin() { this.router.navigate(['/login']); }
+
+  goToLogin() {
+    // Belt-and-suspenders: clear any partial session data that an older or
+    // misconfigured build might have left around (e.g., the historical "null"
+    // string token bug). Then send the user to the login page where they must
+    // re-authenticate after their account is approved.
+    this.authService.logout();
+    this.router.navigate(['/login'], { queryParams: { registered: 'pending' } });
+  }
 }

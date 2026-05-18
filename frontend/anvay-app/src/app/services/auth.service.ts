@@ -24,23 +24,36 @@ export class AuthService {
   }
 
   registerStudent(request: RegisterStudentRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.API_URL}/register/student`, request).pipe(
-      tap(response => this.storeUser(response))
-    );
+    // No .tap(storeUser) — student registration is an APPLICATION, not a session.
+    // Backend returns { token: null, status: "pending" } so even if we stored
+    // it, isLoggedIn() would (correctly) be false. But we don't store at all
+    // here, so the component can route the user to /login cleanly afterwards.
+    return this.http.post<LoginResponse>(`${this.API_URL}/register/student`, request);
   }
 
   private storeUser(response: LoginResponse): void {
+    // Refuse to persist a session when there's no real token. Without this guard,
+    // a pending-account response (token: null) would write the literal string
+    // "null" into localStorage, which then satisfies isLoggedIn() falsely.
+    if (!response || !response.token || typeof response.token !== 'string') {
+      return;
+    }
     localStorage.setItem(this.TOKEN_KEY, response.token);
     localStorage.setItem(this.USER_KEY, JSON.stringify(response));
   }
 
   getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+    const t = localStorage.getItem(this.TOKEN_KEY);
+    // Treat the literal strings "null" / "undefined" — produced by historical
+    // bad writes — as no token. Otherwise stale junk locks users out / in.
+    if (!t || t === 'null' || t === 'undefined') return null;
+    return t;
   }
 
   getCurrentUser(): LoginResponse | null {
     const data = localStorage.getItem(this.USER_KEY);
-    return data ? JSON.parse(data) : null;
+    if (!data || data === 'null' || data === 'undefined') return null;
+    try { return JSON.parse(data); } catch { return null; }
   }
 
   getRole(): string | null {

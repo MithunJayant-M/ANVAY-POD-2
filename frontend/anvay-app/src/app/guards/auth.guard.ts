@@ -11,6 +11,15 @@ export const authGuard: CanActivateFn = (route) => {
     return false;
   }
 
+  // Defense in depth: even if a token somehow exists, refuse dashboard access
+  // for accounts that have not been approved.
+  const user: any = authService.getCurrentUser();
+  if (user?.status === 'pending' || user?.status === 'rejected') {
+    authService.logout();
+    router.navigate(['/login'], { queryParams: { reason: user.status } });
+    return false;
+  }
+
   const requiredRole = route.data?.['role'];
   const userRole = authService.getRole();
 
