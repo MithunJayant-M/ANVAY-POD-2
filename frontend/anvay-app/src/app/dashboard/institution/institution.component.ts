@@ -18,7 +18,24 @@ interface Club { clubId: number; clubName: string; category: string; membersCoun
 interface ClubMember { id: number; userId: number; clubId: number; status: string; user?: {firstName: string; lastName: string; email: string; role?: string; leadingClubId?: number}; }
 interface LeadershipApp { applicationId: number; userId: number; clubId: number; experience: string; status: string; appliedAt: string; user?: {firstName: string; lastName: string; email: string}; }
 interface EventParticipant { id: number; userId: number; eventId: number; status: string; points_earned?: number; user?: {firstName: string; lastName: string; email: string}; }
-interface Student { userId: number; firstName: string; lastName: string; email: string; totalPoints: number; registeredEventsCount: number; joinedClubsCount: number; role?: string; achievements?: Achievement[]; }
+// Mirrors backend StudentSummaryDTO (com.cts.mfrp.anvay.dto.StudentSummaryDTO).
+// Keep this in lock-step with the Java record's canonical constructor field order.
+interface Student {
+  userId: number;
+  institutionId?: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  role?: string;
+  totalPoints: number;
+  rankInLeaderboard?: number;
+  registeredEventsCount: number;
+  joinedClubsCount: number;
+  leadingClubId?: number | null;
+  studentIdNumber?: string;        // NEW — required by the Pending Approval table
+  status?: string;                  // NEW — "pending" / "active" / "rejected" / null
+  achievements?: Achievement[];
+}
 interface Achievement { title: string; description: string; badgeType: string; }
 interface InstitutionRank { institutionId: number; institutionName: string; totalPoints: number; studentCount: number; eventCount: number; }
 

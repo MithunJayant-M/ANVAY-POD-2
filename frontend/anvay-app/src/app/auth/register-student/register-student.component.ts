@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 
@@ -15,7 +15,7 @@ const STUDENT_ID_PATTERN = /^\d{2,4}[A-Za-z]{2,5}\d{2,5}$/;
 @Component({
   selector: 'app-register-student',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './register-student.component.html',
   styleUrls: ['./register-student.component.css']
 })
