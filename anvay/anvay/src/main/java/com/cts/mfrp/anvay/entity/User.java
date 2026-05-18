@@ -44,6 +44,12 @@ public class User {
     @Column(name = "role")
     private String role;
 
+    // Account lifecycle: null/"active" → can log in; "pending" → blocked at
+    // login until institution admin approves; "rejected" → blocked permanently.
+    // Existing rows pre-migration have null and are treated as active.
+    @Column(name = "status")
+    private String status;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Column(name = "created_at")
     private LocalDateTime createdAt;

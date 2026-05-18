@@ -68,6 +68,27 @@ public class StudentController {
         return ResponseEntity.ok(userRepository.findStudentSummariesByInstitution(institutionId, pageable));
     }
 
+    @GetMapping("/institution/{institutionId}/pending")
+    public ResponseEntity<List<StudentSummaryDTO>> getPendingStudents(@PathVariable Long institutionId) {
+        return ResponseEntity.ok(userRepository.findPendingStudentsByInstitution(institutionId));
+    }
+
+    @PutMapping("/{id}/approve")
+    public ResponseEntity<?> approveStudent(@PathVariable Long id) {
+        User u = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Student not found"));
+        u.setStatus("active");
+        userRepository.save(u);
+        return ResponseEntity.ok(java.util.Map.of("message", "Student approved"));
+    }
+
+    @PutMapping("/{id}/reject")
+    public ResponseEntity<?> rejectStudent(@PathVariable Long id) {
+        User u = userRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Student not found"));
+        u.setStatus("rejected");
+        userRepository.save(u);
+        return ResponseEntity.ok(java.util.Map.of("message", "Student rejected"));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> removeStudent(@PathVariable Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new RuntimeException("Student not found"));

@@ -33,6 +33,15 @@ public class UserServiceImpl implements UserService {
             throw new BadCredentialsException("Invalid email or password");
         }
 
+        // Block users whose account hasn't been approved yet (status="pending").
+        // Existing rows pre-migration have status=null and are treated as active.
+        if ("pending".equalsIgnoreCase(user.getStatus())) {
+            throw new BadCredentialsException("Your account is awaiting approval from your institution administrator. Please try again later.");
+        }
+        if ("rejected".equalsIgnoreCase(user.getStatus())) {
+            throw new BadCredentialsException("Your registration was rejected. Please contact your institution administrator.");
+        }
+
         boolean isStudentRole = "student".equals(user.getRole()) || "club_leader".equals(user.getRole());
         if (isStudentRole && user.getInstitutionId() != null) {
             Institution institution = institutionRepository.findById(user.getInstitutionId()).orElse(null);
@@ -92,20 +101,25 @@ public class UserServiceImpl implements UserService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role("student")
+                .status("pending")           // ← waits for institution admin to approve
                 .institutionId(request.getInstitutionId())
                 .studentIdNumber(request.getStudentIdNumber())
                 .build();
 
         user = userRepository.save(user);
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole(), user.getUserId(), user.getInstitutionId());
 
+        // Deliberately NOT issuing a JWT for a pending student. Frontend should
+        // check response.status === "pending" and show the awaiting-approval
+        // screen instead of navigating to the dashboard.
         return LoginResponse.builder()
-                .token(token)
+                .token(null)
                 .role(user.getRole())
                 .name(user.getFirstName())
                 .userId(user.getUserId())
                 .institutionId(user.getInstitutionId())
                 .leadingClubId(user.getLeadingClubId())
+                .status("pending")
+                .message("Registration successful. Your account is awaiting approval from your institution administrator.")
                 .build();
     }
 }

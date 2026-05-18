@@ -40,6 +40,17 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Query("UPDATE User u SET u.role = 'student', u.leadingClubId = null WHERE u.leadingClubId = :clubId")
     int revokeLeadershipsForClub(@Param("clubId") Long clubId);
 
+    // Pending students awaiting institution-admin approval.
+    @Query(
+        value = "SELECT new com.cts.mfrp.anvay.dto.StudentSummaryDTO(" +
+                "  u.userId, u.institutionId, u.email, u.firstName, u.lastName, u.role, " +
+                "  u.totalPoints, u.rankInLeaderboard, u.registeredEventsCount, " +
+                "  u.joinedClubsCount, u.leadingClubId, u.studentIdNumber) " +
+                "FROM User u WHERE u.institutionId = :institutionId " +
+                "  AND u.role = 'student' AND u.status = 'pending'"
+    )
+    List<StudentSummaryDTO> findPendingStudentsByInstitution(@Param("institutionId") Long institutionId);
+
     // Leaderboard view — DTO projection avoids loading profilePicture LONGTEXT
     @Query("SELECT new com.cts.mfrp.anvay.dto.StudentSummaryDTO(" +
            "  u.userId, u.institutionId, u.email, u.firstName, u.lastName, u.role, " +
