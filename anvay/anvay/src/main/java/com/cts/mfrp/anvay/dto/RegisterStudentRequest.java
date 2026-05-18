@@ -21,8 +21,8 @@ public class RegisterStudentRequest {
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
     @Pattern(
-        regexp = "^[A-Za-z0-9._%+-]+@(gmail|anvay)\\.(com|in)$",
-        message = "Email must use @gmail or @anvay domain and end with .com or .in"
+        regexp = "^[A-Za-z0-9._%+-]+@(gmail\\.com|anvay\\.com|anvay\\.in)$",
+        message = "Email must end with @gmail.com, @anvay.com, or @anvay.in"
     )
     private String email;
 
@@ -33,9 +33,10 @@ public class RegisterStudentRequest {
     @NotNull(message = "Please select an institution")
     private Long institutionId;
 
+    @NotBlank(message = "Student ID is required")
     @Pattern(
-        regexp = "^[A-Za-z0-9-]{2,30}$",
-        message = "Student ID must be 2-30 characters (letters, digits, hyphens only)"
+        regexp = "^\\d{2,4}[A-Za-z]{2,5}\\d{2,5}$",
+        message = "Student ID must follow the format like 22IT161 (year + department code + roll number, e.g. 21CSE042)"
     )
     private String studentIdNumber;
 }

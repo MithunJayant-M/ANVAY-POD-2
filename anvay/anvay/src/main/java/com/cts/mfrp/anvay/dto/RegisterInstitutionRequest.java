@@ -20,8 +20,8 @@ public class RegisterInstitutionRequest {
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
     @Pattern(
-        regexp = "^[A-Za-z0-9._%+-]+@(gmail|anvay)\\.(com|in)$",
-        message = "Email must use @gmail or @anvay domain and end with .com or .in"
+        regexp = "^[A-Za-z0-9._%+-]+@(gmail\\.com|anvay\\.com|anvay\\.in)$",
+        message = "Email must end with @gmail.com, @anvay.com, or @anvay.in"
     )
     private String email;
 
