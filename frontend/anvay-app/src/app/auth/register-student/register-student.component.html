@@ -25,6 +25,14 @@
       Back
     </button>
 
+    <!-- Mobile-only horizontal progress bar (replaces the left sidebar on small screens) -->
+    <ol class="steps-mobile" aria-label="Registration progress">
+      <li class="m-step done"><span class="m-dot">✓</span><span class="m-label">Role</span></li>
+      <li class="m-step" [class.active]="!pending" [class.done]="pending"><span class="m-dot">2</span><span class="m-label">Details</span></li>
+      <li class="m-step" [class.active]="pending"><span class="m-dot">3</span><span class="m-label">Approval</span></li>
+      <li class="m-step"><span class="m-dot">4</span><span class="m-label">Login</span></li>
+    </ol>
+
     <div class="rs-header">
       <div class="page-icon">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="28" height="28">
@@ -41,16 +49,16 @@
     </div>
 
     <!-- Awaiting approval state — shown after a successful pending registration -->
-    <div class="approval-success" *ngIf="pending">
+    <section class="approval-success" *ngIf="pending" role="status" aria-live="polite">
       <div class="approval-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="48" height="48">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="32" height="32">
           <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
         </svg>
       </div>
-      <h2>Registration submitted</h2>
-      <p>Your account is awaiting approval from your institution administrator. You'll be able to log in once approved.</p>
-      <button class="btn-submit" (click)="goToLogin()">Go to login</button>
-    </div>
+      <h2 class="approval-title">Registration submitted</h2>
+      <p class="approval-text">Your account is awaiting approval from your institution administrator. You'll be able to log in once approved.</p>
+      <button type="button" class="btn-submit btn-submit--auto" (click)="goToLogin()">Go to login</button>
+    </section>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="reg-form" *ngIf="!pending">
       <div class="form-row">

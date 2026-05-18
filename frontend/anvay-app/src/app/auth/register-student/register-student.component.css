@@ -51,11 +51,107 @@
 .btn-submit:disabled { opacity: .6; cursor: not-allowed; }
 
 .login-hint { margin-top: 20px; font-size: .85rem; color: #64748b; }
-.login-hint a { color: #16a34a; font-weight: 600; text-decoration: none; }
+.login-hint a { color: #16a34a; font-weight: 600; text-decoration: none; min-height: 32px; display: inline-block; padding: 4px 2px; }
+
+/* ── Awaiting-approval success card ──────────────────────────────────── */
+.approval-success {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;       /* left-align icon, heading, text, button */
+  gap: 16px;
+  max-width: 480px;
+  padding: 32px;
+  background: #fff;
+  border: 1px solid #bbf7d0;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(22,163,74,.08);
+}
+.approval-success .approval-icon {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: #dcfce7;
+  color: #15803d;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 4px;
+}
+.approval-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #0f172a;
+  line-height: 1.25;
+  letter-spacing: -.3px;
+  margin: 0;
+}
+.approval-text {
+  font-size: .9rem;
+  color: #475569;
+  line-height: 1.6;
+  max-width: 42ch;             /* cap line length for readability */
+  margin: 0;
+}
+/* Auto-width button variant used by the success card — full-width on mobile */
+.btn-submit.btn-submit--auto {
+  align-self: flex-start;
+  padding: 12px 28px;
+  min-height: 44px;            /* WCAG touch-target */
+  box-shadow: 0 4px 12px rgba(22,163,74,.25);
+}
+
+/* ── Mobile horizontal progress bar (hidden on desktop) ──────────────── */
+.steps-mobile { display: none; }
 
 @media (max-width: 900px) {
   .rs-left { display: none; }
-  .rs-right { padding: 40px 24px; }
-  .back-btn { left: 24px; }
+  .rs-right { padding: 72px 20px 32px; }
+  .back-btn { left: 20px; top: 20px; }
   .form-row { grid-template-columns: 1fr; }
+
+  /* Show horizontal progress at the top instead of the vertical sidebar */
+  .steps-mobile {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    list-style: none;
+    padding: 0; margin: 0 0 24px;
+    gap: 4px;
+  }
+  .steps-mobile .m-step {
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    flex: 1;
+    position: relative;
+  }
+  .steps-mobile .m-step + .m-step::before {
+    content: '';
+    position: absolute;
+    left: -50%;
+    top: 14px;
+    width: 100%;
+    height: 2px;
+    background: #e2e8f0;
+    z-index: 0;
+  }
+  .steps-mobile .m-step.done + .m-step::before,
+  .steps-mobile .m-step.active + .m-step::before { background: #86efac; }
+  .m-dot {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: #e2e8f0; color: #94a3b8;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .75rem; font-weight: 700; z-index: 1;
+  }
+  .m-step.active .m-dot { background: #16a34a; color: #fff; box-shadow: 0 0 0 4px rgba(22,163,74,.18); }
+  .m-step.done .m-dot { background: #15803d; color: #fff; }
+  .m-label { font-size: .68rem; font-weight: 600; color: #64748b; letter-spacing: .2px; }
+  .m-step.active .m-label, .m-step.done .m-label { color: #0f172a; }
+
+  /* Success card scales down on mobile */
+  .approval-success { max-width: 100%; padding: 24px 20px; gap: 14px; }
+  .approval-title { font-size: 1.2rem; }
+  .btn-submit.btn-submit--auto { width: 100%; align-self: stretch; }
+}
+
+@media (max-width: 480px) {
+  .rs-right { padding: 64px 16px 24px; }
+  .back-btn { left: 16px; }
+  .m-label { display: none; }   /* labels too cramped on phones — keep dots only */
+  .rs-header h1 { font-size: 1.4rem; }
 }
